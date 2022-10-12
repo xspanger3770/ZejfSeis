@@ -201,13 +201,9 @@ public class ZejfClient {
 		case "logs":
 			Queue<SimpleLog> received = new LinkedList<SimpleLog>();
 			synchronized (inputMutex) {
-				int count = reader.nextInt();
-				for (int i = 0; i < count; i++) {
+				int value;
+				while((value = reader.nextInt()) != ZejfSeis4.getDataManager().getErrVal()) {
 					long time = reader.nextLong() * ZejfSeis4.getDataManager().getSampleTime();
-					int value = reader.nextInt();
-					if(value == ZejfSeis4.getDataManager().getErrVal()) {
-						continue;
-					}
 					received.add(new SimpleLog(time, value));
 				}
 			}
