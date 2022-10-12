@@ -1,0 +1,476 @@
+package com.morce.zejfseis4.ui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Line2D;
+import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
+
+import com.morce.zejfseis4.data.DataRequest;
+import com.morce.zejfseis4.main.Settings;
+import com.morce.zejfseis4.main.ZejfSeis4;
+import com.morce.zejfseis4.utils.Multithread;
+import com.morce.zejfseis4.utils.NamedThreadFactory;
+
+public class DrumTab extends DataRequestPanel {
+
+	private static final long serialVersionUID = 1L;
+
+	private JButton btnBackM;
+	private JButton btnBackS;
+	private JButton btnForwardS;
+	private JButton btnForwardM;
+
+	private JPanel drumPanel;
+
+	private BufferedImage drum;
+
+	private Graphics2D drumGraphics;
+
+	private boolean needsRedraw;
+	private long lineID;
+	private long lineDurationMinutes;
+
+	private Object mutex;
+
+	public DrumTab() {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), 0, 10) {
+
+			@Override
+			public void onRefill(boolean realtime) {
+				needsRedraw |= !realtime;
+			}
+		});
+
+		setLayout(new BorderLayout(0, 0));
+
+		JPanel panelControl = new JPanel();
+		panelControl.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		add(panelControl, BorderLayout.NORTH);
+		btnBackM = new JButton("<<");
+		panelControl.add(btnBackM);
+		btnBackM.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setLineID(lineID - 10);
+			}
+		});
+		btnBackS = new JButton("<");
+		panelControl.add(btnBackS);
+
+		btnBackS.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setLineID(lineID - 1);
+			}
+		});
+		JButton btnGoto = new JButton("Goto");
+		panelControl.add(btnGoto);
+
+		btnGoto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gotoTime();
+			}
+		});
+
+		JButton btnNow = new JButton("Now");
+		panelControl.add(btnNow);
+
+		btnNow.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setLineID(getCurrentLineID());
+			}
+		});
+
+		btnForwardS = new JButton(">");
+		panelControl.add(btnForwardS);
+
+		btnForwardS.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setLineID(lineID + 1);
+			}
+		});
+
+		btnForwardM = new JButton(">>");
+		panelControl.add(btnForwardM);
+		btnForwardM.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setLineID(lineID + 10);
+			}
+		});
+
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				needsRedraw = true;
+			}
+		});
+
+		addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				setLineID(lineID + e.getWheelRotation());
+				/*
+				 * if (e.getWheelRotation() > 0) {
+				 * 
+				 * } else { setLineID(lineID - 1); }
+				 */
+			}
+		});
+		drumPanel = new JPanel() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void paint(Graphics gr) {
+				super.paint(gr);
+				Graphics2D g = (Graphics2D) (gr);
+				synchronized (mutex) {
+					if (drum != null) {
+						g.drawImage(drum, 0, 0, null);
+					}
+				}
+			}
+		};
+
+		drumPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		drumPanel.setBackground(Color.WHITE);
+		add(drumPanel, BorderLayout.CENTER);
+
+		drumPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					int x = e.getX();
+					int y = e.getY();
+					int width = drumPanel.getWidth();
+
+					// TODO
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO
+			}
+		});
+
+		drumPanel.addMouseMotionListener(new MouseAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				int width = drumPanel.getWidth();
+
+				// TODO
+			}
+
+		});
+
+		mutex = new Object();
+		synchronized (mutex) {
+			lineDurationMinutes = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+			setLineID(getCurrentLineID());
+		}
+
+		runThreads();
+	}
+
+	private void runThreads() {
+		ScheduledExecutorService exec = Executors
+				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Drum Tab Work"));
+		exec.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					setLineID(lineID); // only enables the buttons
+					paintDrum();
+					//ZejfSeis4.getFrame().revalidate();
+					ZejfSeis4.getFrame().repaint();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}, 0, 100, TimeUnit.MILLISECONDS);
+	}
+
+	protected void openDataBrowser() {
+		// TODO
+	}
+
+	private long lastDrawLogID;
+
+	private long lastCurrentLineID = -1;
+
+	private void paintDrum() {
+		int w = drumPanel.getWidth();
+		int h = drumPanel.getHeight();
+
+		long cli = getCurrentLineID();
+		if (cli - lastCurrentLineID == 1 && lineID == lastCurrentLineID) {
+			setLineID(cli);
+		}
+		lastCurrentLineID = cli;
+
+		if (w <= 0 || h <= 0) {
+			return;
+		}
+
+		long newDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		if (drum != null) {
+			needsRedraw |= w != drum.getWidth() || h != drum.getHeight();
+			needsRedraw |= newDuration != lineDurationMinutes;
+			needsRedraw |= decimate != Settings.DECIMATE;
+			needsRedraw |= gain != Settings.DRUM_GAIN;
+		}
+
+		BufferedImage newDrum = null;
+		if (drum == null || needsRedraw) {
+			System.out.println("a");
+			lastDrawLogID = -1;
+			synchronized (mutex) {
+				recalculateParams(w, h);
+			}
+			newDrum = toCompatibleImage(new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR));
+			drumGraphics = newDrum.createGraphics();
+
+			drumGraphics.setColor(Color.white);
+			drumGraphics.fillRect(0, 0, w, h);
+
+			drawBackground(w, h);
+			synchronized (dataRequest.dataMutex) {
+				drawForeground(w, h);
+			}
+			needsRedraw = false;
+			drum = newDrum;
+		}
+
+		if (drumGraphics != null && lastDrawLogID != -1 && dataRequest.lastLogID >= lastDrawLogID + decimate) {
+			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics);
+		}
+
+	}
+
+	private void recalculateParams(int w, int h) {
+		if (w <= 0 || h <= 0) {
+			return;
+		}
+		long newDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		if (newDuration != lineDurationMinutes) {
+			long newLineID = (long) (lineID / (newDuration / (double) lineDurationMinutes));
+			lineDurationMinutes = newDuration;
+			lineID = Math.min(getCurrentLineID(), newLineID);
+		}
+		lines = (int) Math.round((h - 2 * LINE_PADDING) / (double) LINE_SPACE + 1);
+		long endTime = getMillis(lineID + 1);
+		long startTime = getMillis(lineID - lines + 1) - FILTER_PADDING_MINUES * 60 * 1000l;
+		if (endTime != this.endTime || startTime != this.startTime) {
+			getDataRequest().changeTimes(startTime, endTime);
+			this.endTime = endTime;
+			this.startTime = startTime;
+		}
+		gain = Settings.DRUM_GAIN;
+		decimate = Settings.DECIMATE;
+	}
+
+	public static final int LINE_SPACE = 27;
+	public static final int LINE_PADDING = 28;
+
+	public static final int FILTER_PADDING_MINUES = 5;
+
+	private int lines;
+	private int wrx;
+
+	private long startTime;
+	private long endTime;
+
+	private double gain;
+	private int decimate;
+
+	private void drawBackground(int w, int h) {
+		Graphics2D g = drumGraphics;
+
+		g.setFont(new Font("Consolas", Font.BOLD, 24));
+		wrx = g.getFontMetrics().stringWidth("24") + 4;
+
+		g.setColor(Color.black);
+		g.drawRect(0, 0, w - 1, h - 1);
+		g.drawRect(0, 0, wrx, h - 1);
+
+		Calendar cal = Calendar.getInstance();
+		for (int i = 0; i < lines; i++) {
+			int y = h - LINE_PADDING - i * LINE_SPACE;
+
+			g.setColor(Color.gray);
+			g.drawLine(wrx, y, w, y);
+
+			cal.setTimeInMillis(getMillis(lineID - i));
+
+			int minutes = cal.get(Calendar.MINUTE);
+			int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			if (minutes == 0) {
+				g.setFont(new Font("Consolas", Font.BOLD, 24));
+				g.setColor(Color.red);
+				String str = String.format("%02d", hour);
+				g.drawString(str, 2, (int) (y + 7));
+			} else {
+				g.setFont(new Font("Consolas", Font.BOLD, 20));
+				g.setColor(Color.gray);
+				String str = String.format("%02d", minutes);
+				g.drawString(str, 4, (int) (y + 7));
+			}
+
+			if (hour == 0 && minutes == 0) {
+				g.setFont(new Font("Consolas", Font.BOLD, 16));
+				g.setColor(Color.blue);
+				String str = ddMMyyyy.format(cal.getTime());
+				g.drawString(str, wrx + 4, (int) (y - 7));
+			}
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		}
+	}
+
+	private void drawForeground(int w, int h) {
+		Graphics2D g = drumGraphics;
+		g.setColor(Color.black);
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
+		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID + 1));
+		new Multithread(8) {
+
+			@Override
+			public void run(long start, long end) {
+				drawIt(start, end, g);
+			}
+		}.divide(startLogID, endLogID);
+	}
+
+	private void drawIt(long start, long end, Graphics2D g) {
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
+		int w = drumPanel.getWidth();
+		int h = drumPanel.getHeight();
+		long LOGS_PER_LINE = ZejfSeis4.getDataManager().getLogId(lineDurationMinutes * 60 * 1000l);
+		long chuj = ZejfSeis4.getDataManager().getErrVal();
+		int dec = decimate;
+		Line2D.Double drawable = new Line2D.Double();
+		int line = (int) ((start - startLogID) / LOGS_PER_LINE);
+		g.setColor(Color.black);
+		for (long id = start; id < end; id += dec) {
+			if (id > dataRequest.lastLogID) {
+				break;
+			}
+			long nextId = id + dec;
+			double val1 = dataRequest.getFilteredValueByLogID(id);
+			double val2 = dataRequest.getFilteredValueByLogID(nextId);
+			if (val2 != chuj) {
+				lastDrawLogID = nextId;
+			}
+			if (val1 != chuj && val2 != chuj) {
+				long lineStartLogID = startLogID + line * LOGS_PER_LINE;
+				double x1 = wrx + (((id - lineStartLogID)) / (double) LOGS_PER_LINE) * (w - wrx);
+				double x2 = wrx + (((id + dec - lineStartLogID)) / (double) LOGS_PER_LINE) * (w - wrx);
+				double y1 = (h - LINE_PADDING - (lines - line - 1) * LINE_SPACE) - val1 * (gain / 10000.0);
+				double y2 = (h - LINE_PADDING - (lines - line - 1) * LINE_SPACE) - val2 * (gain / 10000.0);
+				drawable.setLine(x1, y1, x2, y2);
+				g.draw(drawable);
+			}
+
+			int _line = (int) ((id - startLogID) / LOGS_PER_LINE);
+			if (_line != line) {
+				line = _line;
+				id -= dec;
+			}
+		}
+
+	}
+
+	private void setLineID(long lineID) {
+		long currentLineID = getCurrentLineID();
+		lineID = Math.min(currentLineID, lineID);
+		synchronized (mutex) {
+			if (lineID != this.lineID) {
+				this.lineID = lineID;
+				recalculateParams(drumPanel.getWidth(), drumPanel.getHeight());
+				needsRedraw = true;
+			}
+		}
+		btnForwardM.setEnabled(lineID != currentLineID);
+		btnForwardS.setEnabled(lineID != currentLineID);
+	}
+
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
+	private static SimpleDateFormat ddMMyyyy = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+
+	protected void gotoTime() {
+		String str = JOptionPane.showInputDialog(ZejfSeis4.getFrame(), "dd.MM.yyyy [HH:mm]", "Enter time:",
+				JOptionPane.QUESTION_MESSAGE);
+		if (str != null && !str.isEmpty()) {
+			try {
+				Date date;
+				try {
+					date = dateFormat.parse(str);
+				} catch (Exception e) {
+					date = ddMMyyyy.parse(str);
+				}
+				Calendar c = Calendar.getInstance();
+				c.setTime(date);
+				synchronized (mutex) {
+					setLineID(c.getTimeInMillis() / (lineDurationMinutes * 60 * 1000l));
+				}
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private long getCurrentLineID() {
+		return System.currentTimeMillis() / (lineDurationMinutes * 60 * 1000l);
+	}
+
+	private long getMillis(long lineID) {
+		return lineID * lineDurationMinutes * 60 * 1000l;
+	}
+
+	@Override
+	public void updateFilter() {
+		super.updateFilter();
+		System.err.println("EEEEEEEEEEEE");
+		needsRedraw = true;
+	}
+
+}
