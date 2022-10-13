@@ -73,14 +73,14 @@ public class ZejfClient {
 		int sr = Integer.valueOf(sample_rate.split(":")[1]);
 		int err = Integer.valueOf(err_value.split(":")[1]);
 		long lli = Long.valueOf(last_log_id.split(":")[1]);
-		
+
 		System.out.println("Received info: ");
 		System.out.println("Sample rate: " + sr + "sps");
 		System.out.println("Error value: " + err);
 		System.out.println("Last log id: " + lli);
-		
-		sendStrings("realtime", lli+"");
-		
+
+		sendStrings("realtime", lli + "");
+
 		ZejfSeis4.getDataManager().load(ip, sr, err);
 	}
 
@@ -117,7 +117,7 @@ public class ZejfClient {
 					}
 					synchronized (outputMutex) {
 						try {
-							while(!temp.isEmpty()) {
+							while (!temp.isEmpty()) {
 								String str = temp.remove();
 								socket.getOutputStream().write(String.format("%s\n", str).getBytes());
 							}
@@ -127,10 +127,10 @@ public class ZejfClient {
 						}
 					}
 				}
-			
+
 			}
 		};
-		
+
 		outputThread.start();
 
 		heartbeatThread = new Thread("ZejfClient Heartbeat Thread") {
@@ -154,7 +154,7 @@ public class ZejfClient {
 
 	private void sendStrings(String... strings) {
 		synchronized (outputQueueMutex) {
-			for(String str:strings) {
+			for (String str : strings) {
 				outputQueue.add(str);
 			}
 		}
@@ -187,22 +187,19 @@ public class ZejfClient {
 			break;
 		case "realtime":
 			synchronized (inputMutex) {
-				int count = reader.nextInt();
-				for (int i = 0; i < count; i++) {
+				int value;
+				while ((value = reader.nextInt()) != ZejfSeis4.getDataManager().getErrVal()) {
 					long time = reader.nextLong() * ZejfSeis4.getDataManager().getSampleTime();
-					int value = reader.nextInt();
-					if(value == ZejfSeis4.getDataManager().getErrVal()) {
-						continue;
-					}
 					ZejfSeis4.getDataManager().logRealtime(new SimpleLog(time, value));
 				}
 			}
 			break;
 		case "logs":
+			System.err.println("LOOOGSSS");
 			Queue<SimpleLog> received = new LinkedList<SimpleLog>();
 			synchronized (inputMutex) {
 				int value;
-				while((value = reader.nextInt()) != ZejfSeis4.getDataManager().getErrVal()) {
+				while ((value = reader.nextInt()) != ZejfSeis4.getDataManager().getErrVal()) {
 					long time = reader.nextLong() * ZejfSeis4.getDataManager().getSampleTime();
 					received.add(new SimpleLog(time, value));
 				}
@@ -247,7 +244,7 @@ public class ZejfClient {
 	}
 
 	public void requestCheck(DataHour result) {
-		sendStrings("datahour_check", result.getHourID()+"", result.getSampleCount()+"");
+		sendStrings("datahour_check", result.getHourID() + "", result.getSampleCount() + "");
 	}
 
 }
