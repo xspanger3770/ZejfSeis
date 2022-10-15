@@ -104,7 +104,6 @@ public class DataManager {
 
 			}
 			if (start != -1) {
-				System.out.println("block from " + start + " to " + end);
 				notifyDataRequests(start, end, false);
 			}
 		}
@@ -135,9 +134,7 @@ public class DataManager {
 	}
 
 	private void notifyDataRequests(long startLogID, long endLogID, boolean realtime) {
-		// System.out.println(startLogID + ", " + endLogID + ", " + realtime);
 		if (endLogID-startLogID < 0) {
-			System.err.println("WRONG TIMEEEEESS");
 			throw new IllegalStateException();
 		}
 		synchronized (dataRequestsMutex) {
@@ -258,10 +255,8 @@ public class DataManager {
 		autosaveThread.start();
 		logQueueThread.start();
 
-		System.out.println("e1");
 		synchronized (dataRequestsMutex) {
 			for (DataRequest dataRequest : dataRequests) {
-				System.out.println("e2");
 				dataRequest.restart();
 			}
 		}
@@ -289,13 +284,12 @@ public class DataManager {
 		synchronized (dataHoursMutex) {
 			dataHours = new LinkedList<DataHour>();
 		}
-		System.err.println("b");
+
 		if (dataRequests == null) {
 			synchronized (dataRequestsMutex) {
 				dataRequests = new LinkedList<DataRequest>();
 			}
 		}
-		System.out.println("c");
 
 		File dataFolder = getDataFolder();
 		if (!dataFolder.exists()) {
@@ -306,9 +300,7 @@ public class DataManager {
 		System.out.println("Loading from " + dataFolder.getAbsolutePath());
 
 		saveInfo();
-		System.out.println("e");
 		startThreads();
-		System.out.println("f");
 
 	}
 
@@ -366,7 +358,7 @@ public class DataManager {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(getMillisFromHourId(hourId));
 		File file = getDataHourFile(c);
-		System.out.println("try to load " + file.getAbsolutePath());
+		System.out.println("Try to load " + file.getAbsolutePath());
 		if (file.exists()) {
 			try {
 				ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
@@ -463,9 +455,7 @@ public class DataManager {
 		}
 
 		if (result != null && !result.isChecked()) {
-			System.out.println("1>>>>>>>>> requestCheck " + result.getHourID());
 			result.check();
-			System.out.println("2>>>>>>>>> requestCheck " + result.getHourID());
 			ZejfSeis4.getClient().requestCheck(result);
 		}
 
@@ -555,7 +545,6 @@ public class DataManager {
 	}
 
 	public void reset() {
-		System.err.println("UNECHECK "+dataHours.size());
 		synchronized (dataHoursMutex) {
 			for (DataHour dh : dataHours) {
 				dh.unCheck();

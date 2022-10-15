@@ -122,7 +122,6 @@ public class DataRequest {
 
 	private synchronized void checkChanges() {
 		if (change) {
-			System.out.println("CHCHCHCHCH");
 			if (nextRealtime) {
 				setDuration(nextDuration);
 			} else {
@@ -175,7 +174,6 @@ public class DataRequest {
 	}
 
 	private void processData() {
-		System.out.println("process data start");
 		while (true) {
 			try {
 				semaphore.acquire();
@@ -212,16 +210,10 @@ public class DataRequest {
 	private void refill(long start, long end, boolean realtime) {
 		start = Math.max(start, startLogID);
 		end = Math.min(endLogID, end);
-		long timeS = System.currentTimeMillis();
-		Queue<DataHour> test = dataManager.getDataHours(start, end);
-		if (!realtime) {
-			System.out.println("fill start");
-			System.out.printf("Refill DataRequest #%d from %d/%d to %d/%d (%d logs) %s\n", id, start, startLogID, end,
-					endLogID, (end - start + 1), refill);
-			System.out.println("TEST " + test.size());
-		}
-		long timeS2 = System.currentTimeMillis();
-		for (DataHour dh : test) {
+
+		Queue<DataHour> dataHours = dataManager.getDataHours(start, end);
+
+		for (DataHour dh : dataHours) {
 			if (dh.isEmpty()) {
 				continue;
 			}
@@ -267,9 +259,6 @@ public class DataRequest {
 				dh.access();
 			}
 		}
-		if (!realtime)
-			System.out.println("fill took " + (System.currentTimeMillis() - timeS) + " resp. "
-					+ (System.currentTimeMillis() - timeS2));
 		onRefill(realtime);
 	}
 
@@ -315,7 +304,6 @@ public class DataRequest {
 
 	public double getFilteredValueByLogID(long logID) {
 		if (logID > lastLogID) {
-			// System.err.println("#"+this.id+" after head: "+logID+"/"+lastLogID);
 			return dataManager.getErrVal();
 		}
 		if (logID < startLogID) {
@@ -323,7 +311,6 @@ public class DataRequest {
 		}
 		Log log = getLog(logID);
 		if (log == null) {
-			System.err.println("#" + this.id + " NULL: " + logID + "/" + lastLogID + ", " + headLogID);
 			return dataManager.getErrVal();
 		}
 		return log.getFilteredValue();
@@ -341,9 +328,7 @@ public class DataRequest {
 		} else {
 			setTimes(startLogID, endLogID);
 		}
-		System.out.println("e6");
 		runWorkerThread();
-		System.out.println("e7");
 	}
 
 	public void onRefill(boolean isRealtime) {

@@ -259,7 +259,6 @@ public class DrumTab extends DataRequestPanel {
 
 		BufferedImage newDrum = null;
 		if (drum == null || needsRedraw) {
-			System.out.println("a");
 			lastDrawLogID = -1;
 			synchronized (mutex) {
 				recalculateParams(w, h);
@@ -470,7 +469,6 @@ public class DrumTab extends DataRequestPanel {
 	@Override
 	public void updateFilter() {
 		super.updateFilter();
-		System.err.println("EEEEEEEEEEEE");
 		needsRedraw = true;
 	}
 
