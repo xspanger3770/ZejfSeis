@@ -218,7 +218,7 @@ public class DrumTab extends DataRequestPanel {
 				try {
 					setLineID(lineID); // only enables the buttons
 					paintDrum();
-					//ZejfSeis4.getFrame().revalidate();
+					// ZejfSeis4.getFrame().revalidate();
 					ZejfSeis4.getFrame().repaint();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -279,7 +279,7 @@ public class DrumTab extends DataRequestPanel {
 		}
 
 		if (drumGraphics != null && lastDrawLogID != -1 && dataRequest.lastLogID >= lastDrawLogID + decimate) {
-			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics);
+			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics, dataRequest.lastLogID);
 		}
 
 	}
@@ -371,16 +371,17 @@ public class DrumTab extends DataRequestPanel {
 		g.setColor(Color.black);
 		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
 		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID + 1));
+		long lastLogID = dataRequest.lastLogID;
 		new Multithread(8) {
 
 			@Override
 			public void run(long start, long end) {
-				drawIt(start, end, g);
+				drawIt(start, end, g, lastLogID);
 			}
 		}.divide(startLogID, endLogID);
 	}
 
-	private void drawIt(long start, long end, Graphics2D g) {
+	private void drawIt(long start, long end, Graphics2D g, long lastLogID) {
 		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
 		int w = drumPanel.getWidth();
 		int h = drumPanel.getHeight();
@@ -391,7 +392,7 @@ public class DrumTab extends DataRequestPanel {
 		int line = (int) ((start - startLogID) / LOGS_PER_LINE);
 		g.setColor(Color.black);
 		for (long id = start; id < end; id += dec) {
-			if (id > dataRequest.lastLogID) {
+			if (id > lastLogID) {
 				break;
 			}
 			long nextId = id + dec;

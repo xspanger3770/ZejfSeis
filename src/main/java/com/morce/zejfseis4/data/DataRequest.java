@@ -234,21 +234,24 @@ public class DataRequest {
 			if (b - a >= 0) {
 				for (long id = a; id <= b; id++) {
 					// 0-1
-					long gap = id - headLogID;
-					long actualGap = id - lastLogID;
-					if (actualGap != 1 && lastFilteredLogID != -1) {
-						resetFilter();
-						lastFilteredLogID = -1;
-					}
 					int val = dh.getValue(ZejfSeis4.getDataManager().getMillis(id));
 					Log log = getLog(id);
 					if (log == null) {
 						continue; //5-6
 					}
-
+					
+					long gap = id - headLogID;
+					
 					if (val == dataManager.getErrVal()) {
 						log.clear(dataManager);
 					} else {
+						
+						long actualGap = id - lastLogID;
+						if (actualGap != 1 && lastFilteredLogID != -1) {
+							resetFilter();
+							lastFilteredLogID = -1;
+						}
+						
 						double filteredV = filter.filter(val);
 						if (remover_50Hz != null&&Settings.MAX_FREQUENCY > 49) {
 							filteredV = remover_50Hz.filter(filteredV);
