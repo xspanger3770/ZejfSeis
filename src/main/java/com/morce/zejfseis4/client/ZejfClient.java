@@ -55,7 +55,6 @@ public class ZejfClient {
 
 	private void receiveInitialInfo(String ip) throws Exception {
 		String compat_version = readString();
-		System.out.println(compat_version);
 		int comp = Integer.valueOf(compat_version.split(":")[1]);
 		if (comp != ZejfSeis4.COMPATIBILITY_VERSION) {
 			throw new IncompatibleServerException();
@@ -195,7 +194,6 @@ public class ZejfClient {
 			}
 			break;
 		case "logs":
-			System.err.println("LOOOGSSS");
 			Queue<SimpleLog> received = new LinkedList<SimpleLog>();
 			synchronized (inputMutex) {
 				int value;

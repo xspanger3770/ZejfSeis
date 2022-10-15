@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import com.morce.zejfseis4.data.DataRequest;
@@ -55,6 +56,11 @@ public class DrumTab extends DataRequestPanel {
 	private long lineDurationMinutes;
 
 	private Object mutex;
+
+	protected int dragStartX = -1;
+	protected int dragStartY = -1;
+	protected int dragEndX = -1;
+	protected int dragEndY = -1;
 
 	public DrumTab() {
 		setRequest(new DataRequest(ZejfSeis4.getDataManager(), 0, 10) {
@@ -163,6 +169,7 @@ public class DrumTab extends DataRequestPanel {
 						g.drawImage(drum, 0, 0, null);
 					}
 				}
+				drawDrag(g);
 			}
 		};
 
@@ -176,15 +183,22 @@ public class DrumTab extends DataRequestPanel {
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					int x = e.getX();
 					int y = e.getY();
-					int width = drumPanel.getWidth();
+					int w = getWidth();
+					int h = getHeight();
 
-					// TODO
+					dragStartX = Math.max(wrx, Math.min(w, x));
+					dragStartY = Math.max(0, Math.min(h, y));
 				}
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO
+				openDataBrowser();
+
+				dragStartX = -1;
+				dragStartY = -1;
+				dragEndX = -1;
+				dragEndY = -1;
 			}
 		});
 
@@ -193,9 +207,14 @@ public class DrumTab extends DataRequestPanel {
 			public void mouseDragged(MouseEvent e) {
 				int x = e.getX();
 				int y = e.getY();
-				int width = drumPanel.getWidth();
 
-				// TODO
+				int w = getWidth();
+				int h = getHeight();
+
+				dragEndX = Math.max(wrx, Math.min(w, x));
+				dragEndY = Math.max(0, Math.min(h, y));
+
+				drumPanel.repaint();
 			}
 
 		});
@@ -207,6 +226,65 @@ public class DrumTab extends DataRequestPanel {
 		}
 
 		runThreads();
+	}
+
+	private void drawDrag(Graphics2D g) {
+		if (dragStartX < 0 || dragEndX < 0) {
+			return;
+		}
+
+		int w = drumPanel.getWidth();
+		int h = drumPanel.getHeight();
+
+		int line1 = (int) Math.round(((h - dragStartY) - LINE_PADDING) / (double) LINE_SPACE);
+		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
+
+		int startLine = line1 >= line2 ? line1 : line2;
+		int endLine = line1 < line2 ? line1 : line2;
+		int startX = line1 > line2 ? dragStartX : dragEndX;
+		int endX = line1 < line2 ? dragStartX : dragEndX;
+
+		if (line1 == line2) {
+			startX = Math.min(dragStartX, dragEndX);
+			endX = Math.max(dragStartX, dragEndX);
+		}
+
+		startX = Math.max(wrx, startX);
+		endX = Math.max(wrx, endX);
+
+		for (int line = startLine; line >= endLine; line--) {
+			int x0 = line == startLine ? startX : wrx;
+			int x1 = line == endLine ? endX : w;
+			int y0 = (int) (h - LINE_PADDING - (line + 0.5) * LINE_SPACE);
+			int y1 = y0 + LINE_SPACE;
+
+			g.setColor(new Color(100, 100, 100, 100));
+			g.fillRect(x0, y0, x1 - x0, y1 - y0);
+		}
+	}
+
+	private void openDataBrowser() {
+		if (!ZejfSeis4.getDataManager().isLoaded()) {
+			return;
+		}
+		int w = drumPanel.getWidth();
+		int h = drumPanel.getHeight();
+
+		int line1 = (int) Math.round(((h - dragStartY) - LINE_PADDING) / (double) LINE_SPACE);
+		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
+
+		long time1 = (long) (getMillis(lineID - line1)
+				+ ((dragStartX - wrx) / (double) (w - wrx)) * lineDurationMinutes * 60 * 1000l);
+		long time2 = (long) (getMillis(lineID - line2)
+				+ ((dragEndX - wrx) / (double) (w - wrx)) * lineDurationMinutes * 60 * 1000l);
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				new DataExplorer(Math.min(time1, time2), Math.max(time1, time2));
+			}
+		});
 	}
 
 	private void runThreads() {
@@ -227,10 +305,6 @@ public class DrumTab extends DataRequestPanel {
 		}, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
-	protected void openDataBrowser() {
-		// TODO
-	}
-
 	private long lastDrawLogID;
 
 	private long lastCurrentLineID = -1;
@@ -245,7 +319,7 @@ public class DrumTab extends DataRequestPanel {
 		}
 		lastCurrentLineID = cli;
 
-		if (w <= 0 || h <= 0) {
+		if (w <= 0 || h <= 0 || !ZejfSeis4.getDataManager().isLoaded()) {
 			return;
 		}
 
