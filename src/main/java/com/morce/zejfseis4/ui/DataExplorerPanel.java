@@ -369,7 +369,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		graphics.draw(rect);
 		if (MODE != FFT) {
 
-			long mouseTime = (long) (start + (end - start) * (lastMouseX / (double) width));
+			long mouseTime = (long) (start + (end - start) * ((lastMouseX - wrx) / (double) (width-wrx)));
 			Calendar c = Calendar.getInstance();
 			c.setTimeInMillis(mouseTime);
 
@@ -493,7 +493,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 
 		explorerGraphics.setFont(calibri12);
 		int extraWrx = 14;
-		int wrx = explorerGraphics.getFontMetrics().stringWidth("-" + max) + 6 + extraWrx;
+		int wrx = explorerGraphics.getFontMetrics().stringWidth(String.format("%,d", -max)) + 6 + extraWrx;
 		explorerGraphics.setColor(Color.white);
 		explorerGraphics.fillRect(0, 0, w, h);
 		explorerGraphics.setColor(Color.lightGray);
@@ -530,7 +530,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			double y1 = (h * 0.5 - statusPanelHeight * 0.5) - (h * 0.5 - statusPanelHeight * 0.5) * (v / (double) max);
 			explorerGraphics.setColor(Color.black);
 			explorerGraphics.setFont(calibri12);
-			String str = (int) v + "";
+			String str = String.format("%,d", (int) v);
 			int width = explorerGraphics.getFontMetrics().stringWidth(str);
 			explorerGraphics.drawString(str, wrx - width - 2, (int) y1 + 4);
 			explorerGraphics.setColor(v == 0 ? Color.black : Color.LIGHT_GRAY);
@@ -554,8 +554,8 @@ public class DataExplorerPanel extends DataRequestPanel {
 				continue;
 			}
 
-			double x1 = (w) * ((lastT - graphStart) / (double) (graphEnd - graphStart));
-			double x2 = (w) * ((t - graphStart) / (double) (graphEnd - graphStart));
+			double x1 = wrx + (w - wrx) * ((lastT - graphStart) / (double) (graphEnd - graphStart));
+			double x2 = wrx + (w - wrx) * ((t - graphStart) / (double) (graphEnd - graphStart));
 			double y1 = (h * 0.5 - statusPanelHeight * 0.5)
 					- (h * 0.5 - statusPanelHeight * 0.5) * (lastV / (double) max);
 			double y2 = (h * 0.5 - statusPanelHeight * 0.5) - (h * 0.5 - statusPanelHeight * 0.5) * (v / (double) max);
@@ -575,6 +575,8 @@ public class DataExplorerPanel extends DataRequestPanel {
 		// System.out.println(max+", "+k);
 		explorerGraphics.setColor(Color.black);
 		explorerGraphics.drawRect(0, 0, w - 1, h - 1);
+
+		this.wrx = wrx;
 	}
 
 	private synchronized void drawSpectro(int w, int h) {
@@ -604,6 +606,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		if (results == null) {
 			return;
 		}
+		drawScale(explorerGraphics, w, h);
 		for (Result res : results) {
 			if (res.broken) {
 				continue;
@@ -611,8 +614,8 @@ public class DataExplorerPanel extends DataRequestPanel {
 			long startTime = ((res.windowID * lastWindow / HORIZONTAL_SCALE) * 1000) / sampleRate;
 			long endTime = (((res.windowID + 1) * lastWindow / HORIZONTAL_SCALE/*-1*/) * 1000) / sampleRate;
 			// no wrx because is is behind
-			double startX = 0 + (startTime - begin) / (double) (getEnd() - getStart()) * (w - 0 - 1);
-			double endX = 0 + (endTime - begin) / (double) (getEnd() - getStart()) * (w - 0 - 1);
+			double startX = wrx + (startTime - begin) / (double) (getEnd() - getStart()) * (w - wrx - 1);
+			double endX = wrx + (endTime - begin) / (double) (getEnd() - getStart()) * (w - wrx - 1);
 			for (int i = 0; i < res.magnitudes.length; i++) {
 				double startY = (h - statusPanelHeight) * (i / (double) res.magnitudes.length);
 				double endY = (h - statusPanelHeight) * ((i + 1) / (double) res.magnitudes.length);
@@ -624,12 +627,13 @@ public class DataExplorerPanel extends DataRequestPanel {
 				explorerGraphics.fill(rect);
 			}
 		}
-		drawScale(explorerGraphics, w, h);
+
 	}
 
 	private void drawScale(Graphics2D drumGraphics, int w, int h) {
 		drumGraphics.setFont(calibri12);
 		int wrx = drumGraphics.getFontMetrics().stringWidth("20Hz") + 8;
+		this.wrx = wrx;
 		drumGraphics.setColor(Color.LIGHT_GRAY);
 		Rectangle2D.Double rect = new Rectangle2D.Double(0, 0, wrx, getHeight());
 		drumGraphics.fill(rect);
