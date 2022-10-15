@@ -142,11 +142,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 		addMouseMotionListener(new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				if (lastMouseX != e.getX()) {
-					repaint();
-				}
 				lastMouseX = e.getX();
 				lastMouseY = e.getY();
+				repaint();
 			}
 
 			@Override
