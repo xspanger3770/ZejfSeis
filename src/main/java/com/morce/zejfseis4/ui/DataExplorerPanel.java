@@ -340,11 +340,11 @@ public class DataExplorerPanel extends DataRequestPanel {
 			g.drawImage(explorer, 0, 0, null);
 			drawStatusPanel(width, height, g);
 		}
-		
-		if(thisMode == CHART) {
+
+		if (thisMode == CHART) {
 			drawIntensity(width, height, g);
 		}
-		
+
 		if (dragStart != -1) {
 			if (dragStart < dragEnd) {
 				double x1 = wrx + (width - wrx) * ((dragStart - start) / (double) (end - start));
@@ -390,7 +390,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			if (pWaveTime > 0) {
 				graphics.setStroke(new BasicStroke(2f));
 				graphics.setColor(Color.BLACK);
-				int px = (int) ((width) * ((pWaveTime - start) / (double) (end - start)));
+				int px = wrx + (int) ((width - wrx) * ((pWaveTime - start) / (double) (end - start)));
 				graphics.drawLine(px, 2, px, height - statusPanelHeight);
 				graphics.setFont(new Font("Calibri", Font.BOLD, 18));
 				graphics.drawString("P", px + 3, 16);
@@ -401,7 +401,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			if (sWaveTime > 0) {
 				graphics.setStroke(new BasicStroke(2f));
 				graphics.setColor(Color.RED);
-				int sx = (int) ((width) * ((sWaveTime - start) / (double) (end - start)));
+				int sx = wrx + (int) ((width - wrx) * ((sWaveTime - start) / (double) (end - start)));
 				graphics.drawLine(sx, 2, sx, height - statusPanelHeight);
 				graphics.setFont(new Font("Calibri", Font.BOLD, 18));
 				graphics.drawString("S", sx + 3, 16);
@@ -450,9 +450,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 		}
 		return str + f3d.format((l % (1000 * 60)) / 1000.0) + "s";
 	}
-	
+
 	int extraWrx = 14;
-	
+
 	private void drawIntensity(int w, int h, Graphics2D g) {
 		if (mouse) {
 			int v = (int) ((h * 0.5 - mouseY) / (h * 0.5) * (double) max);
@@ -519,7 +519,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		System.out.println("MAX=" + max);
 
 		int wrx = explorerGraphics.getFontMetrics().stringWidth(String.format("%,d", -max)) + 6 + extraWrx;
-		this.max=max;
+		this.max = max;
 		explorerGraphics.setFont(calibri12);
 		this.wrx = wrx;
 
