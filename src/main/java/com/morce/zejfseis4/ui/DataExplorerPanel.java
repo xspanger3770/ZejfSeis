@@ -150,6 +150,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				lastMouseX = e.getX();
+				lastMouseY = e.getY();
 				if (dragging) {
 					int x = e.getX();
 					int width = getWidth();
@@ -196,6 +197,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 
 	private double lastGain;
 	private int lastWindow;
+	private int max;
 
 	protected synchronized void generateResults() {
 		if (results == null) {
@@ -338,6 +340,11 @@ public class DataExplorerPanel extends DataRequestPanel {
 			g.drawImage(explorer, 0, 0, null);
 			drawStatusPanel(width, height, g);
 		}
+		
+		if(thisMode == CHART) {
+			drawIntensity(width, height, g);
+		}
+		
 		if (dragStart != -1) {
 			if (dragStart < dragEnd) {
 				double x1 = wrx + (width - wrx) * ((dragStart - start) / (double) (end - start));
@@ -367,7 +374,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		graphics.draw(rect);
 		if (MODE != FFT) {
 
-			long mouseTime = (long) (start + (end - start) * ((lastMouseX - wrx) / (double) (width-wrx)));
+			long mouseTime = (long) (start + (end - start) * ((lastMouseX - wrx) / (double) (width - wrx)));
 			Calendar c = Calendar.getInstance();
 			c.setTimeInMillis(mouseTime);
 
@@ -375,10 +382,10 @@ public class DataExplorerPanel extends DataRequestPanel {
 			graphics.setFont(calibri12);
 			graphics.drawString(dateFormat1.format(c.getTime()), 5, height - 5);
 
-			graphics.setColor(Color.LIGHT_GRAY);
+			graphics.setColor(Color.black);
 			graphics.setStroke(dashed);
-			graphics.drawLine(lastMouseX, 1, lastMouseX, height - statusPanelHeight);
-			graphics.drawLine(0, lastMouseY, width, lastMouseY);
+			graphics.drawLine(Math.max(wrx, lastMouseX), 1, Math.max(wrx, lastMouseX), height - statusPanelHeight);
+			graphics.drawLine(wrx, lastMouseY, width, lastMouseY);
 
 			if (pWaveTime > 0) {
 				graphics.setStroke(new BasicStroke(2f));
@@ -429,6 +436,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 				graphics.setColor(new Color(255, 0, 255, 50));
 				graphics.fillRect(x1, 1, x2 - x1, height - statusPanelHeight);
 			}
+
 		}
 	}
 
@@ -441,6 +449,26 @@ public class DataExplorerPanel extends DataRequestPanel {
 			str = min + " min, ";
 		}
 		return str + f3d.format((l % (1000 * 60)) / 1000.0) + "s";
+	}
+	
+	int extraWrx = 14;
+	
+	private void drawIntensity(int w, int h, Graphics2D g) {
+		if (mouse) {
+			int v = (int) ((h * 0.5 - mouseY) / (h * 0.5) * (double) max);
+			int r = 8;
+			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
+			g.setStroke(new BasicStroke(1f));
+			g.setColor(Intensity.get(v).getColor());
+			g.fill(rect);
+			g.setColor(Color.black);
+			g.draw(rect);
+
+			g.setFont(calibri12);
+			String str = String.format("%,d", (int) v);
+			int width = g.getFontMetrics().stringWidth(str);
+			g.drawString(str, wrx - width - 2, (int) mouseY + 5);
+		}
 	}
 
 	private void drawChart(int w, int h) {
@@ -463,7 +491,6 @@ public class DataExplorerPanel extends DataRequestPanel {
 			explorerGraphics = explorer.createGraphics();
 			explorerGraphics.setColor(Color.white);
 			explorerGraphics.fillRect(0, 0, w, h);
-
 		} else {
 			return;
 		}
@@ -489,9 +516,13 @@ public class DataExplorerPanel extends DataRequestPanel {
 			}
 		}
 
-		explorerGraphics.setFont(calibri12);
-		int extraWrx = 14;
+		System.out.println("MAX=" + max);
+
 		int wrx = explorerGraphics.getFontMetrics().stringWidth(String.format("%,d", -max)) + 6 + extraWrx;
+		this.max=max;
+		explorerGraphics.setFont(calibri12);
+		this.wrx = wrx;
+
 		explorerGraphics.setColor(Color.white);
 		explorerGraphics.fillRect(0, 0, w, h);
 		explorerGraphics.setColor(Color.lightGray);
@@ -533,7 +564,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 			explorerGraphics.drawString(str, wrx - width - 2, (int) y1 + 4);
 			explorerGraphics.setColor(v == 0 ? Color.black : Color.LIGHT_GRAY);
 			explorerGraphics.drawLine(wrx + 1, (int) y1, w - 2, (int) y1);
+
 		}
+
 		// drumGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 		// RenderingHints.VALUE_ANTIALIAS_ON);
 		double lastV = 0;
@@ -574,7 +607,6 @@ public class DataExplorerPanel extends DataRequestPanel {
 		explorerGraphics.setColor(Color.black);
 		explorerGraphics.drawRect(0, 0, w - 1, h - 1);
 
-		this.wrx = wrx;
 	}
 
 	private synchronized void drawSpectro(int w, int h) {
@@ -604,7 +636,11 @@ public class DataExplorerPanel extends DataRequestPanel {
 		if (results == null) {
 			return;
 		}
-		drawScale(explorerGraphics, w, h);
+
+		explorerGraphics.setFont(calibri12);
+		int wrx = explorerGraphics.getFontMetrics().stringWidth("20Hz") + 8;
+		this.wrx = wrx;
+
 		for (Result res : results) {
 			if (res.broken) {
 				continue;
@@ -625,13 +661,12 @@ public class DataExplorerPanel extends DataRequestPanel {
 				explorerGraphics.fill(rect);
 			}
 		}
+		drawScale(explorerGraphics, w, h);
 
 	}
 
 	private void drawScale(Graphics2D drumGraphics, int w, int h) {
-		drumGraphics.setFont(calibri12);
-		int wrx = drumGraphics.getFontMetrics().stringWidth("20Hz") + 8;
-		this.wrx = wrx;
+		explorerGraphics.setFont(calibri12);
 		drumGraphics.setColor(Color.LIGHT_GRAY);
 		Rectangle2D.Double rect = new Rectangle2D.Double(0, 0, wrx, getHeight());
 		drumGraphics.fill(rect);
