@@ -26,9 +26,13 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
 		if (value != null) {
 			try {
 				if (table.getModel() instanceof FilterableTableModel<?>) {
-					E entity = (E) ((FilterableTableModel<?>) table.getModel()).getEntity(table.getRowSorter().convertRowIndexToModel(row));
+					E entity = (E) ((FilterableTableModel<?>) table.getModel())
+							.getEntity(table.getRowSorter().convertRowIndexToModel(row));
 					T t = (T) value;
-					setBackground(getBackground(entity, t));
+					Color bck = getBackground(entity, t);
+					if(bck != null) {
+						setBackground(bck);
+					}
 					setForeground(getForeground(entity, t));
 					setText(getText(entity, t));
 				}
@@ -50,7 +54,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
 	}
 
 	public Color getBackground(E entity, T value) {
-		return getBackground();
+		return null;
 	}
 
 }

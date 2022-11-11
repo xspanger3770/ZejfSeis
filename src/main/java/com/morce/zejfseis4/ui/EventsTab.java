@@ -114,6 +114,30 @@ public class EventsTab extends JPanel {
 		});
 		panelControl.add(btnForwardM);
 
+		JButton download = new JButton("Download");
+		download.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				download.setEnabled(false);
+				download.setText("Downloading...");
+				Thread downloader = new Thread("Whole month download") {
+					public void run() {
+						try {
+							ZejfSeis4.getEventManager().getFdsnDownloader().downloadWholeMonth(displayedTime);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						download.setEnabled(true);
+						download.setText("Download");
+					};
+				};
+
+				downloader.start();
+			}
+		});
+		panelControl.add(download);
+
 		add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
 
 		updatePanel();
@@ -140,6 +164,7 @@ public class EventsTab extends JPanel {
 		table.setRowHeight(24);
 		table.setGridColor(Color.black);
 		table.setShowGrid(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(tableModel.getColumnRenderer(i));

@@ -95,6 +95,37 @@ public class FDSNDownloader {
 			e.printStackTrace();
 		}
 	}
+	
+	public void downloadWholeMonth(Calendar c) throws Exception{
+		Calendar start = Calendar.getInstance();
+		start.setTimeInMillis(c.getTimeInMillis());
+		
+		start.set(Calendar.DATE, 1);
+		start.set(Calendar.HOUR, 0);
+		start.set(Calendar.MINUTE, 0);
+		start.set(Calendar.SECOND, 0);
+		
+		Calendar end = Calendar.getInstance();
+		end.setTime(start.getTime());
+		end.add(Calendar.MONTH, 1);
+		
+		while(start.before(end)) {
+			System.out.println("From "+start.getTimeInMillis()+" to "+end.getTimeInMillis());
+			ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
+			if(events.isEmpty()) {
+				break;
+			}
+			for (CatalogueEvent event : events) {
+				if(event.getOrigin() > end.getTimeInMillis() || event.getOrigin() > System.currentTimeMillis()) {
+					break;
+				}
+				processEvent(event);
+			}
+			
+			start.setTimeInMillis(events.get(events.size() -1).getOrigin());
+			ZejfSeis4.getFrame().getEventsTab().updatePanel();
+		}
+	}
 
 	private void processEvent(CatalogueEvent event) {
 		CatalogueEvent original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
