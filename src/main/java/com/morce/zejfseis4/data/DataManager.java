@@ -470,8 +470,8 @@ public class DataManager {
 	}
 
 	private File getDataHourFile(Calendar c) {
-		String str = String.format("/%d/%s/%02d/%02dH.z4", c.get(Calendar.YEAR), MONTHS[c.get(Calendar.MONTH)],
-				c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY));
+		String str = String.format("/%d/%s/%02d/%02dH_%d.z4", c.get(Calendar.YEAR), MONTHS[c.get(Calendar.MONTH)],
+				c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY), getHourId(c.getTimeInMillis()));
 		return new File(getDataFolder(), str);
 	}
 
@@ -480,8 +480,8 @@ public class DataManager {
 	}
 
 	private File getDataHourTempFile(Calendar c) {
-		String str = String.format("/%d/%s/%02d/temp_%02dH.z4", c.get(Calendar.YEAR), MONTHS[c.get(Calendar.MONTH)],
-				c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY));
+		String str = String.format("/%d/%s/%02d/temp_%02dH_%d.z4", c.get(Calendar.YEAR), MONTHS[c.get(Calendar.MONTH)],
+				c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY), getHourId(c.getTimeInMillis()));
 		return new File(getDataFolder(), str);
 	}
 
