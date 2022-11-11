@@ -365,7 +365,8 @@ public class DataManager {
 				DataHour dh = (DataHour) in.readObject();
 				in.close();
 				if (dh.getHourID() != hourId) {
-					throw new IllegalStateException("DH doesnt match!");
+					System.err.println("DH id doesnt match!");
+					return null;
 				}
 				return dh;
 			} catch (ClassNotFoundException e) {
