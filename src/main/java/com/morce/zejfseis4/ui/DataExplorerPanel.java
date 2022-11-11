@@ -455,17 +455,18 @@ public class DataExplorerPanel extends DataRequestPanel {
 
 	private void drawIntensity(int w, int h, Graphics2D g) {
 		if (mouse) {
-			int v = (int) ((h * 0.5 - mouseY) / (h * 0.5) * (double) max);
+			int intensity = (int) (((h * 0.5 - statusPanelHeight * 0.5) - mouseY) / (h * 0.5 - statusPanelHeight * 0.5) * max);
+			
 			int r = 8;
 			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
 			g.setStroke(new BasicStroke(1f));
-			g.setColor(Intensity.get(v).getColor());
+			g.setColor(Intensity.get(intensity).getColor());
 			g.fill(rect);
 			g.setColor(Color.black);
 			g.draw(rect);
 
 			g.setFont(calibri12);
-			String str = String.format("%,d", (int) v);
+			String str = String.format("%,d", (int) intensity);
 			int width = g.getFontMetrics().stringWidth(str);
 			g.drawString(str, wrx - width - 2, (int) mouseY + 5);
 		}
