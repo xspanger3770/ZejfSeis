@@ -318,6 +318,7 @@ public class DrumTab extends DataRequestPanel {
 			setLineID(cli);
 		}
 		lastCurrentLineID = cli;
+		long _lineID = lineID;
 
 		if (w <= 0 || h <= 0 || !ZejfSeis4.getDataManager().isLoaded()) {
 			return;
@@ -336,6 +337,7 @@ public class DrumTab extends DataRequestPanel {
 			lastDrawLogID = -1;
 			synchronized (mutex) {
 				recalculateParams(w, h);
+				_lineID = lineID;
 			}
 			newDrum = toCompatibleImage(new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR));
 			drumGraphics = newDrum.createGraphics();
@@ -343,16 +345,16 @@ public class DrumTab extends DataRequestPanel {
 			drumGraphics.setColor(Color.white);
 			drumGraphics.fillRect(0, 0, w, h);
 
-			drawBackground(w, h);
+			drawBackground(w, h, _lineID);
 			synchronized (dataRequest.dataMutex) {
-				drawForeground(w, h);
+				drawForeground(w, h, _lineID);
 			}
 			needsRedraw = false;
 			drum = newDrum;
 		}
 
 		if (drumGraphics != null && lastDrawLogID != -1 && dataRequest.lastLogID >= lastDrawLogID + decimate) {
-			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics, dataRequest.lastLogID);
+			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics, dataRequest.lastLogID, _lineID);
 		}
 
 	}
@@ -393,7 +395,7 @@ public class DrumTab extends DataRequestPanel {
 	private double gain;
 	private int decimate;
 
-	private void drawBackground(int w, int h) {
+	private void drawBackground(int w, int h, long _lineID) {
 		Graphics2D g = drumGraphics;
 
 		g.setFont(new Font("Consolas", Font.BOLD, 24));
@@ -410,7 +412,7 @@ public class DrumTab extends DataRequestPanel {
 			g.setColor(Color.gray);
 			g.drawLine(wrx, y, w, y);
 
-			cal.setTimeInMillis(getMillis(lineID - i));
+			cal.setTimeInMillis(getMillis(_lineID - i));
 
 			int minutes = cal.get(Calendar.MINUTE);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
@@ -439,23 +441,23 @@ public class DrumTab extends DataRequestPanel {
 		}
 	}
 
-	private void drawForeground(int w, int h) {
+	private void drawForeground(int w, int h, long _lineID) {
 		Graphics2D g = drumGraphics;
 		g.setColor(Color.black);
-		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
-		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID + 1));
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1)) - 1;
+		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID + 1));
 		long lastLogID = dataRequest.lastLogID;
 		new Multithread(8) {
 
 			@Override
 			public void run(long start, long end) {
-				drawIt(start, end, g, lastLogID);
+				drawIt(start, end, g, lastLogID, _lineID);
 			}
 		}.divide(startLogID, endLogID);
 	}
 
-	private void drawIt(long start, long end, Graphics2D g, long lastLogID) {
-		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(lineID - lines + 1)) - 1;
+	private void drawIt(long start, long end, Graphics2D g, long lastLogID, long _lineID) {
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1)) - 1;
 		int w = drumPanel.getWidth();
 		int h = drumPanel.getHeight();
 		long LOGS_PER_LINE = ZejfSeis4.getDataManager().getLogId(lineDurationMinutes * 60 * 1000l);
