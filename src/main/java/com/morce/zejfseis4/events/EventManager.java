@@ -67,8 +67,6 @@ public class EventManager {
 					eventMonths.add(eventMonth);
 				}
 				return eventMonth;
-			} else {
-				return null;
 			}
 		}
 		return null;

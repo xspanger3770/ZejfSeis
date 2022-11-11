@@ -348,5 +348,9 @@ public class ZejfSeisFrame extends JFrame {
 		this.status = status;
 		semaphore.release();
 	}
+	
+	public EventsTab getEventsTab() {
+		return eventsTab;
+	}
 
 }

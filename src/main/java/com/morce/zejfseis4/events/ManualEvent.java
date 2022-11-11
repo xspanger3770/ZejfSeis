@@ -82,4 +82,9 @@ public class ManualEvent extends Event {
 		return 0;
 	}
 
+	@Override
+	public String getRegion() {
+		return "Local";
+	}
+
 }

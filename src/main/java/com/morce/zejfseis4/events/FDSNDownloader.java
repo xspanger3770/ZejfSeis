@@ -9,14 +9,20 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.morce.zejfseis4.main.ZejfSeis4;
+import com.morce.zejfseis4.utils.NamedThreadFactory;
 
 public class FDSNDownloader {
 
@@ -32,6 +38,7 @@ public class FDSNDownloader {
 	public FDSNDownloader(EventManager eventManager) {
 		this.eventManager = eventManager;
 		load();
+		run();
 	}
 
 	private void load() {
@@ -48,36 +55,48 @@ public class FDSNDownloader {
 		lastDownload = System.currentTimeMillis();
 	}
 
-	public void update() {
-		new Thread("Downloader") {
+	private void run() {
+		ScheduledExecutorService execEvents = Executors
+				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Events Downloader"));
+		execEvents.scheduleAtFixedRate(new Runnable() {
+			@Override
 			public void run() {
 				try {
-					Calendar start = Calendar.getInstance();
-					start.setTimeInMillis(lastDownload - (1000 * 60 * 60 * HOURS_BACKWARD));
-					ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
-					lastDownload = System.currentTimeMillis();
-
-					try {
-						DataOutputStream out = new DataOutputStream(new FileOutputStream(lastDownloadFile));
-						out.writeLong(lastDownload);
-						out.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					for (CatalogueEvent event : events) {
-						parseEvent(event);
-					}
-					
-					// TODO UPDATE UI
+					FDSNDownloader.this.update();
 				} catch (Exception e) {
+					System.err.println("Exception occured in events downloader");
 					e.printStackTrace();
 				}
-			};
-		}.start();
+			}
+		}, 0, 1, TimeUnit.MINUTES);
 	}
 
-	private void parseEvent(CatalogueEvent event) {
+	private void update() {
+		try {
+			Calendar start = Calendar.getInstance();
+			start.setTimeInMillis(lastDownload - (1000 * 60 * 60 * HOURS_BACKWARD));
+			ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
+			lastDownload = System.currentTimeMillis();
+
+			try {
+				DataOutputStream out = new DataOutputStream(new FileOutputStream(lastDownloadFile));
+				out.writeLong(lastDownload);
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			for (CatalogueEvent event : events) {
+				processEvent(event);
+			}
+
+			ZejfSeis4.getFrame().getEventsTab().updatePanel();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void processEvent(CatalogueEvent event) {
 		CatalogueEvent original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
 		boolean exists = original != null;
 		boolean detectable = event.calculateDetectionPct() >= TRESHOLD;
@@ -133,8 +152,6 @@ public class FDSNDownloader {
 		return list;
 	}
 
-	private static TimeZone timeZone = TimeZone.getDefault();
-
 	public static CatalogueEvent _decode(JSONObject properties) throws Exception {
 		double lat = properties.getDouble("lat");
 		double lon = properties.getDouble("lon");
@@ -145,28 +162,20 @@ public class FDSNDownloader {
 		String emsc_id = properties.getString("source_id");
 
 		String time = properties.getString("time");
-		Calendar origin = Calendar.getInstance();
-		origin.setTime(format.parse(time));
-		int timeIncrease = (timeZone.inDaylightTime(origin.getTime()) ? timeZone.getDSTSavings() : 0)
-				+ timeZone.getRawOffset();
-		origin.add(Calendar.MILLISECOND, timeIncrease);
+		String lastUpdateStr = properties.getString("lastupdate");
 
-		String str_lastUpdate = properties.getString("lastupdate");
-		Calendar lastUpdate = Calendar.getInstance();
-		lastUpdate.setTime(format.parse(str_lastUpdate));
-		lastUpdate.add(Calendar.MILLISECOND, timeIncrease);
+		long origin = Instant.parse(time).toEpochMilli();
+		long lastUpdate = Instant.parse(lastUpdateStr).toEpochMilli();
 
-		return new CatalogueEvent(emsc_id, origin.getTimeInMillis(), lat, lon, depth, mag, magType, region,
-				lastUpdate.getTimeInMillis());
+		return new CatalogueEvent(emsc_id, origin, lat, lon, depth, mag, magType, region, lastUpdate);
 	}
 
 	public static void main(String[] args) {
 		Calendar a = Calendar.getInstance();
 		a.setTimeInMillis(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
 		try {
-			System.out.println(downloadEvents(a, null, 100, -999));
+			System.out.println(downloadEvents(a, null, 1000, -999));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

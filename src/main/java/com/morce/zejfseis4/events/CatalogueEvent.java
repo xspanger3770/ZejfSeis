@@ -59,6 +59,7 @@ public class CatalogueEvent extends Event {
 		return magType;
 	}
 
+	@Override
 	public String getRegion() {
 		return region;
 	}

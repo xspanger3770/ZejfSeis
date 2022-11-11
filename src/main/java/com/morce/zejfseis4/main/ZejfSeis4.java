@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 
 import com.morce.zejfseis4.client.ZejfClient;
 import com.morce.zejfseis4.data.DataManager;
+import com.morce.zejfseis4.events.EventManager;
 import com.morce.zejfseis4.ui.ZejfSeisFrame;
 
 public class ZejfSeis4 {
@@ -20,6 +21,7 @@ public class ZejfSeis4 {
 	private static ZejfSeisFrame frame;
 	private static DataManager dataManager;
 	private static ZejfClient client;
+	private static EventManager eventManager;
 
 	public static void init() {
 		if(!MAIN_FOLDER.exists()) {
@@ -31,6 +33,9 @@ public class ZejfSeis4 {
 		client = new ZejfClient();
 		dataManager = new DataManager();
 		dataManager.loadFromInfo();
+		
+		eventManager = new EventManager();
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			
 			@Override
@@ -59,6 +64,10 @@ public class ZejfSeis4 {
 
 	public static ZejfClient getClient() {
 		return client;
+	}
+	
+	public static EventManager getEventManager() {
+		return eventManager;
 	}
 	
 	public static void errorDialog(Exception e) {
