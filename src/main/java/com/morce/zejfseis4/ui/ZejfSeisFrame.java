@@ -37,6 +37,7 @@ public class ZejfSeisFrame extends JFrame {
 	private Semaphore semaphore;
 	private com.morce.zejfseis4.ui.RealtimeTab realtimeTab;
 	private DrumTab drumTab;
+	private EventsTab eventsTab;
 
 	public ZejfSeisFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,6 +60,9 @@ public class ZejfSeisFrame extends JFrame {
 
 		drumTab = new DrumTab();
 		tabbedPane.addTab("Drum", drumTab);
+		
+		eventsTab = new EventsTab();
+		tabbedPane.addTab("Events", eventsTab);
 
 		status = "Loading...";
 		semaphore = new Semaphore(0);

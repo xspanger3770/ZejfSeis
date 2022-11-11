@@ -1,0 +1,178 @@
+package com.morce.zejfseis4.events;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class FDSNDownloader {
+
+	private static final double TRESHOLD = 4.0 / 100.0;
+
+	protected static final int HOURS_BACKWARD = 24 * 1;
+
+	private EventManager eventManager;
+
+	private static File lastDownloadFile = new File(EventManager.eventsFolder, "lastDownload.dat");
+	private long lastDownload;
+
+	public FDSNDownloader(EventManager eventManager) {
+		this.eventManager = eventManager;
+		load();
+	}
+
+	private void load() {
+		try {
+			if (lastDownloadFile.exists()) {
+				DataInputStream in = new DataInputStream(new FileInputStream(lastDownloadFile));
+				lastDownload = in.readLong();
+				in.close();
+				return;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		lastDownload = System.currentTimeMillis();
+	}
+
+	public void update() {
+		new Thread("Downloader") {
+			public void run() {
+				try {
+					Calendar start = Calendar.getInstance();
+					start.setTimeInMillis(lastDownload - (1000 * 60 * 60 * HOURS_BACKWARD));
+					ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
+					lastDownload = System.currentTimeMillis();
+
+					try {
+						DataOutputStream out = new DataOutputStream(new FileOutputStream(lastDownloadFile));
+						out.writeLong(lastDownload);
+						out.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					for (CatalogueEvent event : events) {
+						parseEvent(event);
+					}
+					
+					// TODO UPDATE UI
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			};
+		}.start();
+	}
+
+	private void parseEvent(CatalogueEvent event) {
+		CatalogueEvent original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
+		boolean exists = original != null;
+		boolean detectable = event.calculateDetectionPct() >= TRESHOLD;
+		if (exists) {
+			boolean changed = original.getLastUpdate() < event.getLastUpdate();
+			if (changed) {
+				original.update(event);
+			}
+		} else if (detectable) {
+			getEventManager().newEvent(event);
+		}
+	}
+
+	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+
+	// From ZejfSeis 1
+	public static ArrayList<CatalogueEvent> downloadEvents(Calendar start, Calendar end, int limit, double minMag)
+			throws Exception {
+		ArrayList<CatalogueEvent> list = new ArrayList<CatalogueEvent>();
+
+		if (start != null && end == null) {
+			start.add(Calendar.SECOND, 1);// ?
+		}
+		String start_str = start == null ? "" : "&start=" + format.format(start.getTime());
+		String end_str = end == null ? "" : "&end=" + format.format(end.getTime());
+		URL url = new URL("https://www.seismicportal.eu/fdsnws/event/1/query?"
+				+ ((start != null && end == null) ? "orderby=time-asc" : "") + "&limit=" + limit + start_str + end_str
+				+ "&format=json" + (minMag == -999 ? "" : "&minmag=" + minMag));
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+		System.out.println("URL: " + url.toString());
+		StringBuilder result = new StringBuilder();
+		String inputLine;
+		while ((inputLine = in.readLine()) != null) {
+			result.append(inputLine);
+		}
+		in.close();
+
+		JSONObject obj = null;
+		try {
+			obj = new JSONObject(result.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		JSONArray array = obj.getJSONArray("features");
+		for (int i = 0; i < array.length(); i++) {
+			JSONObject properties = array.getJSONObject(i).getJSONObject("properties");
+			list.add(_decode(properties));
+		}
+		if (start != null && end == null) {
+			// Collections.sort(list); //TODO
+		}
+		return list;
+	}
+
+	private static TimeZone timeZone = TimeZone.getDefault();
+
+	public static CatalogueEvent _decode(JSONObject properties) throws Exception {
+		double lat = properties.getDouble("lat");
+		double lon = properties.getDouble("lon");
+		double depth = properties.getDouble("depth");
+		double mag = properties.getDouble("mag");
+		String magType = properties.getString("magtype");
+		String region = properties.getString("flynn_region");
+		String emsc_id = properties.getString("source_id");
+
+		String time = properties.getString("time");
+		Calendar origin = Calendar.getInstance();
+		origin.setTime(format.parse(time));
+		int timeIncrease = (timeZone.inDaylightTime(origin.getTime()) ? timeZone.getDSTSavings() : 0)
+				+ timeZone.getRawOffset();
+		origin.add(Calendar.MILLISECOND, timeIncrease);
+
+		String str_lastUpdate = properties.getString("lastupdate");
+		Calendar lastUpdate = Calendar.getInstance();
+		lastUpdate.setTime(format.parse(str_lastUpdate));
+		lastUpdate.add(Calendar.MILLISECOND, timeIncrease);
+
+		return new CatalogueEvent(emsc_id, origin.getTimeInMillis(), lat, lon, depth, mag, magType, region,
+				lastUpdate.getTimeInMillis());
+	}
+
+	public static void main(String[] args) {
+		Calendar a = Calendar.getInstance();
+		a.setTimeInMillis(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
+		try {
+			System.out.println(downloadEvents(a, null, 100, -999));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public EventManager getEventManager() {
+		return eventManager;
+	}
+
+}
