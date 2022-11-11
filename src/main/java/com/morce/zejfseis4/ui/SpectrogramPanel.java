@@ -39,7 +39,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 
 	static {
 		try {
-			BufferedImage img = ImageIO.read(SpectrogramPanel.class.getResource("scale2.png"));
+			BufferedImage img = ImageIO.read(SpectrogramPanel.class.getResource("/scale2.png"));
 			scale = new Color[img.getHeight()];
 			for (int i = 0; i < img.getHeight(); i++) {
 				scale[i] = new Color(img.getRGB(0, i));
