@@ -20,7 +20,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import com.morce.zejfseis4.data.DataRequest;
-import com.morce.zejfseis4.data.Intensity;
+import com.morce.zejfseis4.events.Intensity;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.TravelTimeTable;

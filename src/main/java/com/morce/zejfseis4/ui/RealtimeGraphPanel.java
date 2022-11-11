@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.morce.zejfseis4.data.DataRequest;
-import com.morce.zejfseis4.data.Intensity;
+import com.morce.zejfseis4.events.Intensity;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.NamedThreadFactory;

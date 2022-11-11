@@ -48,6 +48,7 @@ public class ZejfSeis4 {
 					@Override
 					public void windowClosing(WindowEvent e) {
 						dataManager.exit();
+						eventManager.saveAll();
 					}
 				});
 			}

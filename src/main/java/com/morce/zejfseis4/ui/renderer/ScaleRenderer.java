@@ -1,43 +1,37 @@
 package com.morce.zejfseis4.ui.renderer;
 
 import java.awt.Color;
-import java.awt.Component;
 
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-
+import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.scale.Scale;
 
-public class ScaleRenderer extends DefaultTableCellRenderer {
+public class ScaleRenderer extends TableCellRendererAdapter<Event, Double> {
 
 	private static final long serialVersionUID = 1L;
 	private final Scale scale;
+	private String format;
 
-	public ScaleRenderer(Scale scale) {
+	public ScaleRenderer(Scale scale, String format) {
+		super();
 		this.scale = scale;
-		setHorizontalAlignment(SwingConstants.CENTER);
+		this.format = format;
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-			int row, int column) {
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		if (value == null) {
-			setBackground(Color.white);
-			setForeground(Color.black);
-			return this;
-		}
-		if (value instanceof Integer) {
-			int val = (int) value;
-			setText(String.format("%d", val));
+	public Color getBackground(Event entity, Double value) {
+		Color col = scale.getColor(value);
+		return col;
+	}
 
-			Color col = scale.getColor(val);
-			setBackground(col);
-			setForeground(col.getRed() * 0.299 + col.getGreen() * 0.587 + col.getBlue() * 0.114 > 60 ? Color.black
-					: Color.white);
-		}
-		return this;
+	@Override
+	public Color getForeground(Event entity, Double value) {
+		Color col = scale.getColor(value);
+		return (col.getRed() * 0.299 + col.getGreen() * 0.587 + col.getBlue() * 0.114 > 60 ? Color.black : Color.white);
+	}
+	
+	@Override
+	public String getText(Event entity, Double value) {
+		return String.format(format, value);
 	}
 
 }

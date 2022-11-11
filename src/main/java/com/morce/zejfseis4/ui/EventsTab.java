@@ -8,12 +8,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,12 +23,10 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
 import com.morce.zejfseis4.data.DataManager;
+import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.main.ZejfSeis4;
-import com.morce.zejfseis4.scale.Scales;
 import com.morce.zejfseis4.ui.model.EventTableModel;
-import com.morce.zejfseis4.ui.renderer.LocalDateRenderer;
-import com.morce.zejfseis4.ui.renderer.ScaleRenderer;
 
 public class EventsTab extends JPanel {
 
@@ -142,31 +141,25 @@ public class EventsTab extends JPanel {
 		table.setGridColor(Color.black);
 		table.setShowGrid(true);
 
-		table.setDefaultRenderer(LocalDateTime.class, new LocalDateRenderer());
+		for (int i = 0; i < table.getColumnCount(); i++) {
+			table.getColumnModel().getColumn(i).setCellRenderer(tableModel.getColumnRenderer(i));
+		}
 
-		table.getColumnModel().getColumn(1).setCellRenderer(new ScaleRenderer(Scales.SYS));
-		// table.getColumnModel().getColumn(2).setCellRenderer(new
-		// ScaleRenderer(Scales.DIA));
-		// table.getColumnModel().getColumn(3).setCellRenderer(new
-		// ScaleRenderer(Scales.HR));
-
-		// pressureTable.getSelectionModel().addListSelectionListener(this::rowSelectionChanged);
+		JComboBox<DetectionStatus> categoryJComboBox = new JComboBox<>(DetectionStatus.values());
+		table.setDefaultEditor(DetectionStatus.class, new DefaultCellEditor(categoryJComboBox));
 
 		return table;
 	}
 
 	public void updatePanel() {
-		System.out.println("UPDATEEE");
-
 		labelTime.setText(String.format("%s %s", DataManager.MONTHS[displayedTime.get(Calendar.MONTH)],
 				displayedTime.get(Calendar.YEAR)));
 
-		@SuppressWarnings("unchecked")
 		ArrayList<Event> events = (ArrayList<Event>) ZejfSeis4.getEventManager()
 				.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true).getEvents();
-		
+
 		System.out.println(events.size());
-		
+
 		this.data.clear();
 		this.data.addAll(events);
 
