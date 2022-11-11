@@ -66,7 +66,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			end = a;
 		}
 
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), start, end) {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DataExplorer", start, end) {
 			@Override
 			public void onRefill(boolean isRealtime) {
 				if (!isRealtime) {

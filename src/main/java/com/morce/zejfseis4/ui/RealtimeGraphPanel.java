@@ -29,7 +29,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 	private static RenderingHints defaultHints;
 	
 	public RealtimeGraphPanel() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), Settings.REALTIME_DURATION_SECONDS * 1000));
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "RealtimeGraph", Settings.REALTIME_DURATION_SECONDS * 1000));
 		setLayout(null);
 		
 		threads();

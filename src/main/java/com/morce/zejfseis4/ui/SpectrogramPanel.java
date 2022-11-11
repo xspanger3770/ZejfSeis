@@ -50,7 +50,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 	}
 
 	public SpectrogramPanel() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), Settings.REALTIME_DURATION_SECONDS * 1000) {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "Spectro", Settings.REALTIME_DURATION_SECONDS * 1000) {
 			@Override
 			public void onRefill(boolean realtime) {
 				if (!realtime) {

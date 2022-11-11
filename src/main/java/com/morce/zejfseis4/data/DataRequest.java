@@ -40,16 +40,19 @@ public class DataRequest {
 	private long nextDuration;
 	private boolean change = false;
 	private long lastFilteredLogID;
+	private String name;
 
-	public DataRequest(DataManager dataManager, long startTime, long endTime) {
+	public DataRequest(DataManager dataManager, String name, long startTime, long endTime) {
 		id = nextID++;
+		this.name=name;
 		this.dataManager = dataManager;
 		setTimes(startTime, endTime);
 
 	}
 
-	public DataRequest(DataManager dataManager, long durationMS) {
+	public DataRequest(DataManager dataManager, String name, long durationMS) {
 		id = nextID++;
+		this.name=name;
 		this.dataManager = dataManager;
 		setDuration(durationMS);
 	}
@@ -150,7 +153,7 @@ public class DataRequest {
 			}
 			workerThread = null;
 		}
-		workerThread = new Thread("DataRequest Worker Thread") {
+		workerThread = new Thread(String.format("DataRequest '%s' Worker Thread", name)) {
 			public void run() {
 				processData();
 			};

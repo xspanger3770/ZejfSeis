@@ -63,7 +63,7 @@ public class DrumTab extends DataRequestPanel {
 	protected int dragEndY = -1;
 
 	public DrumTab() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), 0, 10) {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DrumTab", 0, 10) {
 
 			@Override
 			public void onRefill(boolean realtime) {
