@@ -38,11 +38,11 @@ public abstract class Event implements Serializable {
 	public abstract String getMagType();
 
 	public abstract String getID();
-	
+
 	public abstract String getRegion();
 
 	public int getIntensity() {
-		return intensity;
+		return getDetectionStatus().equals(DetectionStatus.DETECTED) ? intensity : -getDetectionStatus().ordinal();
 	}
 
 	public void setIntensity(int intensity) {

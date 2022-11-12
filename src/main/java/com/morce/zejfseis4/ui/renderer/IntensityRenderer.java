@@ -10,11 +10,12 @@ public class IntensityRenderer extends TableCellRendererAdapter<Event, Integer> 
 
 	private static final long serialVersionUID = 1L;
 
-	public java.awt.Color getBackground(Event entity, Integer value, Color color) {
+	@Override
+	public Color getBackground(Event entity, Integer value) {
 		if (entity.getDetectionStatus().equals(DetectionStatus.DETECTED)) {
 			return Intensity.get(value).getColor();
 		} else {
-			return color;
+			return Color.white;
 		}
 	};
 

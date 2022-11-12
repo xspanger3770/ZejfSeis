@@ -11,6 +11,9 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.morce.zejfseis4.events.ManualEvent;
+import com.morce.zejfseis4.main.ZejfSeis4;
+
 public class DataExplorer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -51,7 +54,11 @@ public class DataExplorer extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				boolean wavesSelected = dataExplorerPanel.pWaveTime > 0 && dataExplorerPanel.sWaveTime > 0;
 				if (wavesSelected) {
-					// TODO
+					ManualEvent manualEvent = new ManualEvent(dataExplorerPanel.pWaveTime, dataExplorerPanel.sWaveTime);
+					ZejfSeis4.getEventManager().newEvent(manualEvent);
+					ZejfSeis4.getFrame().getEventsTab().updatePanel();
+					new EventExplorer(manualEvent);
+					DataExplorer.this.dispose();
 				}
 			}
 		});

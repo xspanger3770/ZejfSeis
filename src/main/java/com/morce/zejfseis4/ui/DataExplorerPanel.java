@@ -39,6 +39,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 	private static final int SPECTRO = 2;
 	private static final int FFT = 3;
 	private static final int HORIZONTAL_SCALE = 5;
+
+	private static final long MAXIMUM_DURATION = 24 * 60 * 60 * 1000l;
+
 	private int MODE = 0;
 
 	private int lastMode;
@@ -64,6 +67,10 @@ public class DataExplorerPanel extends DataRequestPanel {
 			long a = start;
 			start = end;
 			end = a;
+		}
+
+		if (end - start >= MAXIMUM_DURATION) {
+			throw new IllegalArgumentException("Too long!");
 		}
 
 		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DataExplorer", start, end) {
@@ -412,7 +419,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			if (pkpWaveTime > 0) {
 				graphics.setStroke(new BasicStroke(2f));
 				graphics.setColor(new Color(0, 200, 0));
-				int px = (int) ((width) * ((pkpWaveTime - start) / (double) (end - start)));
+				int px = wrx + (int) ((width - wrx) * ((pkpWaveTime - start) / (double) (end - start)));
 				graphics.drawLine(px, 2, px, height - statusPanelHeight);
 				graphics.setFont(new Font("Calibri", Font.BOLD, 18));
 				graphics.drawString("PKP", px + 3, 16);
@@ -430,8 +437,8 @@ public class DataExplorerPanel extends DataRequestPanel {
 			}
 
 			if (sfcEnd > 0 && sfcStart > 0 && MODE == CHART) {
-				int x1 = (int) ((width) * ((sfcStart - start) / (double) (end - start)));
-				int x2 = (int) ((width) * ((sfcEnd - start) / (double) (end - start)));
+				int x1 = wrx + (int) ((width - wrx) * ((sfcStart - start) / (double) (end - start)));
+				int x2 = wrx + (int) ((width - wrx) * ((sfcEnd - start) / (double) (end - start)));
 				graphics.setStroke(new BasicStroke(1f));
 				graphics.setColor(new Color(255, 0, 255, 50));
 				graphics.fillRect(x1, 1, x2 - x1, height - statusPanelHeight);
@@ -455,8 +462,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 
 	private void drawIntensity(int w, int h, Graphics2D g) {
 		if (mouse) {
-			int intensity = (int) (((h * 0.5 - statusPanelHeight * 0.5) - mouseY) / (h * 0.5 - statusPanelHeight * 0.5) * max);
-			
+			int intensity = (int) (((h * 0.5 - statusPanelHeight * 0.5) - mouseY) / (h * 0.5 - statusPanelHeight * 0.5)
+					* max);
+
 			int r = 8;
 			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
 			g.setStroke(new BasicStroke(1f));

@@ -17,15 +17,23 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import com.morce.zejfseis4.data.DataManager;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.main.ZejfSeis4;
+import com.morce.zejfseis4.ui.action.EditEventAction;
 import com.morce.zejfseis4.ui.model.EventTableModel;
 
 public class EventsTab extends JPanel {
@@ -37,6 +45,7 @@ public class EventsTab extends JPanel {
 
 	private List<Event> data = new ArrayList<>();
 	private EventTableModel tableModel;
+	private EditEventAction editEventAction;
 
 	public EventsTab() {
 		setLayout(new BorderLayout(0, 0));
@@ -159,12 +168,38 @@ public class EventsTab extends JPanel {
 		};
 
 		JTable table = new JTable(tableModel);
-		table.setAutoCreateRowSorter(true);
 		table.setFont(new Font("Calibri", Font.BOLD, 16));
 		table.setRowHeight(24);
 		table.setGridColor(Color.black);
 		table.setShowGrid(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		table.setAutoCreateRowSorter(true);
+		
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
+		table.setRowSorter(sorter);
+		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+		 
+		int columnIndexToSort = 0;
+		sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.DESCENDING));
+		 
+		sorter.setSortKeys(sortKeys);
+		sorter.sort();
+		
+		editEventAction = new EditEventAction(table);
+
+		table.getSelectionModel().addListSelectionListener(this::rowSelectionChanged);
+
+		table.setComponentPopupMenu(createPopupMenu());
+
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent mouseEvent) {
+				JTable table = (JTable) mouseEvent.getSource();
+				if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2
+						&& table.getSelectedRow() != -1) {
+					editEventAction.actionPerformed(null);
+				}
+			}
+		});
 
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(tableModel.getColumnRenderer(i));
@@ -174,6 +209,18 @@ public class EventsTab extends JPanel {
 		table.setDefaultEditor(DetectionStatus.class, new DefaultCellEditor(categoryJComboBox));
 
 		return table;
+	}
+
+	private void rowSelectionChanged(ListSelectionEvent event) {
+		var selectionModel = (ListSelectionModel) event.getSource();
+		var count = selectionModel.getSelectedItemsCount();
+		editEventAction.setEnabled(count == 1);
+	}
+
+	private JPopupMenu createPopupMenu() {
+		var menu = new JPopupMenu();
+		menu.add(editEventAction);
+		return menu;
 	}
 
 	public void updatePanel() {
@@ -189,6 +236,10 @@ public class EventsTab extends JPanel {
 		this.data.addAll(events);
 
 		tableModel.applyFilter();
+	}
+
+	public JTable getTable() {
+		return table;
 	}
 
 }

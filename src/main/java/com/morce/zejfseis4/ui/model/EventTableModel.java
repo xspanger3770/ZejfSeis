@@ -3,6 +3,8 @@ package com.morce.zejfseis4.ui.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.swing.SwingConstants;
+
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.events.EventDistance;
@@ -23,16 +25,14 @@ public class EventTableModel extends FilterableTableModel<Event> {
 
 	private final List<Column<Event, ?>> columns = List.of(
 			Column.readonly("Date", LocalDateTime.class, Event::getOriginDate, new LocalDateRenderer()),
-			Column.readonly("Region", String.class, Event::getRegion, new NameRenderer()),
+			Column.readonly("Region", String.class, Event::getRegion, new NameRenderer(SwingConstants.LEFT)),
 			Column.readonly("Type", EventDistance.class, Event::getEventDistance, new EventDistanceRenderer()),
 			Column.readonly("Magnitude", Double.class, Event::getMag, new MagnitudeRenderer()),
 			Column.readonly("Depth", Double.class, Event::getDepth, new ScaleRenderer(Scales.DEPTH, "%.1f km")),
 			Column.readonly("Distance", Double.class, Event::getDistance, new ScaleRenderer(Scales.DIST, "%,.1f km")),
 			Column.readonly("Detectable", Double.class, Event::calculateDetectionPct, new DetectableRenderer()),
-			Column.editable("Detected", DetectionStatus.class, Event::getDetectionStatus, Event::setDetectionStatus,
-					new DetectedRenderer()),
-			Column.editable("Intensity", Integer.class, Event::getIntensity, Event::setIntensity,
-					new IntensityRenderer()));
+			Column.readonly("Detected", DetectionStatus.class, Event::getDetectionStatus, new DetectedRenderer()),
+			Column.readonly("Intensity", Integer.class, Event::getIntensity, new IntensityRenderer()));
 
 	public EventTableModel(List<Event> data) {
 		super(data);

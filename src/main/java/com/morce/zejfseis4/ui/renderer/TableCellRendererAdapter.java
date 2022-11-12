@@ -16,6 +16,10 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
 	public TableCellRendererAdapter() {
 		setHorizontalAlignment(SwingConstants.CENTER);
 	}
+	
+	public TableCellRendererAdapter(int aligment) {
+		setHorizontalAlignment(aligment);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

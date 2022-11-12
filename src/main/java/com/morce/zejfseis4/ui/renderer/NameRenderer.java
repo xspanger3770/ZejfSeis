@@ -6,6 +6,10 @@ public class NameRenderer extends TableCellRendererAdapter<Event, String> {
 
 	private static final long serialVersionUID = 1L;
 	
+	public NameRenderer(int align) {
+		super(align);
+	}
+	
 	@Override
 	public String getText(Event entity, String value) {
 		String text = super.getText();

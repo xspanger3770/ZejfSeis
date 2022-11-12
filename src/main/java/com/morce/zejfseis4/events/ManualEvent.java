@@ -63,6 +63,7 @@ public class ManualEvent extends Event {
 	}
 
 	public static double calculateManualMagnitude(double dist, double intensity) {
+		intensity *= 0.01;
 		return Math.log10(intensity * (0.4 * Math.pow(dist, 2.1) + 1)) - 5.40;
 	}
 

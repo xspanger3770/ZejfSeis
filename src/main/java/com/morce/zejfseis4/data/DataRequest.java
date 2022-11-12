@@ -44,7 +44,7 @@ public class DataRequest {
 
 	public DataRequest(DataManager dataManager, String name, long startTime, long endTime) {
 		id = nextID++;
-		this.name=name;
+		this.name = name;
 		this.dataManager = dataManager;
 		setTimes(startTime, endTime);
 
@@ -52,7 +52,7 @@ public class DataRequest {
 
 	public DataRequest(DataManager dataManager, String name, long durationMS) {
 		id = nextID++;
-		this.name=name;
+		this.name = name;
 		this.dataManager = dataManager;
 		setDuration(durationMS);
 	}
@@ -232,23 +232,23 @@ public class DataRequest {
 					int val = dh.getValue(ZejfSeis4.getDataManager().getMillis(id));
 					Log log = getLog(id);
 					if (log == null) {
-						continue; //5-6
+						continue; // 5-6
 					}
-					
+
 					long gap = id - headLogID;
-					
+
 					if (val == dataManager.getErrVal()) {
 						log.clear(dataManager);
 					} else {
-						
+
 						long actualGap = id - lastLogID;
 						if (actualGap != 1 && lastFilteredLogID != -1) {
 							resetFilter();
 							lastFilteredLogID = -1;
 						}
-						
+
 						double filteredV = filter.filter(val);
-						if (remover_50Hz != null&&Settings.MAX_FREQUENCY > 49) {
+						if (remover_50Hz != null && Settings.MAX_FREQUENCY > 49) {
 							filteredV = remover_50Hz.filter(filteredV);
 						}
 						log.setValues(val, filteredV);
