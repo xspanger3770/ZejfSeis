@@ -22,6 +22,7 @@ import javax.imageio.ImageIO;
 import com.morce.zejfseis4.data.DataRequest;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
+import com.morce.zejfseis4.scale.Scales;
 import com.morce.zejfseis4.utils.NamedThreadFactory;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
@@ -39,7 +40,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 
 	static {
 		try {
-			BufferedImage img = ImageIO.read(SpectrogramPanel.class.getResource("/scale/scale2.png"));
+			BufferedImage img = ImageIO.read(Scales.class.getResource("scale2.png"));
 			scale = new Color[img.getHeight()];
 			for (int i = 0; i < img.getHeight(); i++) {
 				scale[i] = new Color(img.getRGB(0, i));
