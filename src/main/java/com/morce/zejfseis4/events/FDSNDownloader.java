@@ -90,6 +90,7 @@ public class FDSNDownloader {
 				processEvent(event);
 			}
 
+			ZejfSeis4.getEventManager().saveAll();
 			ZejfSeis4.getFrame().getEventsTab().updatePanel();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -124,6 +125,7 @@ public class FDSNDownloader {
 			
 			start.setTimeInMillis(events.get(events.size() -1).getOrigin());
 			ZejfSeis4.getFrame().getEventsTab().updatePanel();
+			ZejfSeis4.getEventManager().saveAll();
 		}
 	}
 

@@ -232,6 +232,7 @@ public class EventExplorer extends JFrame {
 					((ManualEvent) event).setMag(textFieldMag.getText().isEmpty() ? ManualEvent.NO_MAG
 							: Double.valueOf(textFieldMag.getText()));
 				}
+				ZejfSeis4.getEventManager().saveAll();
 				ZejfSeis4.getFrame().getEventsTab().updatePanel();
 				EventExplorer.this.dispose();
 			}
@@ -248,6 +249,7 @@ public class EventExplorer extends JFrame {
 						JOptionPane.YES_NO_OPTION);
 				if (result == 0) {
 					ZejfSeis4.getEventManager().removeEvent(event);
+					ZejfSeis4.getEventManager().saveAll();
 					ZejfSeis4.getFrame().getEventsTab().updatePanel();
 					EventExplorer.this.dispose();
 				}

@@ -46,30 +46,30 @@ public class EventManager {
 	}
 
 	private EventMonth loadEventMonth(int year, int month, boolean createNew) {
+		EventMonth result = null;
+
 		File f = getFile(year, month);
 		if (f.exists()) {
 			try {
 				ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
-
-				EventMonth eventMonth = (EventMonth) in.readObject();
-				synchronized (eventhMonthsSync) {
-					eventMonths.add(eventMonth);
-				}
+				result = (EventMonth) in.readObject();
 				in.close();
-				return eventMonth;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else {
-			if (createNew) {
-				EventMonth eventMonth = new EventMonth(year, month);
-				synchronized (eventhMonthsSync) {
-					eventMonths.add(eventMonth);
-				}
-				return eventMonth;
+		}
+		if (result == null && createNew) {
+			result = new EventMonth(year, month);
+		}
+		
+		if(result != null) {
+			synchronized (eventhMonthsSync) {
+				eventMonths.add(result);
 			}
 		}
-		return null;
+		
+		return result;
+
 	}
 
 	public void saveAll() {
