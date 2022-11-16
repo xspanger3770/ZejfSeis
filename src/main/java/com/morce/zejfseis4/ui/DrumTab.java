@@ -53,9 +53,7 @@ public class DrumTab extends DataRequestPanel {
 
 	private boolean needsRedraw;
 	private long lineID;
-	private long lineDurationMinutes;
-
-	private Object mutex;
+	private long lastDuration;
 
 	protected int dragStartX = -1;
 	protected int dragStartY = -1;
@@ -82,7 +80,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setLineID(lineID - 10);
+				incrementLineID(-10);
 			}
 		});
 		btnBackS = new JButton("<");
@@ -92,7 +90,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setLineID(lineID - 1);
+				incrementLineID(-1);
 			}
 		});
 		JButton btnGoto = new JButton("Goto");
@@ -113,7 +111,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setLineID(getCurrentLineID());
+				resetLineID();
 			}
 		});
 
@@ -124,7 +122,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setLineID(lineID + 1);
+				incrementLineID(1);
 			}
 		});
 
@@ -134,7 +132,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setLineID(lineID + 10);
+				incrementLineID(10);
 			}
 		});
 
@@ -149,12 +147,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				setLineID(lineID + e.getWheelRotation());
-				/*
-				 * if (e.getWheelRotation() > 0) {
-				 * 
-				 * } else { setLineID(lineID - 1); }
-				 */
+				incrementLineID(e.getWheelRotation());
 			}
 		});
 		drumPanel = new JPanel() {
@@ -164,11 +157,10 @@ public class DrumTab extends DataRequestPanel {
 			public void paint(Graphics gr) {
 				super.paint(gr);
 				Graphics2D g = (Graphics2D) (gr);
-				synchronized (mutex) {
-					if (drum != null) {
-						g.drawImage(drum, 0, 0, null);
-					}
+				if (drum != null) {
+					g.drawImage(drum, 0, 0, null);
 				}
+
 				drawDrag(g);
 			}
 		};
@@ -219,11 +211,8 @@ public class DrumTab extends DataRequestPanel {
 
 		});
 
-		mutex = new Object();
-		synchronized (mutex) {
-			lineDurationMinutes = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
-			setLineID(getCurrentLineID());
-		}
+		lastDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		resetLineID();
 
 		runThreads();
 	}
@@ -274,9 +263,9 @@ public class DrumTab extends DataRequestPanel {
 		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
 
 		long time1 = (long) (getMillis(lineID - line1)
-				+ ((dragStartX - wrx) / (double) (w - wrx)) * lineDurationMinutes * 60 * 1000l);
+				+ ((dragStartX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
 		long time2 = (long) (getMillis(lineID - line2)
-				+ ((dragEndX - wrx) / (double) (w - wrx)) * lineDurationMinutes * 60 * 1000l);
+				+ ((dragEndX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
 
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -294,9 +283,8 @@ public class DrumTab extends DataRequestPanel {
 			@Override
 			public void run() {
 				try {
-					setLineID(lineID); // only enables the buttons
-					paintDrum();
-					// ZejfSeis4.getFrame().revalidate();
+					runUpdate();
+
 					ZejfSeis4.getFrame().repaint();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -305,80 +293,84 @@ public class DrumTab extends DataRequestPanel {
 		}, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
-	private long lastDrawLogID;
-
 	private long lastCurrentLineID = -1;
 
-	private void paintDrum() {
+	private void runUpdate() {
 		int w = drumPanel.getWidth();
 		int h = drumPanel.getHeight();
-
-		long cli = getCurrentLineID();
-		if (cli - lastCurrentLineID == 1 && lineID == lastCurrentLineID) {
-			setLineID(cli);
-		}
-		lastCurrentLineID = cli;
-		long _lineID = lineID;
 
 		if (w <= 0 || h <= 0 || !ZejfSeis4.getDataManager().isLoaded()) {
 			return;
 		}
+		
+		long _lineID = lineID;
+		long currentLineID = calculateCurrentLineID();
 
-		long newDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		if (currentLineID - lastCurrentLineID == 1 && _lineID == lastCurrentLineID) {
+			resetLineID();
+		}
+		lastCurrentLineID = currentLineID;
+
+		updateButtons(_lineID == currentLineID);
+
+		int _duration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		double _gain = Settings.DRUM_GAIN;
+		int _decimate = Settings.DECIMATE;
+
+		boolean redraw = needsRedraw;
+		needsRedraw = false;
 		if (drum != null) {
-			needsRedraw |= w != drum.getWidth() || h != drum.getHeight();
-			needsRedraw |= newDuration != lineDurationMinutes;
-			needsRedraw |= decimate != Settings.DECIMATE;
-			needsRedraw |= gain != Settings.DRUM_GAIN;
+			redraw |= w != drum.getWidth() || h != drum.getHeight();
+			redraw |= _duration != lastDuration;
+			redraw |= _decimate != lastDecimate;
+			redraw |= _gain != lastGain;
+			
+			lastDuration = _duration;
+			lastDecimate = _decimate;
+			lastGain = _gain;
 		}
 
-		BufferedImage newDrum = null;
-		if (drum == null || needsRedraw) {
-			lastDrawLogID = -1;
-			synchronized (mutex) {
-				recalculateParams(w, h);
-				_lineID = lineID;
-			}
-			newDrum = toCompatibleImage(new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR));
-			drumGraphics = newDrum.createGraphics();
+		int lines = (int) Math.round((h - 2 * LINE_PADDING) / (double) LINE_SPACE + 1);
 
-			drumGraphics.setColor(Color.white);
-			drumGraphics.fillRect(0, 0, w, h);
-
-			drawBackground(w, h, _lineID);
-			synchronized (dataRequest.dataMutex) {
-				drawForeground(w, h, _lineID);
-			}
-			needsRedraw = false;
-			drum = newDrum;
-		}
-
-		if (drumGraphics != null && lastDrawLogID != -1 && dataRequest.lastLogID >= lastDrawLogID + decimate) {
-			drawIt(lastDrawLogID, dataRequest.lastLogID, drumGraphics, dataRequest.lastLogID, _lineID);
-		}
-
-	}
-
-	private void recalculateParams(int w, int h) {
-		if (w <= 0 || h <= 0) {
-			return;
-		}
-		long newDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
-		if (newDuration != lineDurationMinutes) {
-			long newLineID = (long) (lineID / (newDuration / (double) lineDurationMinutes));
-			lineDurationMinutes = newDuration;
-			lineID = Math.min(getCurrentLineID(), newLineID);
-		}
-		lines = (int) Math.round((h - 2 * LINE_PADDING) / (double) LINE_SPACE + 1);
-		long endTime = getMillis(lineID + 1);
-		long startTime = getMillis(lineID - lines + 1) - FILTER_PADDING_MINUES * 60 * 1000l;
+		long endTime = getMillis(_lineID + 1);
+		long startTime = getMillis(_lineID - lines + 1) - FILTER_PADDING_MINUES * 60 * 1000l;
 		if (endTime != this.endTime || startTime != this.startTime) {
 			getDataRequest().changeTimes(startTime, endTime);
 			this.endTime = endTime;
 			this.startTime = startTime;
 		}
-		gain = Settings.DRUM_GAIN;
-		decimate = Settings.DECIMATE;
+
+		paintDrum(w, h, redraw, _lineID, lines, _duration, _decimate, _gain);
+
+	}
+
+	private long lastDrawLogID;
+
+	private void paintDrum(int w, int h, boolean fullRedraw, long currentLineID, int lines, long duration, int decimate,
+			double gain) {
+		BufferedImage newDrum = null;
+		if (drum == null || fullRedraw) {
+			lastDrawLogID = -1;
+
+			newDrum = toCompatibleImage(new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR));
+
+			drumGraphics = newDrum.createGraphics();
+
+			drumGraphics.setColor(Color.white);
+			drumGraphics.fillRect(0, 0, w, h);
+
+			drawBackground(w, h, currentLineID, lines);
+			synchronized (dataRequest.dataMutex) {
+				drawForeground(w, h, currentLineID, lines, duration, decimate, gain);
+			}
+			drum = newDrum;
+		}
+
+		if (drumGraphics != null && lastDrawLogID != -1 && dataRequest.lastLogID >= lastDrawLogID + lastDecimate) {
+			drawIt(w, h, lastDrawLogID, dataRequest.lastLogID, drumGraphics, dataRequest.lastLogID, currentLineID,
+					lines, duration, decimate, gain);
+		}
+
 	}
 
 	public static final int LINE_SPACE = 27;
@@ -386,16 +378,15 @@ public class DrumTab extends DataRequestPanel {
 
 	public static final int FILTER_PADDING_MINUES = 5;
 
-	private int lines;
 	private int wrx;
 
 	private long startTime;
 	private long endTime;
 
-	private double gain;
-	private int decimate;
+	private double lastGain;
+	private int lastDecimate;
 
-	private void drawBackground(int w, int h, long _lineID) {
+	private void drawBackground(int w, int h, long _lineID, int lines) {
 		Graphics2D g = drumGraphics;
 
 		g.setFont(new Font("Consolas", Font.BOLD, 24));
@@ -404,7 +395,7 @@ public class DrumTab extends DataRequestPanel {
 		g.setColor(Color.black);
 		g.drawRect(0, 0, w - 1, h - 1);
 		g.drawRect(0, 0, wrx, h - 1);
-
+		
 		Calendar cal = Calendar.getInstance();
 		for (int i = 0; i < lines; i++) {
 			int y = h - LINE_PADDING - i * LINE_SPACE;
@@ -441,7 +432,7 @@ public class DrumTab extends DataRequestPanel {
 		}
 	}
 
-	private void drawForeground(int w, int h, long _lineID) {
+	private void drawForeground(int w, int h, long _lineID, int lines, long duration, int decimate, double gain) {
 		Graphics2D g = drumGraphics;
 		g.setColor(Color.black);
 		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1)) - 1;
@@ -451,26 +442,24 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void run(long start, long end) {
-				drawIt(start, end, g, lastLogID, _lineID);
+				drawIt(w, h, start, end, g, lastLogID, _lineID, lines, duration, decimate, gain);
 			}
 		}.divide(startLogID, endLogID);
 	}
 
-	private void drawIt(long start, long end, Graphics2D g, long lastLogID, long _lineID) {
-		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1)) - 1;
-		int w = drumPanel.getWidth();
-		int h = drumPanel.getHeight();
-		long LOGS_PER_LINE = ZejfSeis4.getDataManager().getLogId(lineDurationMinutes * 60 * 1000l);
+	private void drawIt(int w, int h, long start, long end, Graphics2D g, long lastLogID, long currentLineID, int lines,
+			long duration, int decimate, double gain) {
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(currentLineID - lines + 1)) - 1;
+		long LOGS_PER_LINE = ZejfSeis4.getDataManager().getLogId(duration * 60 * 1000l);
 		long chuj = ZejfSeis4.getDataManager().getErrVal();
-		int dec = decimate;
 		Line2D.Double drawable = new Line2D.Double();
 		int line = (int) ((start - startLogID) / LOGS_PER_LINE);
 		g.setColor(Color.black);
-		for (long id = start; id < end; id += dec) {
+		for (long id = start; id < end; id += decimate) {
 			if (id > lastLogID) {
 				break;
 			}
-			long nextId = id + dec;
+			long nextId = id + decimate;
 			double val1 = dataRequest.getFilteredValueByLogID(id);
 			double val2 = dataRequest.getFilteredValueByLogID(nextId);
 			if (val2 != chuj) {
@@ -479,7 +468,7 @@ public class DrumTab extends DataRequestPanel {
 			if (val1 != chuj && val2 != chuj) {
 				long lineStartLogID = startLogID + line * LOGS_PER_LINE;
 				double x1 = wrx + (((id - lineStartLogID)) / (double) LOGS_PER_LINE) * (w - wrx);
-				double x2 = wrx + (((id + dec - lineStartLogID)) / (double) LOGS_PER_LINE) * (w - wrx);
+				double x2 = wrx + (((id + decimate - lineStartLogID)) / (double) LOGS_PER_LINE) * (w - wrx);
 				double y1 = (h - LINE_PADDING - (lines - line - 1) * LINE_SPACE) - val1 * (gain / 10000.0);
 				double y2 = (h - LINE_PADDING - (lines - line - 1) * LINE_SPACE) - val2 * (gain / 10000.0);
 				drawable.setLine(x1, y1, x2, y2);
@@ -489,24 +478,31 @@ public class DrumTab extends DataRequestPanel {
 			int _line = (int) ((id - startLogID) / LOGS_PER_LINE);
 			if (_line != line) {
 				line = _line;
-				id -= dec;
+				id -= decimate;
 			}
 		}
 
 	}
 
-	private void setLineID(long lineID) {
-		long currentLineID = getCurrentLineID();
-		lineID = Math.min(currentLineID, lineID);
-		synchronized (mutex) {
-			if (lineID != this.lineID) {
-				this.lineID = lineID;
-				recalculateParams(drumPanel.getWidth(), drumPanel.getHeight());
-				needsRedraw = true;
-			}
-		}
-		btnForwardM.setEnabled(lineID != currentLineID);
-		btnForwardS.setEnabled(lineID != currentLineID);
+	private synchronized void setLineID(long lineID) {
+		long currentLineID = calculateCurrentLineID();
+		this.lineID = Math.min(currentLineID, lineID);
+		updateButtons(lineID != currentLineID);
+	}
+
+	private synchronized void incrementLineID(long amount) {
+		setLineID(this.lineID + amount);
+	}
+
+	private synchronized void resetLineID() {
+		long currentLineID = calculateCurrentLineID();
+		this.lineID = currentLineID;
+		updateButtons(true);
+	}
+
+	private void updateButtons(boolean enabled) {
+		btnForwardM.setEnabled(enabled);
+		btnForwardS.setEnabled(enabled);
 	}
 
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
@@ -525,21 +521,20 @@ public class DrumTab extends DataRequestPanel {
 				}
 				Calendar c = Calendar.getInstance();
 				c.setTime(date);
-				synchronized (mutex) {
-					setLineID(c.getTimeInMillis() / (lineDurationMinutes * 60 * 1000l));
-				}
+
+				setLineID(c.getTimeInMillis() / (lastDuration * 60 * 1000l));
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
-	private long getCurrentLineID() {
-		return System.currentTimeMillis() / (lineDurationMinutes * 60 * 1000l);
+	private long calculateCurrentLineID() {
+		return System.currentTimeMillis() / (lastDuration * 60 * 1000l);
 	}
 
 	private long getMillis(long lineID) {
-		return lineID * lineDurationMinutes * 60 * 1000l;
+		return lineID * lastDuration * 60 * 1000l;
 	}
 
 	@Override
