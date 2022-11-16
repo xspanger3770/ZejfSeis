@@ -15,7 +15,7 @@ import com.morce.zejfseis4.ui.ZejfSeisFrame;
 public class ZejfSeis4 {
 	
 	public static final File MAIN_FOLDER = new File("./ZejfSeis4/");
-	public static final String VERSION = "4.4.1";
+	public static final String VERSION = "4.4.2";
 	public static final int COMPATIBILITY_VERSION = 4;
 	
 	private static ZejfSeisFrame frame;
