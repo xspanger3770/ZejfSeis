@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import com.morce.zejfseis4.exception.TooBigIntervalException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class DataManager {
@@ -134,7 +135,7 @@ public class DataManager {
 	}
 
 	private void notifyDataRequests(long startLogID, long endLogID, boolean realtime) {
-		if (endLogID-startLogID < 0) {
+		if (endLogID - startLogID < 0) {
 			throw new IllegalStateException();
 		}
 		synchronized (dataRequestsMutex) {
@@ -206,8 +207,6 @@ public class DataManager {
 		join(logQueueThread);
 		logQueueThread = null;
 
-		
-		
 		synchronized (dataRequestsMutex) {
 			for (DataRequest dataRequest : dataRequests) {
 				dataRequest.stop();
@@ -237,7 +236,7 @@ public class DataManager {
 						cleanup();
 						saveAll();
 						System.out.printf("Currently loaded %d DataHours\n", dataHours.size());
-						System.out.println("Queue length "+realtimeQueue.size());
+						System.out.println("Queue length " + realtimeQueue.size());
 					}
 				}
 			}
@@ -378,13 +377,18 @@ public class DataManager {
 		return null;
 	}
 
-	public Queue<DataHour> getDataHours(long start, long end) {
+	public Queue<DataHour> getDataHours(long start, long end) throws TooBigIntervalException {
 		Queue<DataHour> result = new LinkedList<DataHour>();
 		long startHourID = getHourId(getMillis(start));
 		long endHourID = getHourId(getMillis(end));
-		for(long hourID = startHourID; hourID <= endHourID; hourID++) {
+
+		if (endHourID - startHourID > 5 * 24) {
+			throw new TooBigIntervalException(
+					String.format("Too big interval in function getDataHours (%s)", endHourID - startHourID));
+		}
+		for (long hourID = startHourID; hourID <= endHourID; hourID++) {
 			DataHour dh = getDataHour(hourID, true, true);
-			if(dh != null) {
+			if (dh != null) {
 				result.add(dh);
 			}
 		}
@@ -422,11 +426,11 @@ public class DataManager {
 		}
 		DataHour result = null;
 		boolean add = false;
-		
+
 		if (lastDataHour != null && lastDataHour.getHourID() == hourId) {
 			result = lastDataHour;
 		}
-		
+
 		if (result == null) {
 			for (DataHour dh : dataHours) {
 				if (dh.getHourID() == hourId) {
@@ -552,7 +556,7 @@ public class DataManager {
 			}
 		}
 	}
-	
+
 	public boolean isLoaded() {
 		return sampleRate != -1;
 	}

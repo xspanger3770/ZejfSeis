@@ -311,7 +311,7 @@ public class DrumTab extends DataRequestPanel {
 		}
 		lastCurrentLineID = currentLineID;
 
-		updateButtons(_lineID == currentLineID);
+		updateButtons(_lineID != currentLineID);
 
 		int _duration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
 		double _gain = Settings.DRUM_GAIN;
@@ -487,7 +487,7 @@ public class DrumTab extends DataRequestPanel {
 	private synchronized void setLineID(long lineID) {
 		long currentLineID = calculateCurrentLineID();
 		this.lineID = Math.min(currentLineID, lineID);
-		updateButtons(lineID != currentLineID);
+		updateButtons(this.lineID != currentLineID);
 	}
 
 	private synchronized void incrementLineID(long amount) {

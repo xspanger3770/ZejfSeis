@@ -3,6 +3,7 @@ package com.morce.zejfseis4.data;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import com.morce.zejfseis4.exception.TooBigIntervalException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
@@ -58,9 +59,13 @@ public class DataRequest {
 	}
 
 	private void initData() {
-		if (data == null || getLogCount() != data.length) {
-			data = new Log[getLogCount()];
-			for (int i = 0; i < getLogCount(); i++) {
+		int logCount = getLogCount();
+		if(logCount > 10_000_000) {
+			throw new TooBigIntervalException("logs > 10M");
+		}
+		if (data == null || logCount != data.length) {
+			data = new Log[logCount];
+			for (int i = 0; i < logCount; i++) {
 				data[i] = new Log(dataManager);
 			}
 		} else {
@@ -226,6 +231,10 @@ public class DataRequest {
 					- 1;
 			a = Math.max(start, a);
 			b = Math.min(end, b);
+			
+			if(b - a > 10_000_000) {
+				throw new TooBigIntervalException("refill > 10M");
+			}
 			if (b - a >= 0) {
 				for (long id = a; id <= b; id++) {
 					// 0-1
