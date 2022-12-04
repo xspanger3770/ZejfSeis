@@ -6,7 +6,9 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.ImageIcon;
@@ -60,7 +62,7 @@ public class ZejfSeisFrame extends JFrame {
 
 		drumTab = new DrumTab();
 		tabbedPane.addTab("Drum", drumTab);
-		
+
 		eventsTab = new EventsTab();
 		tabbedPane.addTab("Events", eventsTab);
 
@@ -73,6 +75,7 @@ public class ZejfSeisFrame extends JFrame {
 		contentPane.add(lblStatus, BorderLayout.SOUTH);
 
 		JMenuBar bar = new JMenuBar();
+
 		JMenu options = new JMenu("Options");
 
 		JMenuItem menuReconnect = new JMenuItem("Socket", KeyEvent.VK_S);
@@ -117,6 +120,32 @@ public class ZejfSeisFrame extends JFrame {
 		options.add(helicorder);
 		options.add(menuReconnect);
 		bar.add(options);
+
+		JMenu filters = new JMenu("Filters");
+
+		List<DefaultFilter> defaultFilters = new ArrayList<>();
+		
+		defaultFilters.add(new DefaultFilter("Default", 18, 0.5));
+		defaultFilters.add(new DefaultFilter("Full", 18, 0.01));
+		defaultFilters.add(new DefaultFilter("Regional", 6, 1));
+		defaultFilters.add(new DefaultFilter("Distant", 2, 0.5));
+		defaultFilters.add(new DefaultFilter("S Waves", 0.08, 0.01));
+
+		for (DefaultFilter defaultFilter : defaultFilters) {
+			JMenuItem item = new JMenuItem(
+					String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(), defaultFilter.min(), defaultFilter.max()));
+			helicorder.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setFilters(defaultFilter.max(), defaultFilter.min());
+				}
+			});
+			filters.add(item);
+		}
+
+		bar.add(filters);
+
 		setJMenuBar(bar);
 		setMinimumSize(new Dimension(400, 300));
 		setTitle("ZejfSeis " + ZejfSeis4.VERSION);
@@ -230,19 +259,23 @@ public class ZejfSeisFrame extends JFrame {
 				if (max == 0) {
 					throw new IllegalArgumentException("Max cannot be 0!");
 				}
-				Settings.MAX_FREQUENCY = max;
-				Settings.MIN_FREQUENCY = min;
-				Settings.saveProperties();
-
-				realtimeTab.getRealtimeGraphPanel().updateFilter();
-				realtimeTab.getSpectrogramPanel().updateFilter();
-				drumTab.updateFilter();
+				setFilters(max, min);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 
+	}
+
+	private void setFilters(double max, double min) {
+		Settings.MAX_FREQUENCY = max;
+		Settings.MIN_FREQUENCY = min;
+		Settings.saveProperties();
+
+		realtimeTab.getRealtimeGraphPanel().updateFilter();
+		realtimeTab.getSpectrogramPanel().updateFilter();
+		drumTab.updateFilter();
 	}
 
 	protected void drumSettings() {
@@ -348,7 +381,7 @@ public class ZejfSeisFrame extends JFrame {
 		this.status = status;
 		semaphore.release();
 	}
-	
+
 	public EventsTab getEventsTab() {
 		return eventsTab;
 	}
