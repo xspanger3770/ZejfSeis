@@ -134,7 +134,7 @@ public class ZejfSeisFrame extends JFrame {
 		for (DefaultFilter defaultFilter : defaultFilters) {
 			JMenuItem item = new JMenuItem(
 					String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(), defaultFilter.min(), defaultFilter.max()));
-			helicorder.addActionListener(new ActionListener() {
+			item.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
