@@ -53,7 +53,7 @@ public class DrumTab extends DataRequestPanel {
 
 	private boolean needsRedraw;
 	private long lineID;
-	private long lastDuration;
+	private int lastDuration;
 
 	protected int dragStartX = -1;
 	protected int dragStartY = -1;
@@ -61,7 +61,9 @@ public class DrumTab extends DataRequestPanel {
 	protected int dragEndY = -1;
 
 	public DrumTab() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DrumTab", 0, 10) {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DrumTab",
+				System.currentTimeMillis() - Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX] * 60 * 1000l,
+				System.currentTimeMillis()) {
 
 			@Override
 			public void onRefill(boolean realtime) {
@@ -80,7 +82,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				incrementLineID(-10);
+				incrementLineID(-10, lastDuration);
 			}
 		});
 		btnBackS = new JButton("<");
@@ -90,7 +92,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				incrementLineID(-1);
+				incrementLineID(-1, lastDuration);
 			}
 		});
 		JButton btnGoto = new JButton("Goto");
@@ -111,7 +113,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				resetLineID();
+				resetLineID(lastDuration);
 			}
 		});
 
@@ -122,7 +124,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				incrementLineID(1);
+				incrementLineID(1, lastDuration);
 			}
 		});
 
@@ -132,7 +134,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				incrementLineID(10);
+				incrementLineID(10, lastDuration);
 			}
 		});
 
@@ -147,7 +149,7 @@ public class DrumTab extends DataRequestPanel {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				incrementLineID(e.getWheelRotation());
+				incrementLineID(e.getWheelRotation(), lastDuration);
 			}
 		});
 		drumPanel = new JPanel() {
@@ -212,7 +214,7 @@ public class DrumTab extends DataRequestPanel {
 		});
 
 		lastDuration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
-		resetLineID();
+		resetLineID(lastDuration);
 
 		runThreads();
 	}
@@ -262,9 +264,9 @@ public class DrumTab extends DataRequestPanel {
 		int line1 = (int) Math.round(((h - dragStartY) - LINE_PADDING) / (double) LINE_SPACE);
 		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
 
-		long time1 = (long) (getMillis(lineID - line1)
+		long time1 = (long) (getMillis(lineID - line1, lastDuration)
 				+ ((dragStartX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
-		long time2 = (long) (getMillis(lineID - line2)
+		long time2 = (long) (getMillis(lineID - line2, lastDuration)
 				+ ((dragEndX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
 
 		SwingUtilities.invokeLater(new Runnable() {
@@ -302,18 +304,23 @@ public class DrumTab extends DataRequestPanel {
 		if (w <= 0 || h <= 0 || !ZejfSeis4.getDataManager().isLoaded()) {
 			return;
 		}
-		
+
 		long _lineID = lineID;
-		long currentLineID = calculateCurrentLineID();
+		int _duration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
+		long currentLineID = calculateCurrentLineID(_duration);
+		if (_duration != lastDuration) {
+			long newLineID = (long) ((_lineID) * (lastDuration / (double) _duration));
+			setLineID(newLineID, _duration);
+			_lineID = lineID;
+		}
 
 		if (currentLineID - lastCurrentLineID == 1 && _lineID == lastCurrentLineID) {
-			resetLineID();
+			resetLineID(_duration);
 		}
 		lastCurrentLineID = currentLineID;
 
 		updateButtons(_lineID != currentLineID);
 
-		int _duration = Settings.DRUM_SPACES[Settings.DRUM_SPACE_INDEX];
 		double _gain = Settings.DRUM_GAIN;
 		int _decimate = Settings.DECIMATE;
 
@@ -324,7 +331,7 @@ public class DrumTab extends DataRequestPanel {
 			redraw |= _duration != lastDuration;
 			redraw |= _decimate != lastDecimate;
 			redraw |= _gain != lastGain;
-			
+
 			lastDuration = _duration;
 			lastDecimate = _decimate;
 			lastGain = _gain;
@@ -332,8 +339,9 @@ public class DrumTab extends DataRequestPanel {
 
 		int lines = (int) Math.round((h - 2 * LINE_PADDING) / (double) LINE_SPACE + 1);
 
-		long endTime = getMillis(_lineID + 1);
-		long startTime = getMillis(_lineID - lines + 1) - FILTER_PADDING_MINUES * 60 * 1000l;
+		long endTime = getMillis(_lineID + 1, _duration);
+		long startTime = getMillis(_lineID - lines + 1, _duration) - FILTER_PADDING_MINUES * 60 * 1000l;
+		System.err.println(startTime + ", " + _duration + ", " + _lineID);
 		if (endTime != this.endTime || startTime != this.startTime) {
 			getDataRequest().changeTimes(startTime, endTime);
 			this.endTime = endTime;
@@ -346,7 +354,7 @@ public class DrumTab extends DataRequestPanel {
 
 	private long lastDrawLogID;
 
-	private void paintDrum(int w, int h, boolean fullRedraw, long currentLineID, int lines, long duration, int decimate,
+	private void paintDrum(int w, int h, boolean fullRedraw, long currentLineID, int lines, int duration, int decimate,
 			double gain) {
 		BufferedImage newDrum = null;
 		if (drum == null || fullRedraw) {
@@ -359,7 +367,7 @@ public class DrumTab extends DataRequestPanel {
 			drumGraphics.setColor(Color.white);
 			drumGraphics.fillRect(0, 0, w, h);
 
-			drawBackground(w, h, currentLineID, lines);
+			drawBackground(w, h, currentLineID, lines, duration);
 			synchronized (dataRequest.dataMutex) {
 				drawForeground(w, h, currentLineID, lines, duration, decimate, gain);
 			}
@@ -386,7 +394,7 @@ public class DrumTab extends DataRequestPanel {
 	private double lastGain;
 	private int lastDecimate;
 
-	private void drawBackground(int w, int h, long _lineID, int lines) {
+	private void drawBackground(int w, int h, long _lineID, int lines, int duration) {
 		Graphics2D g = drumGraphics;
 
 		g.setFont(new Font("Consolas", Font.BOLD, 24));
@@ -395,7 +403,7 @@ public class DrumTab extends DataRequestPanel {
 		g.setColor(Color.black);
 		g.drawRect(0, 0, w - 1, h - 1);
 		g.drawRect(0, 0, wrx, h - 1);
-		
+
 		Calendar cal = Calendar.getInstance();
 		for (int i = 0; i < lines; i++) {
 			int y = h - LINE_PADDING - i * LINE_SPACE;
@@ -403,7 +411,7 @@ public class DrumTab extends DataRequestPanel {
 			g.setColor(Color.gray);
 			g.drawLine(wrx, y, w, y);
 
-			cal.setTimeInMillis(getMillis(_lineID - i));
+			cal.setTimeInMillis(getMillis(_lineID - i, duration));
 
 			int minutes = cal.get(Calendar.MINUTE);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
@@ -432,11 +440,11 @@ public class DrumTab extends DataRequestPanel {
 		}
 	}
 
-	private void drawForeground(int w, int h, long _lineID, int lines, long duration, int decimate, double gain) {
+	private void drawForeground(int w, int h, long _lineID, int lines, int duration, int decimate, double gain) {
 		Graphics2D g = drumGraphics;
 		g.setColor(Color.black);
-		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1)) - 1;
-		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID + 1));
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1, duration)) - 1;
+		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID + 1, duration));
 		long lastLogID = dataRequest.lastLogID;
 		new Multithread(8) {
 
@@ -448,8 +456,8 @@ public class DrumTab extends DataRequestPanel {
 	}
 
 	private void drawIt(int w, int h, long start, long end, Graphics2D g, long lastLogID, long currentLineID, int lines,
-			long duration, int decimate, double gain) {
-		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(currentLineID - lines + 1)) - 1;
+			int duration, int decimate, double gain) {
+		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(currentLineID - lines + 1, duration)) - 1;
 		long LOGS_PER_LINE = ZejfSeis4.getDataManager().getLogId(duration * 60 * 1000l);
 		long chuj = ZejfSeis4.getDataManager().getErrVal();
 		Line2D.Double drawable = new Line2D.Double();
@@ -484,18 +492,18 @@ public class DrumTab extends DataRequestPanel {
 
 	}
 
-	private synchronized void setLineID(long lineID) {
-		long currentLineID = calculateCurrentLineID();
+	private synchronized void setLineID(long lineID, int duration) {
+		long currentLineID = calculateCurrentLineID(duration);
 		this.lineID = Math.min(currentLineID, lineID);
 		updateButtons(this.lineID != currentLineID);
 	}
 
-	private synchronized void incrementLineID(long amount) {
-		setLineID(this.lineID + amount);
+	private synchronized void incrementLineID(long amount, int duration) {
+		setLineID(this.lineID + amount, duration);
 	}
 
-	private synchronized void resetLineID() {
-		long currentLineID = calculateCurrentLineID();
+	private synchronized void resetLineID(int duration) {
+		long currentLineID = calculateCurrentLineID(duration);
 		this.lineID = currentLineID;
 		updateButtons(true);
 	}
@@ -522,19 +530,19 @@ public class DrumTab extends DataRequestPanel {
 				Calendar c = Calendar.getInstance();
 				c.setTime(date);
 
-				setLineID(c.getTimeInMillis() / (lastDuration * 60 * 1000l));
+				setLineID(c.getTimeInMillis() / (lastDuration * 60 * 1000l), lastDuration);
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
-	private long calculateCurrentLineID() {
-		return System.currentTimeMillis() / (lastDuration * 60 * 1000l);
+	private long calculateCurrentLineID(long duration) {
+		return System.currentTimeMillis() / (duration * 60 * 1000l);
 	}
 
-	private long getMillis(long lineID) {
-		return lineID * lastDuration * 60 * 1000l;
+	private long getMillis(long lineID, int duration) {
+		return lineID * duration * 60 * 1000l;
 	}
 
 	@Override
