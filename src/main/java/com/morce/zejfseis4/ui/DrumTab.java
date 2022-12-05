@@ -341,7 +341,6 @@ public class DrumTab extends DataRequestPanel {
 
 		long endTime = getMillis(_lineID + 1, _duration);
 		long startTime = getMillis(_lineID - lines + 1, _duration) - FILTER_PADDING_MINUES * 60 * 1000l;
-		System.err.println(startTime + ", " + _duration + ", " + _lineID);
 		if (endTime != this.endTime || startTime != this.startTime) {
 			getDataRequest().changeTimes(startTime, endTime);
 			this.endTime = endTime;

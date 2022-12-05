@@ -249,7 +249,6 @@ public class DataRequest {
 					if (val == dataManager.getErrVal()) {
 						log.clear(dataManager);
 					} else {
-
 						long actualGap = id - lastLogID;
 						if (actualGap != 1 && lastFilteredLogID != -1) {
 							resetFilter();
