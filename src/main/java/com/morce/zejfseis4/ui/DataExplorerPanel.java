@@ -857,7 +857,6 @@ public class DataExplorerPanel extends DataRequestPanel {
 	}
 
 	public void close() {
-		System.err.println("UNE");
 		ZejfSeis4.getDataManager().unregisterDataRequest(dataRequest);
 	}
 

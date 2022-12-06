@@ -26,7 +26,7 @@ import com.morce.zejfseis4.utils.NamedThreadFactory;
 
 public class FDSNDownloader {
 
-	private static final double TRESHOLD = 4.0 / 100.0;
+	private static final double TRESHOLD = 25.0 / 100.0;
 
 	protected static final int HOURS_BACKWARD = 24 * 1;
 

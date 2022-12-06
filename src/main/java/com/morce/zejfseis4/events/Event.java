@@ -62,7 +62,7 @@ public abstract class Event implements Serializable {
 	}
 
 	public double calculateDetectionPct() {
-		return GeoUtils.probability_v53(getMag(), getDistance());// TODO mag types
+		return GeoUtils.probability_v6(getMag(), getDistance(), getDepth());// TODO mag types
 	}
 
 }

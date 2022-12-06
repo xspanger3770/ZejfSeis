@@ -121,8 +121,27 @@ public interface GeoUtils {
 		return km <= 1000 ? (Math.log10((km + 18.864036) / 18.864036) * 3) : (Math.log10((km + 0.25) / 0.25) * 1.443);
 	}
 
-	public static double probability_v53(double mag, double dist) {
+	public static double probability_v53_dep(double mag, double dist) {
 		return Math.pow(10, mag) / Math.pow(10, detectionNOTCurve_v53(dist));
+	}
+
+	public static double probability_v6(double mag, double dist, double depth) {
+		double actualDetectionCurve = detectionCurve_v6(dist);
+		if (dist > 9000) {
+			actualDetectionCurve += Math.min(0.3, (dist - 9000) / 2000 * 0.3);
+		}
+		if (dist > 14700) {
+			actualDetectionCurve -= Math.min(0.7, (dist - 14700) / 600 * 0.7);
+		}
+
+		double depthIncrease = 1.0 / (1 + 500.0 / depth);
+		actualDetectionCurve -= depthIncrease;
+
+		return Math.pow(10, mag) / Math.pow(10, actualDetectionCurve) * 0.4;
+	}
+
+	public static double detectionCurve_v6(double km) {
+		return 7.0 / (1.0 + 800.0 / (km + 1000.0) + 100.0 / km) - 1;
 	}
 
 	public static double fixProbability(double prob) {
@@ -136,9 +155,9 @@ public interface GeoUtils {
 	public static double detectionCurve_v42(double dist) {
 		return Math.log10((dist + 2.5) / 2.5) * 1.75;
 	}
-	
+
 	public static void main(String[] args) {
-		System.out.println(probability_v53(6.4, 500)*100);
+		System.out.println(probability_v6(5.05, 16000, 600) * 100);
 	}
 
 }
