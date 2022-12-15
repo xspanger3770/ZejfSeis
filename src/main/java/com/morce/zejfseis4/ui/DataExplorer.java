@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.morce.zejfseis4.events.ManualEvent;
+import com.morce.zejfseis4.exception.EventsIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class DataExplorer extends JFrame {
@@ -55,7 +56,11 @@ public class DataExplorer extends JFrame {
 				boolean wavesSelected = dataExplorerPanel.pWaveTime > 0 && dataExplorerPanel.sWaveTime > 0;
 				if (wavesSelected) {
 					ManualEvent manualEvent = new ManualEvent(dataExplorerPanel.pWaveTime, dataExplorerPanel.sWaveTime);
-					ZejfSeis4.getEventManager().newEvent(manualEvent);
+					try {
+						ZejfSeis4.getEventManager().newEvent(manualEvent);
+					} catch (EventsIOException e1) {
+						ZejfSeis4.errorDialog(e1);
+					}
 					ZejfSeis4.getFrame().getEventsTab().updatePanel();
 					new EventExplorer(manualEvent);
 					DataExplorer.this.dispose();

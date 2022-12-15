@@ -3,6 +3,7 @@ package com.morce.zejfseis4.events;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.morce.zejfseis4.data.DataManager;
+import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalApplicationException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class EventManager {
@@ -24,11 +27,15 @@ public class EventManager {
 	public EventManager() {
 		eventMonths = new ArrayList<EventMonth>();
 		eventhMonthsSync = new Object();
-		load();
+		try {
+			load();
+		} catch (EventsIOException e) {
+			ZejfSeis4.errorDialog(e);
+		}
 		fdsnDownloader = new FDSNDownloader(this);
 	}
 
-	private void load() {
+	private void load() throws EventsIOException {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
 		c.set(Calendar.DATE, 1);
@@ -45,19 +52,29 @@ public class EventManager {
 		}
 	}
 
-	private EventMonth loadEventMonth(int year, int month, boolean createNew) {
+	private EventMonth loadEventMonth(int year, int month, boolean createNew) throws EventsIOException {
 		EventMonth result = null;
 
-		File f = getFile(year, month);
-		if (f.exists()) {
-			try {
-				ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
-				result = (EventMonth) in.readObject();
-				in.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+		File file = getFile(year, month);
+		File tempFile = getTempFile(year, month);
+		int attempt = 1;
+		for (File f : new File[] { file, tempFile }) {
+			if (f.exists()) {
+				try {
+					ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
+					result = (EventMonth) in.readObject();
+					in.close();
+					break;
+				} catch (IOException | ClassNotFoundException e) {
+					e.printStackTrace();
+					attempt++;
+					if(attempt == 2) {
+						throw new EventsIOException(e);
+					}
+				}
 			}
 		}
+
 		if (result == null && createNew) {
 			result = new EventMonth(year, month);
 		}
@@ -72,7 +89,7 @@ public class EventManager {
 
 	}
 
-	public void saveAll() {
+	public void saveAll() throws EventsIOException {
 		synchronized (eventhMonthsSync) {
 			for (EventMonth eventMonth : eventMonths) {
 				save(eventMonth);
@@ -80,7 +97,7 @@ public class EventManager {
 		}
 	}
 
-	private void save(EventMonth eventMonth) {
+	private void save(EventMonth eventMonth) throws EventsIOException {
 		try {
 			File file = eventMonth.getFile();
 			File temp = eventMonth.getTempFile();
@@ -92,12 +109,12 @@ public class EventManager {
 				out.writeObject(eventMonth);
 				out.close();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			throw new EventsIOException(e);
 		}
 	}
 
-	public EventMonth getEventMonth(int year, int month, boolean createNew) {
+	public EventMonth getEventMonth(int year, int month, boolean createNew) throws EventsIOException {
 		synchronized (eventhMonthsSync) {
 			for (EventMonth ev : eventMonths) {
 				if (ev.getMonth() == month && ev.getYear() == year) {
@@ -109,11 +126,11 @@ public class EventManager {
 		}
 	}
 
-	public ArrayList<Event> getEvents(Calendar start, Calendar end) {
+	public ArrayList<Event> getEvents(Calendar start, Calendar end) throws EventsIOException {
 		return getEvents(start.getTimeInMillis(), end.getTimeInMillis());
 	}
 
-	public ArrayList<Event> getEvents(long start, long end) {
+	public ArrayList<Event> getEvents(long start, long end) throws EventsIOException {
 		ArrayList<Event> result = new ArrayList<Event>();
 		Calendar endC = Calendar.getInstance();
 		endC.setTimeInMillis(end);
@@ -145,7 +162,7 @@ public class EventManager {
 		return fdsnDownloader;
 	}
 
-	public Event getEvent(String id, long origin) {
+	public Event getEvent(String id, long origin) throws EventsIOException {
 		ArrayList<Event> candidates = getEvents(origin - 1000 * 60 * 5, origin + 1000 * 60 * 5);
 		for (Event e : candidates) {
 			if (e.getID().equals(id)) {
@@ -155,17 +172,17 @@ public class EventManager {
 		return null;
 	}
 
-	public void newEvent(Event event) {
+	public void newEvent(Event event) throws EventsIOException {
 		getEventMonth(event.getOrigin(), true).addEvent(event);
 	}
 
-	public EventMonth getEventMonth(long origin, boolean createNew) {
+	public EventMonth getEventMonth(long origin, boolean createNew) throws EventsIOException {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(origin);
 		return getEventMonth(c.get(Calendar.YEAR), c.get(Calendar.MONTH), createNew);
 	}
 
-	public void removeEvent(Event event) {
+	public void removeEvent(Event event) throws EventsIOException {
 		EventMonth eventMonth = getEventMonth(event.getOrigin(), false);
 		if (eventMonth != null) {
 			eventMonth.removeEvent(event);

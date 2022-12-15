@@ -20,7 +20,9 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.tinylog.Logger;
 
+import com.morce.zejfseis4.exception.EventsIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.NamedThreadFactory;
 
@@ -130,7 +132,13 @@ public class FDSNDownloader {
 	}
 
 	private void processEvent(CatalogueEvent event) {
-		CatalogueEvent original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
+		CatalogueEvent original;
+		try {
+			original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
+		} catch (EventsIOException e) {
+			Logger.error(e);
+			return;
+		}
 		boolean exists = original != null;
 		boolean detectable = event.calculateDetectionPct() >= TRESHOLD;
 		if (exists) {
@@ -139,7 +147,11 @@ public class FDSNDownloader {
 				original.update(event);
 			}
 		} else if (detectable) {
-			getEventManager().newEvent(event);
+			try {
+				getEventManager().newEvent(event);
+			} catch (EventsIOException e) {
+				Logger.error(e);
+			}
 		}
 	}
 

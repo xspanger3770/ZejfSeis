@@ -10,6 +10,7 @@ import java.util.concurrent.Semaphore;
 import com.morce.zejfseis4.data.DataHour;
 import com.morce.zejfseis4.data.SimpleLog;
 import com.morce.zejfseis4.exception.IncompatibleServerException;
+import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class ZejfClient {
@@ -45,11 +46,9 @@ public class ZejfClient {
 			runReader();
 			ZejfSeis4.getFrame().setStatus(String.format("Connected to %s:%d", ip, port));
 		} catch (Exception e) {
-			e.printStackTrace();
 			connected = false;
-			ZejfSeis4.errorDialog(e);
 			ZejfSeis4.getFrame().setStatus("Failure");
-			return;
+			throw new RuntimeApplicationException("Cannot connect: "+e.getMessage(), e);
 		}
 	}
 

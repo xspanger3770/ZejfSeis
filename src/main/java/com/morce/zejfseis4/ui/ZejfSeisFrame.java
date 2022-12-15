@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 
+import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.SpringUtilities;
@@ -124,7 +125,7 @@ public class ZejfSeisFrame extends JFrame {
 		JMenu filters = new JMenu("Filters");
 
 		List<DefaultFilter> defaultFilters = new ArrayList<>();
-		
+
 		defaultFilters.add(new DefaultFilter("Default", 18, 0.5));
 		defaultFilters.add(new DefaultFilter("Full", 18, 0.01));
 		defaultFilters.add(new DefaultFilter("Regional", 6, 1));
@@ -133,8 +134,8 @@ public class ZejfSeisFrame extends JFrame {
 		defaultFilters.add(new DefaultFilter("Calibration", 0.01, 0.0));
 
 		for (DefaultFilter defaultFilter : defaultFilters) {
-			JMenuItem item = new JMenuItem(
-					String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(), defaultFilter.min(), defaultFilter.max()));
+			JMenuItem item = new JMenuItem(String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(),
+					defaultFilter.min(), defaultFilter.max()));
 			item.addActionListener(new ActionListener() {
 
 				@Override
@@ -336,7 +337,11 @@ public class ZejfSeisFrame extends JFrame {
 			}
 		}
 		if (getAddress()) {
-			ZejfSeis4.getClient().connect(Settings.ADDRESS, Settings.PORT);
+			try {
+				ZejfSeis4.getClient().connect(Settings.ADDRESS, Settings.PORT);
+			} catch (RuntimeApplicationException e) {
+				ZejfSeis4.errorDialog(e);
+			}
 		}
 	}
 

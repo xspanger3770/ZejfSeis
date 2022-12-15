@@ -3,7 +3,6 @@ package com.morce.zejfseis4.main;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -11,7 +10,7 @@ import javax.swing.SwingUtilities;
 import com.morce.zejfseis4.client.ZejfClient;
 import com.morce.zejfseis4.data.DataManager;
 import com.morce.zejfseis4.events.EventManager;
-import com.morce.zejfseis4.exception.ApplicationErrorHandler;
+import com.morce.zejfseis4.exception.FatalApplicationException;
 import com.morce.zejfseis4.ui.ZejfSeisFrame;
 
 public class ZejfSeis4 {
@@ -25,9 +24,6 @@ public class ZejfSeis4 {
 	private static ZejfClient client;
 	private static EventManager eventManager;
 
-	public static Logger LOGGER = Logger.getLogger("MyLog");
-	public static String LOG_FILE = "./logs.log";
-
 	public static void init() {
 		if (!MAIN_FOLDER.exists()) {
 			if (!MAIN_FOLDER.mkdirs()) {
@@ -35,9 +31,6 @@ public class ZejfSeis4 {
 				return;
 			}
 		}
-
-		var errorHandler = new ApplicationErrorHandler();
-		Thread.setDefaultUncaughtExceptionHandler(errorHandler);
 
 		client = new ZejfClient();
 		dataManager = new DataManager();
@@ -57,11 +50,16 @@ public class ZejfSeis4 {
 					@Override
 					public void windowClosing(WindowEvent e) {
 						dataManager.exit();
-						eventManager.saveAll();
+						try {
+							eventManager.saveAll();
+						} catch (FatalApplicationException e1) {
+							e1.printStackTrace();
+						}
 					}
 				});
 			}
 		});
+
 	}
 
 	public static ZejfSeisFrame getFrame() {

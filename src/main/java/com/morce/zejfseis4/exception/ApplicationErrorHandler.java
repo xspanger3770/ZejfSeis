@@ -11,7 +11,7 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		Logger.error("Application error handler: {}", e.getMessage());
+		Logger.error("An uncaught exception has occured in thread {} : {}", t.getName(), e.getMessage());
 		Logger.error(e);
 
 		if (e instanceof FatalError ex) {
@@ -32,12 +32,10 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	private static Object[] getOptionsForDialog(boolean isFatal) {
-        if (!isFatal) {
-            return null; // use default
-        }
+		if (!isFatal) {
+			return null; // use default
+		}
 
-        return new Object[]{
-                new GenericQuitAction()
-        };
-    }
+		return new Object[] { new JButton(new GenericQuitAction()) };
+	}
 }

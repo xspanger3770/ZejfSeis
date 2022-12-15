@@ -27,6 +27,8 @@ import com.morce.zejfseis4.events.CatalogueEvent;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.events.ManualEvent;
+import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalApplicationException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.TravelTimeTable;
 
@@ -232,7 +234,11 @@ public class EventExplorer extends JFrame {
 					((ManualEvent) event).setMag(textFieldMag.getText().isEmpty() ? ManualEvent.NO_MAG
 							: Double.valueOf(textFieldMag.getText()));
 				}
-				ZejfSeis4.getEventManager().saveAll();
+				try {
+					ZejfSeis4.getEventManager().saveAll();
+				} catch (FatalApplicationException e1) {
+					ZejfSeis4.errorDialog(e1);
+				}
 				ZejfSeis4.getFrame().getEventsTab().updatePanel();
 				EventExplorer.this.dispose();
 			}
@@ -248,8 +254,12 @@ public class EventExplorer extends JFrame {
 				int result = JOptionPane.showConfirmDialog(EventExplorer.this, "Delete?", "Confirm",
 						JOptionPane.YES_NO_OPTION);
 				if (result == 0) {
-					ZejfSeis4.getEventManager().removeEvent(event);
-					ZejfSeis4.getEventManager().saveAll();
+					try {
+						ZejfSeis4.getEventManager().removeEvent(event);
+						ZejfSeis4.getEventManager().saveAll();
+					} catch (EventsIOException e2) {
+						ZejfSeis4.errorDialog(e2);
+					}
 					ZejfSeis4.getFrame().getEventsTab().updatePanel();
 					EventExplorer.this.dispose();
 				}

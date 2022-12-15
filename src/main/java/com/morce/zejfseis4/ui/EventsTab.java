@@ -32,6 +32,7 @@ import javax.swing.table.TableRowSorter;
 import com.morce.zejfseis4.data.DataManager;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
+import com.morce.zejfseis4.exception.EventsIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.ui.action.EditEventAction;
 import com.morce.zejfseis4.ui.model.EventTableModel;
@@ -227,10 +228,13 @@ public class EventsTab extends JPanel {
 		labelTime.setText(String.format("%s %s", DataManager.MONTHS[displayedTime.get(Calendar.MONTH)],
 				displayedTime.get(Calendar.YEAR)));
 
-		ArrayList<Event> events = (ArrayList<Event>) ZejfSeis4.getEventManager()
-				.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true).getEvents();
-
-		System.out.println(events.size());
+		ArrayList<Event> events = new ArrayList<>();
+		try {
+			events = (ArrayList<Event>) ZejfSeis4.getEventManager()
+					.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true).getEvents();
+		} catch (EventsIOException e) {
+			ZejfSeis4.errorDialog(e);
+		}
 
 		this.data.clear();
 		this.data.addAll(events);
