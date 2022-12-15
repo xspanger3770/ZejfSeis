@@ -61,13 +61,13 @@ public class EventManager {
 		if (result == null && createNew) {
 			result = new EventMonth(year, month);
 		}
-		
-		if(result != null) {
+
+		if (result != null) {
 			synchronized (eventhMonthsSync) {
 				eventMonths.add(result);
 			}
 		}
-		
+
 		return result;
 
 	}
@@ -82,17 +82,16 @@ public class EventManager {
 
 	private void save(EventMonth eventMonth) {
 		try {
-			File temp = eventMonth.getTempFile();
 			File file = eventMonth.getFile();
+			File temp = eventMonth.getTempFile();
 			if (!temp.getParentFile().exists()) {
 				temp.getParentFile().mkdirs();
 			}
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(temp));
-			out.writeObject(eventMonth);
-			out.close();
-			file.delete();
-			temp.renameTo(file);
-			temp.delete();
+			for (File f : new File[] { file, temp }) {
+				ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+				out.writeObject(eventMonth);
+				out.close();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,6 @@
 package com.morce.zejfseis4.exception;
 
-public class TooBigIntervalException extends RuntimeException {
+public class TooBigIntervalException extends RuntimeApplicationException {
 
 	private static final long serialVersionUID = 1L;
 	

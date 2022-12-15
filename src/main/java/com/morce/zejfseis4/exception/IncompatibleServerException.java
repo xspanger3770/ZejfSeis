@@ -1,6 +1,6 @@
 package com.morce.zejfseis4.exception;
 
-public class IncompatibleServerException extends RuntimeException {
+public class IncompatibleServerException extends RuntimeApplicationException {
 
 	private static final long serialVersionUID = 337581990828507402L;
 	
