@@ -181,10 +181,17 @@ public class FDSNDownloader {
 		}
 		in.close();
 
+		String resultStr = result.toString();
+
 		ArrayList<CatalogueEvent> list = new ArrayList<CatalogueEvent>();
+
+		if (resultStr.isBlank()) {
+			return list;
+		}
+
 		JSONObject obj = null;
 		try {
-			obj = new JSONObject(result.toString());
+			obj = new JSONObject(resultStr);
 		} catch (JSONException e) {
 			Logger.error(e);
 			return list;
@@ -192,7 +199,11 @@ public class FDSNDownloader {
 		JSONArray array = obj.getJSONArray("features");
 		for (int i = 0; i < array.length(); i++) {
 			JSONObject properties = array.getJSONObject(i).getJSONObject("properties");
-			list.add(_decode(properties));
+			try {
+				list.add(_decode(properties));
+			} catch (JSONException e) {
+				Logger.error(e);
+			}
 		}
 		if (start != null && end == null) {
 			// Collections.sort(list); //TODO
@@ -200,7 +211,7 @@ public class FDSNDownloader {
 		return list;
 	}
 
-	public static CatalogueEvent _decode(JSONObject properties) {
+	public static CatalogueEvent _decode(JSONObject properties) throws JSONException {
 		double lat = properties.getDouble("lat");
 		double lon = properties.getDouble("lon");
 		double depth = properties.getDouble("depth");
