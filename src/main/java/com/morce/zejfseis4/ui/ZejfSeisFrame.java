@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
@@ -220,9 +221,10 @@ public class ZejfSeisFrame extends JFrame {
 
 				realtimeTab.getRealtimeGraphPanel().updateDuration();
 				realtimeTab.getSpectrogramPanel().updateDuration();
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (FatalIOException e) {
+				ZejfSeis4.handleException(e);
 			}
 		}
 	}
@@ -262,8 +264,7 @@ public class ZejfSeisFrame extends JFrame {
 					throw new IllegalArgumentException("Max cannot be 0!");
 				}
 				setFilters(max, min);
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -273,7 +274,11 @@ public class ZejfSeisFrame extends JFrame {
 	private void setFilters(double max, double min) {
 		Settings.MAX_FREQUENCY = max;
 		Settings.MIN_FREQUENCY = min;
-		Settings.saveProperties();
+		try {
+			Settings.saveProperties();
+		} catch (FatalIOException e) {
+			ZejfSeis4.handleException(e);
+		}
 
 		realtimeTab.getRealtimeGraphPanel().updateFilter();
 		realtimeTab.getSpectrogramPanel().updateFilter();
@@ -317,8 +322,9 @@ public class ZejfSeisFrame extends JFrame {
 				Settings.DRUM_SPACE_INDEX = line.getSelectedIndex();
 				Settings.DECIMATE = Integer.valueOf(fields[1].getText());
 				Settings.saveProperties();
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (FatalIOException e) {
+				ZejfSeis4.handleException(e);
+			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -339,8 +345,8 @@ public class ZejfSeisFrame extends JFrame {
 		if (getAddress()) {
 			try {
 				ZejfSeis4.getClient().connect(Settings.ADDRESS, Settings.PORT);
-			} catch (RuntimeApplicationException e) {
-				ZejfSeis4.errorDialog(e);
+			} catch (RuntimeApplicationException | FatalIOException e) {
+				ZejfSeis4.handleException(e);
 			}
 		}
 	}
@@ -373,10 +379,11 @@ public class ZejfSeisFrame extends JFrame {
 				Settings.ADDRESS = address;
 				Settings.PORT = port;
 				Settings.saveProperties();
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				getAddress();
+			} catch (FatalIOException e) {
+				ZejfSeis4.handleException(e);
 			}
 			return true;
 		}

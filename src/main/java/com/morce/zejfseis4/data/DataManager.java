@@ -15,6 +15,9 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import org.tinylog.Logger;
+
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.exception.TooBigIntervalException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
@@ -64,7 +67,7 @@ public class DataManager {
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 	}
@@ -151,31 +154,33 @@ public class DataManager {
 		}
 	}
 
-	public void loadFromInfo() {
+	public void loadFromInfo() throws FatalIOException {
 		Properties prop = new Properties();
-		try {
-			if (!INFO_FILE.exists()) {
-				System.out.println("Last data info file doesn't exist");
-				return;
-			}
-			prop.load(new FileInputStream(INFO_FILE));
-
-			String sourceName = prop.getProperty("source_name");
-			int sampleRate = Integer.valueOf(prop.getProperty("sample_rate", "-1"));
-			int errVal = Integer.valueOf(prop.getProperty("err_val", "-1"));
-
-			if (sampleRate <= 0) {
-				System.err.println("Invalid sample rate: " + sampleRate);
-				return;
-			}
-
-			load(sourceName, sampleRate, errVal);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (!INFO_FILE.exists()) {
+			System.out.println("Last data info file doesn't exist");
+			return;
 		}
+
+		try {
+			prop.load(new FileInputStream(INFO_FILE));
+		} catch (IOException e) {
+			throw new FatalIOException("Unable to load last data info", e);
+		}
+
+		String sourceName = prop.getProperty("source_name");
+		int sampleRate = Integer.valueOf(prop.getProperty("sample_rate", "-1"));
+		int errVal = Integer.valueOf(prop.getProperty("err_val", "-1"));
+
+		if (sampleRate <= 0) {
+			System.err.println("Invalid sample rate: " + sampleRate);
+			return;
+		}
+
+		load(sourceName, sampleRate, errVal);
+
 	}
 
-	public void exit() {
+	public void exit() throws FatalIOException {
 		join(autosaveThread);
 		autosaveThread = null;
 		join(logQueueThread);
@@ -186,7 +191,7 @@ public class DataManager {
 		saveInfo();
 	}
 
-	private void saveInfo() {
+	private void saveInfo() throws FatalIOException {
 		if (sourceName == null) {
 			return;
 		}
@@ -197,7 +202,7 @@ public class DataManager {
 		try {
 			prop.store(new FileOutputStream(INFO_FILE), "");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new FatalIOException("Failed to store last data info", e);
 		}
 	}
 
@@ -234,7 +239,11 @@ public class DataManager {
 					}
 					synchronized (dataHoursMutex) {
 						cleanup();
-						saveAll();
+						try {
+							saveAll();
+						} catch (FatalIOException e) {
+							ZejfSeis4.handleException(e);
+						}
 						System.out.printf("Currently loaded %d DataHours\n", dataHours.size());
 						System.out.println("Queue length " + realtimeQueue.size());
 					}
@@ -261,7 +270,7 @@ public class DataManager {
 		}
 	}
 
-	public void load(String sourceName, int sampleRate, int errVal) {
+	public void load(String sourceName, int sampleRate, int errVal) throws FatalIOException {
 		if (this.sourceName != null && this.sourceName.equals(sourceName) && this.sampleRate == sampleRate
 				&& this.errVal == errVal) {
 			return;
@@ -300,7 +309,6 @@ public class DataManager {
 
 		saveInfo();
 		startThreads();
-
 	}
 
 	private void cleanup() {
@@ -318,7 +326,7 @@ public class DataManager {
 		System.out.printf("Removed %d DataHours\n", count);
 	}
 
-	private void saveAll() {
+	private void saveAll() throws FatalIOException {
 		if (dataHours == null) {
 			return;
 		}
@@ -332,7 +340,7 @@ public class DataManager {
 					dh.store();
 					count++;
 				} catch (IOException e) {
-					e.printStackTrace();
+					throw new FatalIOException("Unable to save DataHour", e);
 				}
 			}
 		}
@@ -353,7 +361,7 @@ public class DataManager {
 		temp.delete();
 	}
 
-	private DataHour loadDataHour(long hourId) {
+	private DataHour loadDataHour(long hourId) throws FatalIOException {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(getMillisFromHourId(hourId));
 		File file = getDataHourFile(c);
@@ -369,15 +377,16 @@ public class DataManager {
 				}
 				return dh;
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				throw new FatalIOException(String.format("DataHour file probably corrupt: %s", file.getAbsolutePath()),
+						e);
 			} catch (IOException e) {
-				return null;
+				throw new FatalIOException(String.format("Unable to load DataHour: %s", file.getAbsolutePath()), e);
 			}
 		}
 		return null;
 	}
 
-	public Queue<DataHour> getDataHours(long start, long end) throws TooBigIntervalException {
+	public Queue<DataHour> getDataHours(long start, long end) throws TooBigIntervalException, FatalIOException {
 		Queue<DataHour> result = new LinkedList<DataHour>();
 		long startHourID = getHourId(getMillis(start));
 		long endHourID = getHourId(getMillis(end));
@@ -387,7 +396,8 @@ public class DataManager {
 					String.format("Too big interval in function getDataHours (%s)", endHourID - startHourID));
 		}
 		for (long hourID = startHourID; hourID <= endHourID; hourID++) {
-			DataHour dh = getDataHour(hourID, true, true);
+			DataHour dh;
+			dh = getDataHour(hourID, true, true);
 			if (dh != null) {
 				result.add(dh);
 			}
@@ -397,7 +407,13 @@ public class DataManager {
 
 	public int getLog(long logId) {
 		long millis = getMillis(logId);
-		DataHour dh = getDataHour(getHourId(millis), true, true);
+		DataHour dh;
+		try {
+			dh = getDataHour(getHourId(millis), true, true);
+		} catch (FatalIOException e) {
+			Logger.error(e);
+			return errVal;
+		}
 		if (dh == null) {
 			return errVal;
 		}
@@ -406,7 +422,13 @@ public class DataManager {
 	}
 
 	private boolean nextLog(SimpleLog log) {
-		DataHour dh = getDataHour(getHourId(log.time()), true, true);
+		DataHour dh;
+		try {
+			dh = getDataHour(getHourId(log.time()), true, true);
+		} catch (FatalIOException e) {
+			Logger.error(e);
+			return false;
+		}
 		if (dh == null) {
 			return false;
 		}
@@ -420,7 +442,7 @@ public class DataManager {
 		return true;
 	}
 
-	private DataHour getDataHour(long hourId, boolean loadFromFile, boolean createNew) {
+	private DataHour getDataHour(long hourId, boolean loadFromFile, boolean createNew) throws FatalIOException {
 		if (dataHours == null) {
 			return null;
 		}

@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.morce.zejfseis4.events.ManualEvent;
-import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class DataExplorer extends JFrame {
@@ -25,6 +25,10 @@ public class DataExplorer extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
+				windowClosed(e);
+			}
+			@Override
+			public void windowClosed(WindowEvent e) {
 				dataExplorerPanel.close();
 			}
 		});
@@ -58,8 +62,8 @@ public class DataExplorer extends JFrame {
 					ManualEvent manualEvent = new ManualEvent(dataExplorerPanel.pWaveTime, dataExplorerPanel.sWaveTime);
 					try {
 						ZejfSeis4.getEventManager().newEvent(manualEvent);
-					} catch (EventsIOException e1) {
-						ZejfSeis4.errorDialog(e1);
+					} catch (FatalIOException e1) {
+						ZejfSeis4.handleException(e1);
 					}
 					ZejfSeis4.getFrame().getEventsTab().updatePanel();
 					new EventExplorer(manualEvent);

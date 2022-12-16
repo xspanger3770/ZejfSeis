@@ -23,6 +23,7 @@ import com.morce.zejfseis4.data.DataRequest;
 import com.morce.zejfseis4.events.Intensity;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
+import com.morce.zejfseis4.scale.Scales;
 import com.morce.zejfseis4.utils.TravelTimeTable;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
@@ -638,7 +639,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		} else {
 			return;
 		}
-		explorerGraphics.setColor(SpectrogramPanel.scale[0]);
+		explorerGraphics.setColor(Scales.scale[0]);
 		explorerGraphics.fillRect(0, 0, w, h);
 		long begin = getStart();
 		int sampleRate = ZejfSeis4.getDataManager().getSampleRate();
@@ -664,7 +665,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 				double endY = (h - statusPanelHeight) * ((i + 1) / (double) res.magnitudes.length);
 				double mag = res.magnitudes[res.magnitudes.length - 1 - i];
 				int col = (int) (Math.pow(mag * 0.2, 1 / 2.0) * lastGain);
-				Color color = SpectrogramPanel.scale[Math.max(0, Math.min(SpectrogramPanel.scale.length - 1, col))];
+				Color color = Scales.scale[Math.max(0, Math.min(Scales.scale.length - 1, col))];
 				Rectangle2D rect = new Rectangle2D.Double(startX, startY, endX - startX, endY - startY);
 				explorerGraphics.setColor(color);
 				explorerGraphics.fill(rect);

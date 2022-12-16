@@ -9,15 +9,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
 
 import com.morce.zejfseis4.data.DataRequest;
 import com.morce.zejfseis4.main.Settings;
@@ -33,22 +30,9 @@ public class SpectrogramPanel extends DataRequestPanel {
 	private BufferedImage spectro;
 	protected boolean resized;
 
-	public static Color[] scale;
 	public static DoubleFFT_1D ifft;
 
 	public boolean fullRedrawNext;
-
-	static {
-		try {
-			BufferedImage img = ImageIO.read(Scales.class.getResource("scale2.png"));
-			scale = new Color[img.getHeight()];
-			for (int i = 0; i < img.getHeight(); i++) {
-				scale[i] = new Color(img.getRGB(0, i));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public SpectrogramPanel() {
 		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "Spectro", Settings.REALTIME_DURATION_SECONDS * 1000) {
@@ -80,20 +64,16 @@ public class SpectrogramPanel extends DataRequestPanel {
 				try {
 					repaint();
 				} catch (Exception e) {
-					e.printStackTrace();
+					ZejfSeis4.handleException(e); // uncaught
 				}
 			}
 		}, 0, 10, TimeUnit.MILLISECONDS);
 		exec2.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					if (resized) {
-						resized = false;
-						fullRedrawNext = true;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (resized) {
+					resized = false;
+					fullRedrawNext = true;
 				}
 			}
 		}, 0, 400, TimeUnit.MILLISECONDS);
@@ -103,7 +83,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 	public void paint(Graphics g) {
 		maxF = Settings.SPECTRO_MAX_FREQUENCY;
 		super.paint(g);
-		g.setColor(scale[0]);
+		g.setColor(Scales.scale[0]);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		synchronized (dataRequest.dataMutex) {
 			drawSpectroNew();
@@ -237,7 +217,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 			valuesBuffer = null;
 			spectro = toCompatibleImage(new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR));
 			spectroGraphics = spectro.createGraphics();
-			spectroGraphics.setColor(scale[0]);
+			spectroGraphics.setColor(Scales.scale[0]);
 			spectroGraphics.fillRect(0, 0, getWidth(), getHeight());
 			fullRedrawNext = false;
 		}
@@ -253,7 +233,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 				long _logID = (long) (firstLogID + (currentLogID - firstLogID) * (x / (w - 1.0)));
 				double val = dataRequest.getFilteredValue(ZejfSeis4.getDataManager().getMillis(_logID));
 				if (val == ZejfSeis4.getDataManager().getErrVal()) {
-					spectroGraphics.setColor(scale[0]);
+					spectroGraphics.setColor(Scales.scale[0]);
 					spectroGraphics.drawLine(x, 0, x, h);
 				}
 			}
@@ -314,15 +294,11 @@ public class SpectrogramPanel extends DataRequestPanel {
 							: y == h - 1 ? magnitude[0]
 									: magnitude[(int) index] * (1.0 - pct) + magnitude[(int) (index + 1)] * (pct);
 					int col = (int) (Math.pow(v2 * 0.2, 1 / 2.0) * GAIN);
-					color = SpectrogramPanel.scale[Math.max(0, Math.min(SpectrogramPanel.scale.length - 1, col))];
+					color = Scales.scale[Math.max(0, Math.min(Scales.scale.length - 1, col))];
 				} else {
-					color = scale[0];
+					color = Scales.scale[0];
 				}
-				try {
-					spectro.setRGB(x, y, color.getRGB());
-				} catch (Exception ex) {
-					System.err.println(x + ", " + (y));
-				}
+				spectro.setRGB(x, y, color.getRGB());
 			}
 
 			lastX = x;

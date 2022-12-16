@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.tinylog.Logger;
+
 import com.morce.zejfseis4.data.DataManager;
-import com.morce.zejfseis4.exception.EventsIOException;
-import com.morce.zejfseis4.exception.FatalApplicationException;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 
 public class EventManager {
@@ -29,13 +30,13 @@ public class EventManager {
 		eventhMonthsSync = new Object();
 		try {
 			load();
-		} catch (EventsIOException e) {
-			ZejfSeis4.errorDialog(e);
+		} catch (FatalIOException e) {
+			ZejfSeis4.handleException(e);
 		}
 		fdsnDownloader = new FDSNDownloader(this);
 	}
 
-	private void load() throws EventsIOException {
+	private void load() throws FatalIOException {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
 		c.set(Calendar.DATE, 1);
@@ -52,7 +53,7 @@ public class EventManager {
 		}
 	}
 
-	private EventMonth loadEventMonth(int year, int month, boolean createNew) throws EventsIOException {
+	private EventMonth loadEventMonth(int year, int month, boolean createNew) throws FatalIOException {
 		EventMonth result = null;
 
 		File file = getFile(year, month);
@@ -66,10 +67,10 @@ public class EventManager {
 					in.close();
 					break;
 				} catch (IOException | ClassNotFoundException e) {
-					e.printStackTrace();
+					Logger.error(e);
 					attempt++;
-					if(attempt == 2) {
-						throw new EventsIOException(e);
+					if (attempt == 2) {
+						throw new FatalIOException("Unable to load event month", e);
 					}
 				}
 			}
@@ -89,7 +90,7 @@ public class EventManager {
 
 	}
 
-	public void saveAll() throws EventsIOException {
+	public void saveAll() throws FatalIOException {
 		synchronized (eventhMonthsSync) {
 			for (EventMonth eventMonth : eventMonths) {
 				save(eventMonth);
@@ -97,7 +98,7 @@ public class EventManager {
 		}
 	}
 
-	private void save(EventMonth eventMonth) throws EventsIOException {
+	private void save(EventMonth eventMonth) throws FatalIOException {
 		try {
 			File file = eventMonth.getFile();
 			File temp = eventMonth.getTempFile();
@@ -110,11 +111,11 @@ public class EventManager {
 				out.close();
 			}
 		} catch (IOException e) {
-			throw new EventsIOException(e);
+			throw new FatalIOException("Unable to save event month", e);
 		}
 	}
 
-	public EventMonth getEventMonth(int year, int month, boolean createNew) throws EventsIOException {
+	public EventMonth getEventMonth(int year, int month, boolean createNew) throws FatalIOException {
 		synchronized (eventhMonthsSync) {
 			for (EventMonth ev : eventMonths) {
 				if (ev.getMonth() == month && ev.getYear() == year) {
@@ -126,11 +127,11 @@ public class EventManager {
 		}
 	}
 
-	public ArrayList<Event> getEvents(Calendar start, Calendar end) throws EventsIOException {
+	public ArrayList<Event> getEvents(Calendar start, Calendar end) throws FatalIOException {
 		return getEvents(start.getTimeInMillis(), end.getTimeInMillis());
 	}
 
-	public ArrayList<Event> getEvents(long start, long end) throws EventsIOException {
+	public ArrayList<Event> getEvents(long start, long end) throws FatalIOException {
 		ArrayList<Event> result = new ArrayList<Event>();
 		Calendar endC = Calendar.getInstance();
 		endC.setTimeInMillis(end);
@@ -162,7 +163,7 @@ public class EventManager {
 		return fdsnDownloader;
 	}
 
-	public Event getEvent(String id, long origin) throws EventsIOException {
+	public Event getEvent(String id, long origin) throws FatalIOException {
 		ArrayList<Event> candidates = getEvents(origin - 1000 * 60 * 5, origin + 1000 * 60 * 5);
 		for (Event e : candidates) {
 			if (e.getID().equals(id)) {
@@ -172,17 +173,17 @@ public class EventManager {
 		return null;
 	}
 
-	public void newEvent(Event event) throws EventsIOException {
+	public void newEvent(Event event) throws FatalIOException {
 		getEventMonth(event.getOrigin(), true).addEvent(event);
 	}
 
-	public EventMonth getEventMonth(long origin, boolean createNew) throws EventsIOException {
+	public EventMonth getEventMonth(long origin, boolean createNew) throws FatalIOException {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(origin);
 		return getEventMonth(c.get(Calendar.YEAR), c.get(Calendar.MONTH), createNew);
 	}
 
-	public void removeEvent(Event event) throws EventsIOException {
+	public void removeEvent(Event event) throws FatalIOException {
 		EventMonth eventMonth = getEventMonth(event.getOrigin(), false);
 		if (eventMonth != null) {
 			eventMonth.removeEvent(event);

@@ -44,7 +44,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 				try {
 					repaint();
 				} catch (Exception e) {
-					e.printStackTrace();
+					ZejfSeis4.handleException(e); // uncaught
 				}
 			}
 		}, 0, 10, TimeUnit.MILLISECONDS);

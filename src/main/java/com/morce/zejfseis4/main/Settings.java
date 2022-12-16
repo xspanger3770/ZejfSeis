@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.morce.zejfseis4.exception.FatalIOException;
 
 public class Settings {
-	
+
 	private static File propertiesFile = new File(ZejfSeis4.MAIN_FOLDER, "properties.properties");
 	public static double SPECTRO_GAIN;
 	public static int REALTIME_DURATION_SECONDS;
@@ -30,38 +31,34 @@ public class Settings {
 
 	public static final int[] DRUM_SPACES = { 1, 2, 5, 10, 15, 20, 30, 60 };
 
-	static {
-		loadProperties();
-	}
-
-	private static void loadProperties() {
+	static void loadProperties() throws FatalIOException {
 		Properties prop = new Properties();
 		try {
 			if (!propertiesFile.exists()) {
 				propertiesFile.createNewFile();
 			}
 			prop.load(new FileInputStream(propertiesFile));
-			MAX_FREQUENCY =  Double.valueOf(prop.getProperty("max_frequency", "20.0"));
-			MIN_FREQUENCY = Double.valueOf(prop.getProperty("min_frequency", "0.0"));
-			
-			SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.20"));
-			REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "7"))];
-			WINDOW = Integer.valueOf(prop.getProperty("window", "120"));
-			DRUM_SPACE_INDEX = Integer.valueOf(prop.getProperty("drum_space_index", "3"));
-			DRUM_GAIN = Double.valueOf(prop.getProperty("drum_gain", "1.0"));
-			ANTIALIAS = Boolean.valueOf(prop.getProperty("antialiasing", "false"));
-			DECIMATE = Integer.valueOf(prop.getProperty("decimate", "1"));
-			ADDRESS = String.valueOf(prop.getProperty("address", "0.0.0.0"));
-			PORT = Integer.valueOf(prop.getProperty("port", "6222"));
-			SPECTRO_MAX_FREQUENCY = Double.valueOf(prop.getProperty("spectro_max_freq", "20.0"));
-			
-			saveProperties();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			throw new FatalIOException("Failed to load properties", e);
 		}
+		MAX_FREQUENCY = Double.valueOf(prop.getProperty("max_frequency", "20.0"));
+		MIN_FREQUENCY = Double.valueOf(prop.getProperty("min_frequency", "0.0"));
+
+		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.20"));
+		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "7"))];
+		WINDOW = Integer.valueOf(prop.getProperty("window", "120"));
+		DRUM_SPACE_INDEX = Integer.valueOf(prop.getProperty("drum_space_index", "3"));
+		DRUM_GAIN = Double.valueOf(prop.getProperty("drum_gain", "1.0"));
+		ANTIALIAS = Boolean.valueOf(prop.getProperty("antialiasing", "false"));
+		DECIMATE = Integer.valueOf(prop.getProperty("decimate", "1"));
+		ADDRESS = String.valueOf(prop.getProperty("address", "0.0.0.0"));
+		PORT = Integer.valueOf(prop.getProperty("port", "6222"));
+		SPECTRO_MAX_FREQUENCY = Double.valueOf(prop.getProperty("spectro_max_freq", "20.0"));
+
+		saveProperties();
 	}
 
-	public static void saveProperties() {
+	public static void saveProperties() throws FatalIOException {
 		Properties prop = new Properties();
 		prop.setProperty("max_frequency", MAX_FREQUENCY + "");
 		prop.setProperty("min_frequency", MIN_FREQUENCY + "");
@@ -78,7 +75,7 @@ public class Settings {
 		try {
 			prop.store(new FileOutputStream(propertiesFile), "");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new FatalIOException("Failed to store properties", e);
 		}
 	}
 

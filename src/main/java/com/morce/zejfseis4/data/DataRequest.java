@@ -3,6 +3,9 @@ package com.morce.zejfseis4.data;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import org.tinylog.Logger;
+
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.exception.TooBigIntervalException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
@@ -60,7 +63,7 @@ public class DataRequest {
 
 	private void initData() {
 		int logCount = getLogCount();
-		if(logCount > 10_000_000) {
+		if (logCount > 10_000_000) {
 			throw new TooBigIntervalException("logs > 10M");
 		}
 		if (data == null || logCount != data.length) {
@@ -154,13 +157,19 @@ public class DataRequest {
 			try {
 				workerThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 			workerThread = null;
 		}
 		workerThread = new Thread(String.format("DataRequest '%s' Worker Thread", name)) {
 			public void run() {
-				processData();
+				try {
+					processData();
+				} catch (TooBigIntervalException e) {
+					Logger.error(e);
+				} catch (FatalIOException e) {
+					ZejfSeis4.handleException(e);
+				}
 			};
 		};
 		workerThread.start();
@@ -181,7 +190,7 @@ public class DataRequest {
 		}
 	}
 
-	private void processData() {
+	private void processData() throws TooBigIntervalException, FatalIOException {
 		while (true) {
 			try {
 				semaphore.acquire();
@@ -208,6 +217,7 @@ public class DataRequest {
 						long end = Math.min(getEndLogID(), dataManager.lastRealtimeLogID);
 						if (end - start >= 0) {
 							refill(start, end, true);
+
 						}
 					}
 				}
@@ -215,7 +225,7 @@ public class DataRequest {
 		}
 	}
 
-	private void refill(long start, long end, boolean realtime) {
+	private void refill(long start, long end, boolean realtime) throws TooBigIntervalException, FatalIOException {
 		start = Math.max(start, startLogID);
 		end = Math.min(endLogID, end);
 
@@ -231,8 +241,8 @@ public class DataRequest {
 					- 1;
 			a = Math.max(start, a);
 			b = Math.min(end, b);
-			
-			if(b - a > 10_000_000) {
+
+			if (b - a > 10_000_000) {
 				throw new TooBigIntervalException("refill > 10M");
 			}
 			if (b - a >= 0) {
@@ -303,7 +313,7 @@ public class DataRequest {
 			try {
 				workerThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 			workerThread = null;
 		}

@@ -27,7 +27,7 @@ import com.morce.zejfseis4.events.CatalogueEvent;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
 import com.morce.zejfseis4.events.ManualEvent;
-import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.exception.FatalApplicationException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.TravelTimeTable;
@@ -73,6 +73,10 @@ public class EventExplorer extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
+				windowClosed(e);
+			}
+			@Override
+			public void windowClosed(WindowEvent e) {
 				dataExplorerPanel.close();
 			}
 		});
@@ -237,7 +241,7 @@ public class EventExplorer extends JFrame {
 				try {
 					ZejfSeis4.getEventManager().saveAll();
 				} catch (FatalApplicationException e1) {
-					ZejfSeis4.errorDialog(e1);
+					ZejfSeis4.handleException(e1);
 				}
 				ZejfSeis4.getFrame().getEventsTab().updatePanel();
 				EventExplorer.this.dispose();
@@ -257,8 +261,8 @@ public class EventExplorer extends JFrame {
 					try {
 						ZejfSeis4.getEventManager().removeEvent(event);
 						ZejfSeis4.getEventManager().saveAll();
-					} catch (EventsIOException e2) {
-						ZejfSeis4.errorDialog(e2);
+					} catch (FatalIOException e2) {
+						ZejfSeis4.handleException(e2);
 					}
 					ZejfSeis4.getFrame().getEventsTab().updatePanel();
 					EventExplorer.this.dispose();

@@ -7,14 +7,14 @@ import java.awt.event.KeyEvent;
 /**
  * Action responsible for terminating the application.
  */
-public final class GenericQuitAction extends AbstractAction {
+public final class TerminateAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
 
-	public GenericQuitAction() {
-        super("Quit");
+	public TerminateAction() {
+        super("Terminate");
         putValue(SHORT_DESCRIPTION, "Terminates the application");
-        putValue(MNEMONIC_KEY, KeyEvent.VK_Q);
+        putValue(MNEMONIC_KEY, KeyEvent.VK_T);
     }
 
     @Override

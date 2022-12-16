@@ -31,7 +31,7 @@ public abstract class Multithread {
 			try {
 				buffer[i].join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				break;
 			}
 		}
 	}

@@ -16,6 +16,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,9 +32,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import com.morce.zejfseis4.data.DataRequest;
+import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
-import com.morce.zejfseis4.utils.Multithread;
 import com.morce.zejfseis4.utils.NamedThreadFactory;
 
 public class DrumTab extends DataRequestPanel {
@@ -286,10 +287,9 @@ public class DrumTab extends DataRequestPanel {
 			public void run() {
 				try {
 					runUpdate();
-
 					ZejfSeis4.getFrame().repaint();
 				} catch (Exception e) {
-					e.printStackTrace();
+					ZejfSeis4.handleException(e);
 				}
 			}
 		}, 0, 100, TimeUnit.MILLISECONDS);
@@ -445,13 +445,9 @@ public class DrumTab extends DataRequestPanel {
 		long startLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID - lines + 1, duration)) - 1;
 		long endLogID = ZejfSeis4.getDataManager().getLogId(getMillis(_lineID + 1, duration));
 		long lastLogID = dataRequest.lastLogID;
-		new Multithread(8) {
+		drawIt(w, h, startLogID, endLogID, g, lastLogID, _lineID, lines, duration, decimate, gain);
 
-			@Override
-			public void run(long start, long end) {
-				drawIt(w, h, start, end, g, lastLogID, _lineID, lines, duration, decimate, gain);
-			}
-		}.divide(startLogID, endLogID);
+		// removed MultiThread
 	}
 
 	private void drawIt(int w, int h, long start, long end, Graphics2D g, long lastLogID, long currentLineID, int lines,
@@ -530,8 +526,8 @@ public class DrumTab extends DataRequestPanel {
 				c.setTime(date);
 
 				setLineID(c.getTimeInMillis() / (lastDuration * 60 * 1000l), lastDuration);
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (ParseException ex) {
+				throw new RuntimeApplicationException("Unparseable date", ex);
 			}
 		}
 	}

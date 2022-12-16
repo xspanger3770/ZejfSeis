@@ -7,6 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import org.tinylog.Logger;
+
 public abstract class ZejfCReader {
 
 	private InputStream in;
@@ -26,7 +28,7 @@ public abstract class ZejfCReader {
 	}
 
 	public void run() {
-		if(connected) {
+		if (connected) {
 			throw new IllegalStateException("Cannot run Reader: already running!");
 		}
 		semaphore = new Semaphore(0);
@@ -59,34 +61,33 @@ public abstract class ZejfCReader {
 			try {
 				readerThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 		if (notifierThread != null) {
 			try {
 				notifierThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 	}
 
-	public int nextInt() throws NoSuchElementException, NumberFormatException, InterruptedException {
+	public String nextLine() throws InterruptedException {
 		semaphore.acquire();
 		String line;
 		synchronized (mutex) {
 			line = queue.remove();
 		}
-		return Integer.valueOf(line);
+		return line;
+	}
+
+	public int nextInt() throws NoSuchElementException, NumberFormatException, InterruptedException {
+		return Integer.valueOf(nextLine());
 	}
 
 	public long nextLong() throws NoSuchElementException, NumberFormatException, InterruptedException {
-		semaphore.acquire();
-		String line;
-		synchronized (mutex) {
-			line = queue.remove();
-		}
-		return Long.valueOf(line);
+		return Long.valueOf(nextLine());
 	}
 
 	private void runNotifier() {
@@ -111,8 +112,8 @@ public abstract class ZejfCReader {
 			}
 			try {
 				nextLine(line);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (NumberFormatException | NoSuchElementException | InterruptedException e) {
+				Logger.error(e);
 				connected = false;
 				break;
 			}
@@ -139,13 +140,14 @@ public abstract class ZejfCReader {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 		connected = false;
 		semaphore.release();
 	}
 
-	public abstract void nextLine(String line) throws Exception;
+	public abstract void nextLine(String line)
+			throws NumberFormatException, NoSuchElementException, InterruptedException;
 
 	public abstract void onClose();
 

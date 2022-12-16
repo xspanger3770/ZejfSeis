@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -22,7 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.tinylog.Logger;
 
-import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.utils.NamedThreadFactory;
 
@@ -51,8 +52,8 @@ public class FDSNDownloader {
 				in.close();
 				return;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			Logger.error(e);
 		}
 		lastDownload = System.currentTimeMillis();
 	}
@@ -66,8 +67,7 @@ public class FDSNDownloader {
 				try {
 					FDSNDownloader.this.update();
 				} catch (Exception e) {
-					System.err.println("Exception occured in events downloader");
-					e.printStackTrace();
+					ZejfSeis4.handleException(e); // uncaughtException
 				}
 			}
 		}, 0, 1, TimeUnit.MINUTES);
@@ -80,13 +80,7 @@ public class FDSNDownloader {
 			ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
 			lastDownload = System.currentTimeMillis();
 
-			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(lastDownloadFile));
-				out.writeLong(lastDownload);
-				out.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			saveLastDownload();
 
 			for (CatalogueEvent event : events) {
 				processEvent(event);
@@ -94,38 +88,46 @@ public class FDSNDownloader {
 
 			ZejfSeis4.getEventManager().saveAll();
 			ZejfSeis4.getFrame().getEventsTab().updatePanel();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			Logger.error(e);
+		} catch (FatalIOException e1) {
+			ZejfSeis4.handleException(e1);
 		}
 	}
-	
-	public void downloadWholeMonth(Calendar c) throws Exception{
+
+	private void saveLastDownload() throws IOException {
+		DataOutputStream out = new DataOutputStream(new FileOutputStream(lastDownloadFile));
+		out.writeLong(lastDownload);
+		out.close();
+	}
+
+	public void downloadWholeMonth(Calendar c) throws FatalIOException, IOException {
 		Calendar start = Calendar.getInstance();
 		start.setTimeInMillis(c.getTimeInMillis());
-		
+
 		start.set(Calendar.DATE, 1);
 		start.set(Calendar.HOUR, 0);
 		start.set(Calendar.MINUTE, 0);
 		start.set(Calendar.SECOND, 0);
-		
+
 		Calendar end = Calendar.getInstance();
 		end.setTime(start.getTime());
 		end.add(Calendar.MONTH, 1);
-		
-		while(start.before(end)) {
-			System.out.println("From "+start.getTimeInMillis()+" to "+end.getTimeInMillis());
+
+		while (start.before(end)) {
+			System.out.println("From " + start.getTimeInMillis() + " to " + end.getTimeInMillis());
 			ArrayList<CatalogueEvent> events = downloadEvents(start, null, 1000, -999);
-			if(events.isEmpty()) {
+			if (events.isEmpty()) {
 				break;
 			}
 			for (CatalogueEvent event : events) {
-				if(event.getOrigin() > end.getTimeInMillis() || event.getOrigin() > System.currentTimeMillis()) {
+				if (event.getOrigin() > end.getTimeInMillis() || event.getOrigin() > System.currentTimeMillis()) {
 					break;
 				}
 				processEvent(event);
 			}
-			
-			start.setTimeInMillis(events.get(events.size() -1).getOrigin());
+
+			start.setTimeInMillis(events.get(events.size() - 1).getOrigin());
 			ZejfSeis4.getFrame().getEventsTab().updatePanel();
 			ZejfSeis4.getEventManager().saveAll();
 		}
@@ -135,7 +137,7 @@ public class FDSNDownloader {
 		CatalogueEvent original;
 		try {
 			original = (CatalogueEvent) getEventManager().getEvent(event.getID(), event.getOrigin());
-		} catch (EventsIOException e) {
+		} catch (FatalIOException e) {
 			Logger.error(e);
 			return;
 		}
@@ -149,7 +151,7 @@ public class FDSNDownloader {
 		} else if (detectable) {
 			try {
 				getEventManager().newEvent(event);
-			} catch (EventsIOException e) {
+			} catch (FatalIOException e) {
 				Logger.error(e);
 			}
 		}
@@ -159,8 +161,7 @@ public class FDSNDownloader {
 
 	// From ZejfSeis 1
 	public static ArrayList<CatalogueEvent> downloadEvents(Calendar start, Calendar end, int limit, double minMag)
-			throws Exception {
-		ArrayList<CatalogueEvent> list = new ArrayList<CatalogueEvent>();
+			throws IOException {
 
 		if (start != null && end == null) {
 			start.add(Calendar.SECOND, 1);// ?
@@ -180,11 +181,13 @@ public class FDSNDownloader {
 		}
 		in.close();
 
+		ArrayList<CatalogueEvent> list = new ArrayList<CatalogueEvent>();
 		JSONObject obj = null;
 		try {
 			obj = new JSONObject(result.toString());
 		} catch (JSONException e) {
-			e.printStackTrace();
+			Logger.error(e);
+			return list;
 		}
 		JSONArray array = obj.getJSONArray("features");
 		for (int i = 0; i < array.length(); i++) {
@@ -197,7 +200,7 @@ public class FDSNDownloader {
 		return list;
 	}
 
-	public static CatalogueEvent _decode(JSONObject properties) throws Exception {
+	public static CatalogueEvent _decode(JSONObject properties) {
 		double lat = properties.getDouble("lat");
 		double lon = properties.getDouble("lon");
 		double depth = properties.getDouble("depth");
@@ -220,7 +223,7 @@ public class FDSNDownloader {
 		a.setTimeInMillis(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
 		try {
 			System.out.println(downloadEvents(a, null, 1000, -999));
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

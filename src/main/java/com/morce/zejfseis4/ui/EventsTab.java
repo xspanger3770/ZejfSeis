@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -29,10 +30,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.tinylog.Logger;
+
 import com.morce.zejfseis4.data.DataManager;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
-import com.morce.zejfseis4.exception.EventsIOException;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.ui.action.EditEventAction;
 import com.morce.zejfseis4.ui.model.EventTableModel;
@@ -135,8 +138,10 @@ public class EventsTab extends JPanel {
 					public void run() {
 						try {
 							ZejfSeis4.getEventManager().getFdsnDownloader().downloadWholeMonth(displayedTime);
-						} catch (Exception e) {
-							e.printStackTrace();
+						} catch (FatalIOException e) {
+							ZejfSeis4.handleException(e);
+						} catch (IOException e) {
+							Logger.error(e);
 						}
 						download.setEnabled(true);
 						download.setText("Download");
@@ -175,17 +180,17 @@ public class EventsTab extends JPanel {
 		table.setShowGrid(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		table.setAutoCreateRowSorter(true);
-		
+
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
 		table.setRowSorter(sorter);
 		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-		 
+
 		int columnIndexToSort = 0;
 		sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.DESCENDING));
-		 
+
 		sorter.setSortKeys(sortKeys);
 		sorter.sort();
-		
+
 		editEventAction = new EditEventAction(table);
 
 		table.getSelectionModel().addListSelectionListener(this::rowSelectionChanged);
@@ -231,9 +236,10 @@ public class EventsTab extends JPanel {
 		ArrayList<Event> events = new ArrayList<>();
 		try {
 			events = (ArrayList<Event>) ZejfSeis4.getEventManager()
-					.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true).getEvents();
-		} catch (EventsIOException e) {
-			ZejfSeis4.errorDialog(e);
+					.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true)
+					.getEvents();
+		} catch (FatalIOException e) {
+			ZejfSeis4.handleException(e);
 		}
 
 		this.data.clear();

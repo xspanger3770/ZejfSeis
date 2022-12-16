@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import org.tinylog.Logger;
+
 import com.morce.zejfseis4.data.DataHour;
 import com.morce.zejfseis4.data.SimpleLog;
+import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.exception.IncompatibleServerException;
 import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.main.ZejfSeis4;
@@ -33,7 +37,7 @@ public class ZejfClient {
 
 	private boolean connected;
 
-	public void connect(String ip, int port) {
+	public void connect(String ip, int port) throws FatalIOException {
 		System.out.printf("Connecting to %s:%d\n", ip, port);
 		ZejfSeis4.getFrame().setStatus("Connecting...");
 		connected = true;
@@ -45,14 +49,14 @@ public class ZejfClient {
 			init();
 			runReader();
 			ZejfSeis4.getFrame().setStatus(String.format("Connected to %s:%d", ip, port));
-		} catch (Exception e) {
+		} catch (IOException e) {
 			connected = false;
 			ZejfSeis4.getFrame().setStatus("Failure");
-			throw new RuntimeApplicationException("Cannot connect: "+e.getMessage(), e);
+			throw new RuntimeApplicationException(String.format("Cannot connect to %s:%s", ip, port), e);
 		}
 	}
 
-	private void receiveInitialInfo(String ip) throws Exception {
+	private void receiveInitialInfo(String ip) throws IOException, FatalIOException {
 		String compat_version = readString();
 		int comp = Integer.valueOf(compat_version.split(":")[1]);
 		if (comp != ZejfSeis4.COMPATIBILITY_VERSION) {
@@ -120,8 +124,8 @@ public class ZejfClient {
 								socket.getOutputStream().write(String.format("%s\n", str).getBytes());
 							}
 							socket.getOutputStream().flush();
-						} catch (Exception e) {
-							e.printStackTrace();
+						} catch (IOException e) {
+							Logger.error(e);
 						}
 					}
 				}
@@ -163,7 +167,7 @@ public class ZejfClient {
 		reader = new ZejfCReader(socket.getInputStream()) {
 
 			@Override
-			public void nextLine(String line) throws Exception {
+			public void nextLine(String line) throws NumberFormatException, NoSuchElementException, InterruptedException {
 				parseLine(line);
 			}
 
@@ -178,7 +182,7 @@ public class ZejfClient {
 		reader.run();
 	}
 
-	private void parseLine(String line) throws Exception {
+	private void parseLine(String line) throws NumberFormatException, NoSuchElementException, InterruptedException {
 		switch (line) {
 		case "heartbeat":
 			// todo nothing
@@ -213,7 +217,7 @@ public class ZejfClient {
 			try {
 				heartbeatThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 		if (outputThread != null) {
@@ -221,7 +225,7 @@ public class ZejfClient {
 			try {
 				outputThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 		if (reader != null) {
