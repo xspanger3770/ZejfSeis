@@ -58,7 +58,7 @@ public class EventManager {
 
 		File file = getFile(year, month);
 		File tempFile = getTempFile(year, month);
-		int attempt = 1;
+		int attempt = 0;
 		for (File f : new File[] { file, tempFile }) {
 			if (f.exists()) {
 				try {
@@ -140,12 +140,16 @@ public class EventManager {
 		c.set(Calendar.DATE, 1);
 
 		while (c.before(endC)) {
-			for (Event e : getEventMonth(c.get(Calendar.YEAR), c.get(Calendar.MONTH), false).getEvents()) {
+			EventMonth eventMonth = getEventMonth(c.get(Calendar.YEAR), c.get(Calendar.MONTH), false);
+			c.add(Calendar.MONTH, 1);
+			if (eventMonth == null) {
+				continue;
+			}
+			for (Event e : eventMonth.getEvents()) {
 				if (e.getOrigin() >= start && e.getOrigin() <= end) {
 					result.add(e);
 				}
 			}
-			c.add(Calendar.MONTH, 1);
 		}
 
 		return result;
