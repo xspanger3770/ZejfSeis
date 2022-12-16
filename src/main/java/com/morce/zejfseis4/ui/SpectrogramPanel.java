@@ -83,7 +83,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 	public void paint(Graphics g) {
 		maxF = Settings.SPECTRO_MAX_FREQUENCY;
 		super.paint(g);
-		g.setColor(Scales.scale[0]);
+		g.setColor(Scales.SPECTRO.getColor(0));
 		g.fillRect(0, 0, getWidth(), getHeight());
 		synchronized (dataRequest.dataMutex) {
 			drawSpectroNew();
@@ -217,7 +217,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 			valuesBuffer = null;
 			spectro = toCompatibleImage(new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR));
 			spectroGraphics = spectro.createGraphics();
-			spectroGraphics.setColor(Scales.scale[0]);
+			spectroGraphics.setColor(Scales.SPECTRO.getColor(0));
 			spectroGraphics.fillRect(0, 0, getWidth(), getHeight());
 			fullRedrawNext = false;
 		}
@@ -233,7 +233,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 				long _logID = (long) (firstLogID + (currentLogID - firstLogID) * (x / (w - 1.0)));
 				double val = dataRequest.getFilteredValue(ZejfSeis4.getDataManager().getMillis(_logID));
 				if (val == ZejfSeis4.getDataManager().getErrVal()) {
-					spectroGraphics.setColor(Scales.scale[0]);
+					spectroGraphics.setColor(Scales.SPECTRO.getColor(0));
 					spectroGraphics.drawLine(x, 0, x, h);
 				}
 			}
@@ -293,10 +293,10 @@ public class SpectrogramPanel extends DataRequestPanel {
 					double v2 = y == 0 ? magnitude[magnitude.length - 1]
 							: y == h - 1 ? magnitude[0]
 									: magnitude[(int) index] * (1.0 - pct) + magnitude[(int) (index + 1)] * (pct);
-					int col = (int) (Math.pow(v2 * 0.2, 1 / 2.0) * GAIN);
-					color = Scales.scale[Math.max(0, Math.min(Scales.scale.length - 1, col))];
+					double col = Math.pow(v2 * 0.2, 1 / 2.0);
+					color = Scales.SPECTRO.getColor(col * GAIN);
 				} else {
-					color = Scales.scale[0];
+					color = Scales.SPECTRO.getColor(0);
 				}
 				spectro.setRGB(x, y, color.getRGB());
 			}

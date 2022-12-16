@@ -13,17 +13,14 @@ public abstract class Scale {
 
 	private String resourceName;
 	private ArrayList<Color> colors;
+	
+	public static final Color ERROR_COLOR = Color.white;
 
-	public Scale(String resourceName) throws FatalIOException {
+	public Scale(String resourceName) {
 		this.resourceName = resourceName;
-		try {
-			loadColors();
-		} catch (IOException | IllegalArgumentException e) {
-			throw new FatalIOException("Cannot load scale", e);
-		}
 	}
 
-	private void loadColors() throws IOException {
+	void loadColors() throws IOException {
 		colors = new ArrayList<Color>();
 		BufferedImage img = getImage(getResourceName());
 		Color last = null;

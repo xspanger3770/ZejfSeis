@@ -8,14 +8,14 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
-public class ContinueAction extends AbstractAction {
+public class IgnoreAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
 	
-	public ContinueAction() {
-		super("Continue");
-		putValue(SHORT_DESCRIPTION, "Continue (further errors may occur)");
-        putValue(MNEMONIC_KEY, KeyEvent.VK_C);
+	public IgnoreAction() {
+		super("Ignore");
+		putValue(SHORT_DESCRIPTION, "Ignore the error and continue (unsafe)");
+        putValue(MNEMONIC_KEY, KeyEvent.VK_I);
 	}
 
 	@Override

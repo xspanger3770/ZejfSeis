@@ -14,6 +14,7 @@ import org.tinylog.Logger;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.ui.ZejfSeisFrame;
 import com.morce.zejfseis4.ui.action.CloseAction;
+import com.morce.zejfseis4.ui.action.IgnoreAction;
 import com.morce.zejfseis4.ui.action.TerminateAction;
 
 public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler {
@@ -47,12 +48,17 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 			showGeneralError("Oops something went wrong!", true);
 		}
 	}
+	
+	int i = 0;
 
 	private void showDetailedError(Throwable e) {
 		final Object[] options = getOptionsForDialog(true);
 		JOptionPane.showOptionDialog(frame, createDetailedPane(e), "Error", JOptionPane.DEFAULT_OPTION,
 				JOptionPane.ERROR_MESSAGE, null, options, null);
-		System.exit(0);
+		i++;
+		if(i == 2) {
+			System.exit(0);
+		}
 	}
 
 	private Component createDetailedPane(Throwable e) {
@@ -71,9 +77,6 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 
 		JOptionPane.showOptionDialog(frame, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null,
 				options, null);
-		if(isFatal) {
-			System.exit(0);
-		}
 	}
 
 	private Component[] getOptionsForDialog(boolean isFatal) {
@@ -82,6 +85,6 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 		}
 
 		return new Component[] { new JButton(new TerminateAction()), new JButton(new CloseAction(frame)),
-				/* new JButton(new ContinueAction()) */ };
+				new JButton(new IgnoreAction()) };
 	}
 }
