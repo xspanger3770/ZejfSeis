@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import com.morce.zejfseis4.exception.FatalIOException;
-
 public abstract class Scale {
 
 	private String resourceName;
