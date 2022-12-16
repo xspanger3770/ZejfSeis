@@ -35,6 +35,7 @@ import org.tinylog.Logger;
 import com.morce.zejfseis4.data.DataManager;
 import com.morce.zejfseis4.events.DetectionStatus;
 import com.morce.zejfseis4.events.Event;
+import com.morce.zejfseis4.events.EventMonth;
 import com.morce.zejfseis4.exception.FatalIOException;
 import com.morce.zejfseis4.main.ZejfSeis4;
 import com.morce.zejfseis4.ui.action.EditEventAction;
@@ -235,9 +236,11 @@ public class EventsTab extends JPanel {
 
 		ArrayList<Event> events = new ArrayList<>();
 		try {
-			events = (ArrayList<Event>) ZejfSeis4.getEventManager()
-					.getEventMonth(displayedTime.get(Calendar.YEAR), displayedTime.get(Calendar.MONTH), true)
-					.getEvents();
+			EventMonth eventMonth = ZejfSeis4.getEventManager().getEventMonth(displayedTime.get(Calendar.YEAR),
+					displayedTime.get(Calendar.MONTH), false);
+			if (eventMonth != null) {
+				events = (ArrayList<Event>) eventMonth.getEvents();
+			}
 		} catch (FatalIOException e) {
 			ZejfSeis4.handleException(e);
 		}
