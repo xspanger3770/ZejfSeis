@@ -8,12 +8,12 @@ public class DetectableRenderer extends ScaleRenderer {
 	private static final long serialVersionUID = 1L;
 
 	public DetectableRenderer() {
-		super(Scales.DETECTABLE, "%,.1f%%");
+		super(Scales.DETECTABLE, "%,.2f");
 	}
 	
 	@Override
 	public String getText(Event entity, Double value) {
-		return super.getText(entity, value * 100);
+		return super.getText(entity, value);
 	}
 
 }

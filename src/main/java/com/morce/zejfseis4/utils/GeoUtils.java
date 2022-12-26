@@ -131,7 +131,7 @@ public interface GeoUtils {
 			actualDetectionCurve += Math.min(0.3, (dist - 9000) / 2000 * 0.3);
 		}
 		if (dist > 14700) {
-			actualDetectionCurve -= Math.min(0.7, (dist - 14700) / 600 * 0.7);
+			actualDetectionCurve -= Math.min(0.4, (dist - 14700) / 600 * 0.4);
 		}
 
 		double depthIncrease = 1.0 / (1 + 500.0 / depth);

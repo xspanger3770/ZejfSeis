@@ -26,9 +26,13 @@ public class ScaleRenderer extends TableCellRendererAdapter<Event, Double> {
 	@Override
 	public Color getForeground(Event entity, Double value) {
 		Color col = scale.getColor(value);
-		return (col.getRed() * 0.299 + col.getGreen() * 0.587 + col.getBlue() * 0.114 > 60 ? Color.black : Color.white);
+		return foregroundColor(col);
 	}
 	
+	public static Color foregroundColor(Color col) {
+		return (col.getRed() * 0.299 + col.getGreen() * 0.587 + col.getBlue() * 0.05 > 60 ? Color.black : Color.white);
+	}
+
 	@Override
 	public String getText(Event entity, Double value) {
 		return String.format(format, value);
