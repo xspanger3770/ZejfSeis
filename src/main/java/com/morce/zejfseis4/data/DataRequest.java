@@ -6,7 +6,6 @@ import java.util.concurrent.Semaphore;
 import org.tinylog.Logger;
 
 import com.morce.zejfseis4.exception.FatalIOException;
-import com.morce.zejfseis4.exception.RuntimeApplicationException;
 import com.morce.zejfseis4.exception.TooBigIntervalException;
 import com.morce.zejfseis4.main.Settings;
 import com.morce.zejfseis4.main.ZejfSeis4;
@@ -103,13 +102,6 @@ public class DataRequest {
 			this.realtime = false;
 			if (!dataManager.isLoaded()) {
 				return;
-			}
-			if (startTime < 106885036000l) {
-				try {
-					throw new RuntimeApplicationException("EEEE");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
 			this.startLogID = dataManager.getLogId(startTime);
 			this.endLogID = dataManager.getLogId(endTime);
