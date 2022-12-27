@@ -247,6 +247,7 @@ public class ZejfClient {
 	public void requestCheck(DataHour result) {
 		if(result.getHourID() < 100000) {
 			System.err.println("SUSPICIOUS VALUE: "+result.getHourID());
+			throw new RuntimeApplicationException("SUS");
 		}
 		sendStrings("datahour_check", result.getHourID() + "", result.getSampleCount() + "");
 	}

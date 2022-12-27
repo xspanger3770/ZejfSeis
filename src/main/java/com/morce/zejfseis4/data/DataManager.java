@@ -61,7 +61,7 @@ public class DataManager {
 		this.dataRequests = new ArrayList<>();
 	}
 
-	private void join(Thread thread) {
+	private void interruptAndJoin(Thread thread) {
 		if (thread != null) {
 			thread.interrupt();
 			try {
@@ -181,9 +181,9 @@ public class DataManager {
 	}
 
 	public void exit() throws FatalIOException {
-		join(autosaveThread);
+		interruptAndJoin(autosaveThread);
 		autosaveThread = null;
-		join(logQueueThread);
+		interruptAndJoin(logQueueThread);
 		logQueueThread = null;
 		synchronized (dataHoursMutex) {
 			saveAll();
@@ -207,9 +207,9 @@ public class DataManager {
 	}
 
 	private void stopThreads() {
-		join(autosaveThread);
+		interruptAndJoin(autosaveThread);
 		autosaveThread = null;
-		join(logQueueThread);
+		interruptAndJoin(logQueueThread);
 		logQueueThread = null;
 
 		synchronized (dataRequestsMutex) {
