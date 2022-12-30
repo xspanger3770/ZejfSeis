@@ -29,11 +29,12 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	public void uncaughtException(Thread t, Throwable e) {
 		Logger.error("An uncaught exception has occured in thread {} : {}", t.getName(), e.getMessage());
 		Logger.error(e);
-
+		frame.dispose();
 		handleException(e);
+		System.exit(1);
 	}
 
-	public void handleException(Throwable e) {
+	public synchronized void handleException(Throwable e) {
 		System.err.println((e instanceof RuntimeApplicationException) + ", " + e.getCause());
 		if (ZejfSeis4.DEBUG && !(e instanceof RuntimeApplicationException)) {
 			showDetailedError(e);
@@ -48,15 +49,15 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 			showGeneralError("Oops something went wrong!", true);
 		}
 	}
-	
+
 	int i = 0;
 
 	private void showDetailedError(Throwable e) {
 		final Object[] options = getOptionsForDialog(true);
-		JOptionPane.showOptionDialog(frame, createDetailedPane(e), "Error", JOptionPane.DEFAULT_OPTION,
+		JOptionPane.showOptionDialog(frame, createDetailedPane(e), "Fatal Error", JOptionPane.DEFAULT_OPTION,
 				JOptionPane.ERROR_MESSAGE, null, options, null);
 		i++;
-		if(i == 2) {
+		if (i == 2) {
 			System.exit(0);
 		}
 	}

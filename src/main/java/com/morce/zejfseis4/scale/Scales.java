@@ -22,7 +22,7 @@ public class Scales {
 
 	public static ScaleRange DETECTABLE = new ScaleRange("scale1.png", 0, 3) {
 		public java.awt.Color getColor(double value) {
-			return super.getColor(Math.sqrt(Math.abs(value)));
+			return super.getColor(value>1?1+Math.log10(Math.abs(value)):value);
 		};
 	};
 
