@@ -127,8 +127,8 @@ public class ZejfSeisFrame extends JFrame {
 
 		List<DefaultFilter> defaultFilters = new ArrayList<>();
 
-		defaultFilters.add(new DefaultFilter("Default", 18, 0.5));
-		defaultFilters.add(new DefaultFilter("Full", 18, 0.01));
+		defaultFilters.add(new DefaultFilter("Default", 20, 0.5));
+		defaultFilters.add(new DefaultFilter("Full", 20, 0.0));
 		defaultFilters.add(new DefaultFilter("Regional", 6, 1));
 		defaultFilters.add(new DefaultFilter("Distant", 2, 0.5));
 		defaultFilters.add(new DefaultFilter("S Waves", 0.08, 0.01));
