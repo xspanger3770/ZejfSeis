@@ -49,9 +49,9 @@ public class Settings {
 		MAX_FREQUENCY = Double.valueOf(prop.getProperty("max_frequency", "20.0"));
 		MIN_FREQUENCY = Double.valueOf(prop.getProperty("min_frequency", "0.0"));
 
-		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.20"));
-		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "7"))];
-		WINDOW = Integer.valueOf(prop.getProperty("window", "120"));
+		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.25"));
+		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "8"))];
+		WINDOW = Integer.valueOf(prop.getProperty("window", "160"));
 		DRUM_SPACE_INDEX = Integer.valueOf(prop.getProperty("drum_space_index", "3"));
 		DRUM_GAIN = Double.valueOf(prop.getProperty("drum_gain", "1.0"));
 		ANTIALIAS = Boolean.valueOf(prop.getProperty("antialiasing", "false"));
