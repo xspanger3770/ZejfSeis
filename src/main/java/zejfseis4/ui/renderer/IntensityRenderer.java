@@ -18,6 +18,12 @@ public class IntensityRenderer extends TableCellRendererAdapter<Event, Integer> 
 			return Color.white;
 		}
 	};
+	
+	@Override
+	public Color getForeground(Event entity, Integer value) {
+		return ScaleRenderer.foregroundColor(getBackground(entity, value));
+	}
+	
 
 	@Override
 	public String getText(Event entity, Integer value) {

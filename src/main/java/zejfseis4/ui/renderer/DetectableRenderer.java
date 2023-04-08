@@ -15,5 +15,6 @@ public class DetectableRenderer extends ScaleRenderer {
 	public String getText(Event entity, Double value) {
 		return super.getText(entity, value);
 	}
+	
 
 }

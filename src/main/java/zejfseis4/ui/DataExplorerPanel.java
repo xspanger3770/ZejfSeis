@@ -25,6 +25,7 @@ import zejfseis4.events.Intensity;
 import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
 import zejfseis4.scale.Scales;
+import zejfseis4.ui.renderer.ScaleRenderer;
 import zejfseis4.utils.TravelTimeTable;
 
 public class DataExplorerPanel extends DataRequestPanel {
@@ -468,11 +469,12 @@ public class DataExplorerPanel extends DataRequestPanel {
 			int r = 8;
 			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
 			g.setStroke(new BasicStroke(1f));
-			g.setColor(Intensity.get(intensity).getColor());
+			Color intensityColor;
+			g.setColor(intensityColor = Intensity.get(intensity).getColor());
 			g.fill(rect);
 			g.setColor(Color.black);
 			g.draw(rect);
-
+			g.setColor(ScaleRenderer.foregroundColor(intensityColor));
 			g.setFont(calibri12);
 			String str = String.format("%,d", (int) intensity);
 			int width = g.getFontMetrics().stringWidth(str);
