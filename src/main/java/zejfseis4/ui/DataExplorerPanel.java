@@ -537,7 +537,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		explorerGraphics.setColor(Color.lightGray);
 		explorerGraphics.fillRect(0, 0, wrx, h - 1);
 		for (int i = Intensity.values().length - 1; i >= 0; i--) {
-			double intensity = Intensity.values()[i].getIntensity();
+			double intensity = Intensity.getIntensity(i);
 			double y0 = (h * 0.5 - statusPanelHeight * 0.5)
 					- (h * 0.5 - statusPanelHeight * 0.5) * (intensity / (double) max);
 			double y1 = (h * 0.5 - statusPanelHeight * 0.5)

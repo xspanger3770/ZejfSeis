@@ -1,5 +1,6 @@
 package zejfseis4.events;
 
+import zejfseis4.main.Settings;
 import zejfseis4.utils.GeoUtils;
 
 public class CatalogueEvent extends Event {
@@ -31,7 +32,7 @@ public class CatalogueEvent extends Event {
 
 	@Override
 	public double getDistance() {
-		return GeoUtils.greatCircleDistance(lat, lon, GeoUtils.ZEJF_LAT, GeoUtils.ZEJF_LON);
+		return GeoUtils.greatCircleDistance(lat, lon, Settings.LOCATION_LATITUDE, Settings.LOCATION_LONGITUDE);
 	}
 
 	@Override

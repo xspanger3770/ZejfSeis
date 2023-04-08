@@ -114,7 +114,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 		graphics.fillRect(0, 0, wrx, h - 1);
 
 		for (int i = Intensity.values().length - 1; i >= 0; i--) {
-			double intensity = Intensity.values()[i].getIntensity();
+			double intensity = Intensity.getIntensity(i);
 			double y0 = h * 0.5 - (h * 0.5) * (intensity / (double) max);
 			double y1 = h * 0.5 - (h * 0.5) * (-intensity / (double) max);
 			Rectangle2D rect = new Rectangle2D.Double(1, y0, extraWrx - 1, y1 - y0);

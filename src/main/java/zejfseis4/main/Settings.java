@@ -24,7 +24,12 @@ public class Settings {
 	public static String ADDRESS;
 	public static int PORT;
 	public static double SPECTRO_MAX_FREQUENCY;
-
+	
+	public static double LOCATION_LATITUDE;
+	public static double LOCATION_LONGITUDE;
+	
+	public static int NOISE_LEVEL;
+	
 	public static final int[] DURATIONS = { 5, 10, 15, 20, 30, 60, 60 * 2, 60 * 3, 60 * 5, 60 * 10 };
 	public static final String[] DURATIONS_NAMES = { "5 Seconds", "10 Seconds", "15 Seconds", "20 Seconds",
 			"30 Seconds", "1 Minute", "2 Minutes", "3 Minutes", "5 Minutes", "10 Minutes" };
@@ -54,7 +59,12 @@ public class Settings {
 		ADDRESS = String.valueOf(prop.getProperty("address", "0.0.0.0"));
 		PORT = Integer.valueOf(prop.getProperty("port", "6222"));
 		SPECTRO_MAX_FREQUENCY = Double.valueOf(prop.getProperty("spectro_max_freq", "20.0"));
-
+		
+		LOCATION_LATITUDE = Double.valueOf(prop.getProperty("geo_lat", "0.0"));
+		LOCATION_LONGITUDE = Double.valueOf(prop.getProperty("geo_lon", "0.0"));
+		
+		NOISE_LEVEL = Integer.valueOf(prop.getProperty("noise", "0"));
+		
 		saveProperties();
 	}
 
@@ -72,6 +82,9 @@ public class Settings {
 		prop.setProperty("address", ADDRESS + "");
 		prop.setProperty("port", PORT + "");
 		prop.setProperty("spectro_max_freq", SPECTRO_MAX_FREQUENCY + "");
+		prop.setProperty("geo_lat", LOCATION_LATITUDE + "");
+		prop.setProperty("geo_lon", LOCATION_LONGITUDE + "");
+		prop.setProperty("noise", NOISE_LEVEL + "");
 		try {
 			prop.store(new FileOutputStream(propertiesFile), "");
 		} catch (IOException e) {
