@@ -33,4 +33,14 @@ By left-clicking in the graph on two different locations, you can select the P a
 
 ![screenshot_data_explorer](https://user-images.githubusercontent.com/100421968/230775680-46cffdaa-9761-4142-9779-d044ef3d1dd1.png)
 
-**Work in progress!**
+## Events tab
+
+The Events tab displays a table of recorded earthquakes for each month. These events are automatically downloaded using the [EMSC API](https://www.seismicportal.eu/fdsn-wsevent.html) for the past ~2 days. By clicking the `Download` button, you can download events for the entire month.
+
+To navigate through the months, use the buttons in the upper control panel. Click `<` to go one month into the past, `<<` to go one year back, and the text in between the buttons to fast forward to the current month.
+
+Note: Keep in mind that the EMSC API has a limit on the number of requests per minute, so if you're having trouble downloading the events, you may need to wait a few minutes before trying again.
+
+### Event explorer 
+
+## Filters
