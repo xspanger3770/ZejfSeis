@@ -25,6 +25,7 @@ import zejfseis4.events.Intensity;
 import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
 import zejfseis4.scale.Scales;
+import zejfseis4.ui.renderer.ScaleRenderer;
 import zejfseis4.utils.TravelTimeTable;
 
 public class DataExplorerPanel extends DataRequestPanel {
@@ -468,11 +469,12 @@ public class DataExplorerPanel extends DataRequestPanel {
 			int r = 8;
 			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
 			g.setStroke(new BasicStroke(1f));
-			g.setColor(Intensity.get(intensity).getColor());
+			Color intensityColor;
+			g.setColor(intensityColor = Intensity.get(intensity).getColor());
 			g.fill(rect);
 			g.setColor(Color.black);
 			g.draw(rect);
-
+			g.setColor(ScaleRenderer.foregroundColor(intensityColor));
 			g.setFont(calibri12);
 			String str = String.format("%,d", (int) intensity);
 			int width = g.getFontMetrics().stringWidth(str);
@@ -537,7 +539,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		explorerGraphics.setColor(Color.lightGray);
 		explorerGraphics.fillRect(0, 0, wrx, h - 1);
 		for (int i = Intensity.values().length - 1; i >= 0; i--) {
-			double intensity = Intensity.values()[i].getIntensity();
+			double intensity = Intensity.getIntensity(i);
 			double y0 = (h * 0.5 - statusPanelHeight * 0.5)
 					- (h * 0.5 - statusPanelHeight * 0.5) * (intensity / (double) max);
 			double y1 = (h * 0.5 - statusPanelHeight * 0.5)

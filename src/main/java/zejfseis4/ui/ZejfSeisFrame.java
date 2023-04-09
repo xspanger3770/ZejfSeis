@@ -78,7 +78,7 @@ public class ZejfSeisFrame extends JFrame {
 
 		JMenuBar bar = new JMenuBar();
 
-		JMenu options = new JMenu("Options");
+		JMenu settingsMenu = new JMenu("Settings");
 
 		JMenuItem menuReconnect = new JMenuItem("Socket", KeyEvent.VK_S);
 		menuReconnect.addActionListener(new ActionListener() {
@@ -100,7 +100,7 @@ public class ZejfSeisFrame extends JFrame {
 				filterSettings();
 			}
 		});
-		options.add(filt);
+		settingsMenu.add(filt);
 		JMenuItem realtime = new JMenuItem("Realtime", KeyEvent.VK_R);
 		realtime.addActionListener(new ActionListener() {
 
@@ -109,7 +109,7 @@ public class ZejfSeisFrame extends JFrame {
 				realtimeSettings();
 			}
 		});
-		options.add(realtime);
+		settingsMenu.add(realtime);
 
 		JMenuItem helicorder = new JMenuItem("Drum Settings", KeyEvent.VK_D);
 		helicorder.addActionListener(new ActionListener() {
@@ -119,9 +119,22 @@ public class ZejfSeisFrame extends JFrame {
 				drumSettings();
 			}
 		});
-		options.add(helicorder);
-		options.add(menuReconnect);
-		bar.add(options);
+		
+		JMenuItem seismometer = new JMenuItem("Seismometer", KeyEvent.VK_S);
+		seismometer.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				seismometerSettings();
+			}
+		});
+		//location.setEnabled(false);
+		
+		settingsMenu.add(seismometer);
+		
+		settingsMenu.add(helicorder);
+		settingsMenu.add(menuReconnect);
+		bar.add(settingsMenu);
 
 		JMenu filters = new JMenu("Filters");
 
@@ -169,6 +182,49 @@ public class ZejfSeisFrame extends JFrame {
 		}.start();
 	}
 
+	protected void seismometerSettings() {
+		String[] labels = { "Latitude (˚N):", "Longitude(˚E):", "Background noise:" };
+		int numPairs = labels.length;
+		JTextField[] fields = new JTextField[numPairs];
+		String[] values = new String[numPairs];
+		values[0] = Settings.LOCATION_LATITUDE + "";
+		values[1] = Settings.LOCATION_LONGITUDE + "";
+		values[2] = Settings.NOISE_LEVEL + "";
+		JPanel p = new JPanel(new SpringLayout());
+		for (int i = 0; i < numPairs; i++) {
+			JLabel l = new JLabel(labels[i], JLabel.TRAILING);
+			p.add(l);
+			JTextField textField = new JTextField(3);
+			textField.setText(values[i]);
+			l.setLabelFor(textField);
+			p.add(textField);
+			fields[i] = textField;
+		}
+		SpringUtilities.makeCompactGrid(p, numPairs, 2, // rows, cols
+				6, 6, // initX, initY
+				6, 6); // xPad, yPad
+		if (JOptionPane.showConfirmDialog(this, p, "Seismometer Settings", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE) == 0) {
+			try {
+				double lat = Double.valueOf(fields[0].getText());
+				double lon = Double.valueOf(fields[1].getText());
+				int noise = Integer.valueOf(fields[2].getText());
+				if(noise < 0) {
+					throw new IllegalArgumentException("noise must be > 0!");
+				}
+				Settings.LOCATION_LATITUDE = lat;
+				Settings.LOCATION_LONGITUDE = lon;
+				Settings.NOISE_LEVEL = noise;
+				Settings.saveProperties();
+			} catch (IllegalArgumentException ex) {
+				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			}  catch (FatalIOException e) {
+				ZejfSeis4.handleException(e);
+			}
+		}
+
+	}
+	
 	protected void realtimeSettings() {
 		String[] labels = { "Spectrogram gain: ", "Spectrogram window: ", "Spectrogram maximum frequency: " };
 		int numPairs = labels.length;
@@ -264,7 +320,7 @@ public class ZejfSeisFrame extends JFrame {
 					throw new IllegalArgumentException("Max cannot be 0!");
 				}
 				setFilters(max, min);
-			} catch (NumberFormatException ex) {
+			} catch (IllegalArgumentException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
