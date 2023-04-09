@@ -37,6 +37,8 @@ By left-clicking in the graph on two different locations, you can select the P a
 
 The Events tab displays a table of recorded earthquakes for each month. These events are automatically downloaded using the [EMSC API](https://www.seismicportal.eu/fdsn-wsevent.html) for the past ~2 days. By clicking the `Download` button, you can download events for the entire month.
 
+The earthquake distance and the detection probability is calculated based on the coordinates entered at `Settings->Seismometer`.
+
 To navigate through the months, use the buttons in the upper control panel. Click `<` to go one month into the past, `<<` to go one year back, and the text in between the buttons to fast forward to the current month.
 
 Note: Keep in mind that the EMSC API has a limit on the number of requests per minute, so if you're having trouble downloading the events, you may need to wait a few minutes before trying again.
@@ -47,5 +49,6 @@ By double-clicking on an individual event in the Events tab, you can open the Ev
 
 The status can be one of the following: `Unknown`, `Not Detected`, `Broken`, `Noise`, or `Detected`. Clicking the `Select` button will automatically assign the maximum amplitude from the chart as the event amplitude. Use the `Save` button to save and close any changes made, or use `Delete` to remove the earthquake from your database.
 
-
 ## Filters
+
+All the data displayed in the application are filtered using a band-pass filter, meaning that frequencies outside the range specified at `Settings->Filter` will get attenuated. Additionally, there is a quick filter selector at the top of the main window. These filters makes it easier seeing earthquakes at different distances by filtering some noise out from the signal.
