@@ -29,7 +29,7 @@ Another functionality of the Drum tab is the Data explorer. It can be accessed b
 
 ### Picking earthquakes
 
-By left-clicking in the graph on two different locations, you can select the P and S wave arrival of a nearby earthquake, and the estimated epicenter distance will appear in the lower right corner. You can then click the `Add Event` button to save the event into your event database.
+By left-clicking in the graph on two different locations, you can select the P and S wave arrival of a nearby earthquake, and the estimated epicenter distance will appear in the lower right corner. You can then click the `Add Event` button to save the event into your event database so you can see it in the following Events tab.
 
 ![screenshot_data_explorer](https://user-images.githubusercontent.com/100421968/230775680-46cffdaa-9761-4142-9779-d044ef3d1dd1.png)
 
@@ -42,5 +42,10 @@ To navigate through the months, use the buttons in the upper control panel. Clic
 Note: Keep in mind that the EMSC API has a limit on the number of requests per minute, so if you're having trouble downloading the events, you may need to wait a few minutes before trying again.
 
 ### Event explorer 
+
+By double-clicking on an individual event in the Events tab, you can open the Event Explorer window. It is similar to the Data Explorer window, providing the three main display modes. Additionally, you can manually assign the measured amplitude for this earthquake and set the status of the event.
+
+The status can be one of the following: `Unknown`, `Not Detected`, `Broken`, `Noise`, or `Detected`. Clicking the `Select` button will automatically assign the maximum amplitude from the chart as the event amplitude. Use the `Save` button to save and close any changes made, or use `Delete` to remove the earthquake from your database.
+
 
 ## Filters
