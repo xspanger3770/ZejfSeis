@@ -16,7 +16,9 @@ On the bottom is a spectrogram panel, that allows you to analyze the waveform in
 
 # Drum tab
 
-The drum tab allows you to browse the recorded data. Each line represents a time interval whose start is labeled on the left side - red numbers indicating hours and gray ones minutes. On default, each line is 10 minutes. This can be changed in `Settings->Drum Settings`.
+The drum tab allows you to browse the recorded data. Each line represents a time interval whose start is labeled on the left side - red numbers indicating hours and gray ones minutes. On default, each line is 10 minutes. For navigation you can scroll with your mouse or you can use buttons on the upper control panel. `<` will move the drum by one line and `<<` will move it by 10 lines. By pressing the `Now` button you will move the drum to the latest data and for accessing older data you can use the `Goto` button and enter specific date and time. <br>
+The drum can be configured by accessing `Settings->Drum Settings` - by changing the value `Gain` you can adjust the scale of the waveform and you can increase the `Decimate` field to lower the waveform resolution for better performance.
+
 
 ![](https://user-images.githubusercontent.com/100421968/230572243-ad604679-4adf-420e-9f8f-30c36f75cf50.png)
 
