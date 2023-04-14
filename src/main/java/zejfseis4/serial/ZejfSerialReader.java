@@ -41,6 +41,7 @@ public class ZejfSerialReader {
 
 	boolean initialized = false;
 	private OutputStream outputStream;
+	private int sample_rate;
 
 	public void run(SerialPort port) {
 		new Thread() {
@@ -58,6 +59,18 @@ public class ZejfSerialReader {
 		running = true;
 		initialized = false;
 		serialPort = port;
+		
+		count_diffs = 0;
+		sum_diffs = 0;
+		first_log_id = -1;
+		first_log_num = 0;
+		last_log_num = 0;
+		calibrating = true;
+		last_set = false;
+		last_avg_diff = 0;
+		sample_rate = Settings.SERIAL_PORT_SAMPLE_RATE;
+		sample_time_ms = 1000 / sample_rate;
+		
 		ZejfSeis4.getFrame().setStatus("Opening serial port...");
 
 		if (!port.openPort()) {
@@ -69,7 +82,7 @@ public class ZejfSerialReader {
 		port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 		ZejfSeis4.getFrame().setStatus("Connected to " + port.getDescriptivePortName() + ", waiting for data...");
 
-		ZejfSeis4.getDataManager().load(port.getDescriptivePortName(), Settings.SERIAL_PORT_SAMPLE_RATE, ERR_VALUE);
+		ZejfSeis4.getDataManager().load(port.getDescriptivePortName(), sample_rate, ERR_VALUE);
 
 		outputStream = port.getOutputStream();
 
@@ -185,7 +198,7 @@ public class ZejfSerialReader {
 	private void nextLine(String str) {
 		if (!initialized) {
 			try {
-				outputStream.write((Arrays.binarySearch(Settings.SAMPLE_RATES, Settings.SERIAL_PORT_SAMPLE_RATE) + "\n")
+				outputStream.write((Arrays.binarySearch(Settings.SAMPLE_RATES, sample_rate) + "\n")
 						.getBytes());
 			} catch (IOException e) {
 				throw new RuntimeApplicationException("Serial port failure", e);
@@ -197,16 +210,6 @@ public class ZejfSerialReader {
 	}
 
 	private void runReader(SerialPort port) {
-		count_diffs = 0;
-		sum_diffs = 0;
-		first_log_id = -1;
-		first_log_num = 0;
-		last_log_num = 0;
-		calibrating = true;
-		last_set = false;
-		last_avg_diff = 0;
-		sample_time_ms = 1000 / Settings.SERIAL_PORT_SAMPLE_RATE;
-
 		InputStream in = port.getInputStream();
 		StringBuilder str = new StringBuilder();
 		char ch;

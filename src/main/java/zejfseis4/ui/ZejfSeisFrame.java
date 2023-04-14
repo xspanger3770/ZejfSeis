@@ -559,5 +559,9 @@ public class ZejfSeisFrame extends JFrame {
 	public EventsTab getEventsTab() {
 		return eventsTab;
 	}
+	
+	public DrumTab getDrumTab() {
+		return drumTab;
+	}
 
 }

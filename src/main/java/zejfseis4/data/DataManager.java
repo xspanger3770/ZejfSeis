@@ -43,7 +43,7 @@ public class DataManager {
 	private Queue<SimpleLog> realtimeQueue;
 	private Queue<Queue<SimpleLog>> requestsQueue;
 
-	private Semaphore queueSemaphore;
+	private Semaphore queueSemaphore = new Semaphore(0);
 	private Object logQueueMutex = new Object();
 
 	protected Object dataHoursMutex = new Object();
@@ -77,7 +77,7 @@ public class DataManager {
 			try {
 				queueSemaphore.acquire();
 			} catch (InterruptedException e) {
-				break;
+				return;
 			}
 			processQueues();
 		}
@@ -141,6 +141,7 @@ public class DataManager {
 		if (endLogID - startLogID < 0) {
 			throw new IllegalStateException();
 		}
+
 		synchronized (dataRequestsMutex) {
 			for (DataRequest dr : dataRequests) {
 				if (!realtime) {
@@ -223,7 +224,7 @@ public class DataManager {
 
 		realtimeQueue = new LinkedList<SimpleLog>();
 		requestsQueue = new LinkedList<Queue<SimpleLog>>();
-		queueSemaphore = new Semaphore(0);
+		queueSemaphore.drainPermits();
 
 		temp_requests.clear();
 		temp_realtime.clear();
@@ -290,7 +291,11 @@ public class DataManager {
 		this.errVal = errVal;
 
 		synchronized (dataHoursMutex) {
-			dataHours = new LinkedList<DataHour>();
+			if (dataHours == null) {
+				dataHours = new LinkedList<>();
+			} else {
+				dataHours.clear();
+			}
 		}
 
 		if (dataRequests == null) {
@@ -307,6 +312,10 @@ public class DataManager {
 
 		System.out.println("Loading from " + dataFolder.getAbsolutePath());
 
+		if(ZejfSeis4.getFrame() != null && ZejfSeis4.getFrame().getDrumTab() != null) {
+			ZejfSeis4.getFrame().getDrumTab().reset();
+		}
+		
 		saveInfo();
 		startThreads();
 	}
