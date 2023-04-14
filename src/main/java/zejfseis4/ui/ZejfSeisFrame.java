@@ -104,35 +104,7 @@ public class ZejfSeisFrame extends JFrame {
 		connectionMenu.add(menuServer);
 
 		JMenu settingsMenu = new JMenu("Settings");
-
-		JMenuItem filt = new JMenuItem("Filter", KeyEvent.VK_F);
-		filt.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				filterSettings();
-			}
-		});
-		settingsMenu.add(filt);
-		JMenuItem realtime = new JMenuItem("Realtime", KeyEvent.VK_R);
-		realtime.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				realtimeSettings();
-			}
-		});
-		settingsMenu.add(realtime);
-
-		JMenuItem helicorder = new JMenuItem("Drum Settings", KeyEvent.VK_D);
-		helicorder.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				drumSettings();
-			}
-		});
-
+		
 		JMenuItem seismometer = new JMenuItem("Seismometer", KeyEvent.VK_S);
 		seismometer.addActionListener(new ActionListener() {
 
@@ -142,8 +114,37 @@ public class ZejfSeisFrame extends JFrame {
 			}
 		});
 
+		JMenuItem realtime = new JMenuItem("Realtime", KeyEvent.VK_R);
+		realtime.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				realtimeSettings();
+			}
+		});
+
+		JMenuItem drumMenuItem = new JMenuItem("Drum", KeyEvent.VK_D);
+		drumMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				drumSettings();
+			}
+		});
+
+		JMenuItem serialPortItem = new JMenuItem("Serial Port", KeyEvent.VK_P);
+		serialPortItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				serialPortSettings();
+			}
+		});
+		
 		settingsMenu.add(seismometer);
-		settingsMenu.add(helicorder);
+		settingsMenu.add(realtime);
+		settingsMenu.add(drumMenuItem);
+		settingsMenu.add(serialPortItem);
 
 		bar.add(connectionMenu);
 		bar.add(settingsMenu);
@@ -171,6 +172,17 @@ public class ZejfSeisFrame extends JFrame {
 			});
 			filters.add(item);
 		}
+		
+		JMenuItem customFilter = new JMenuItem("Custom", KeyEvent.VK_C);
+		customFilter.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				filterSettings();
+			}
+		});
+		
+		filters.add(customFilter);
 
 		bar.add(filters);
 
@@ -193,6 +205,42 @@ public class ZejfSeisFrame extends JFrame {
 			};
 		}.start();
 	}
+	
+
+	protected void serialPortSettings() {
+		JLabel l = new JLabel("Sample Rate:", JLabel.TRAILING);
+		JPanel p = new JPanel(new SpringLayout());
+		
+		p.add(l);
+		JComboBox<String> line = new JComboBox<String>();
+		for (int sr : Settings.SAMPLE_RATES) {
+			line.addItem(sr+" Hz");
+		}
+		line.setSelectedIndex(Arrays.binarySearch(Settings.SAMPLE_RATES, Settings.SERIAL_PORT_SAMPLE_RATE));
+		p.add(line);
+
+		// JLabel l2 = new JLabel("Antialiasing:", JLabel.TRAILING);
+		// p.add(l2);
+		// JCheckBox checkBox = new JCheckBox();
+		// checkBox.setSelected(Settings.ANTIALIAS);
+		// p.add(checkBox);
+		// Lay out the panel.
+		SpringUtilities.makeCompactGrid(p, 1, 2, // rows, cols
+				6, 6, // initX, initY
+				6, 6); // xPad, yPad
+		if (JOptionPane.showConfirmDialog(this, p, "Serial Port Settings", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE) == 0) {
+			try {
+				Settings.SERIAL_PORT_SAMPLE_RATE = Settings.SAMPLE_RATES[line.getSelectedIndex()];
+				Settings.saveProperties();
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (FatalIOException e) {
+				ZejfSeis4.handleException(e);
+			}
+		}
+	}
+
 
 	protected void seismometerSettings() {
 		String[] labels = { "Latitude (˚N):", "Longitude(˚E):", "Background noise:" };

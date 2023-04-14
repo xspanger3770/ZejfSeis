@@ -2,12 +2,15 @@ package zejfseis4.serial;
 
 import com.fazecast.jSerialComm.SerialPort;
 
+import zejfseis4.exception.FatalIOException;
 import zejfseis4.exception.RuntimeApplicationException;
+import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
 
 public class ZejfSerialReader {
 
 	public static final int BAUD_RATE = 115200;
+	public static final int ERR_VALUE = Integer.MIN_VALUE;
 
 	private boolean running = false;
 	private SerialPort serialPort = null;
@@ -24,7 +27,7 @@ public class ZejfSerialReader {
 		}.start();
 	}
 
-	private void openPort(SerialPort port) {
+	private void openPort(SerialPort port) throws FatalIOException {
 		running = true;
 		serialPort = port;
 		ZejfSeis4.getFrame().setStatus("Opening serial port...");
@@ -37,6 +40,8 @@ public class ZejfSerialReader {
 		port.setBaudRate(BAUD_RATE);
 		port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 		ZejfSeis4.getFrame().setStatus("Connected to " + port.getDescriptivePortName());
+		
+		ZejfSeis4.getDataManager().load(port.getDescriptivePortName(), Settings.SERIAL_PORT_SAMPLE_RATE, ERR_VALUE);
 
 		// InputStream in = port.getInputStream();
 		// StringBuilder str = new StringBuilder();
