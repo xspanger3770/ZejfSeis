@@ -26,7 +26,6 @@ import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 
 import zejfseis4.exception.FatalIOException;
-import zejfseis4.exception.RuntimeApplicationException;
 import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
 import zejfseis4.utils.SpringUtilities;
@@ -34,19 +33,19 @@ import zejfseis4.utils.SpringUtilities;
 public class ZejfSeisFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+
 	private JPanel contentPane;
 	private JLabel lblStatus;
 
 	private String status;
 	private Semaphore semaphore;
-	private zejfseis4.ui.RealtimeTab realtimeTab;
+	private RealtimeTab realtimeTab;
 	private DrumTab drumTab;
 	private EventsTab eventsTab;
 
 	public ZejfSeisFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setIconImage(new ImageIcon(ZejfSeisFrame.class.getResource("icon.png")).getImage());
-
 	}
 
 	public void createFrame() {
@@ -78,20 +77,32 @@ public class ZejfSeisFrame extends JFrame {
 
 		JMenuBar bar = new JMenuBar();
 
-		JMenu settingsMenu = new JMenu("Settings");
+		JMenu connectionMenu = new JMenu("Connection");
 
-		JMenuItem menuReconnect = new JMenuItem("Socket", KeyEvent.VK_S);
-		menuReconnect.addActionListener(new ActionListener() {
+		JMenuItem menuSerial = new JMenuItem("Serial Port", KeyEvent.VK_P);
+		menuSerial.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Thread() {
-					public void run() {
-						runSocket();
-					};
-				}.start();
+				runSerial();
 			}
 		});
+
+		connectionMenu.add(menuSerial);
+
+		JMenuItem menuServer = new JMenuItem("Server", KeyEvent.VK_S);
+		menuServer.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				runSocket();
+			}
+		});
+
+		connectionMenu.add(menuServer);
+
+		JMenu settingsMenu = new JMenu("Settings");
+
 		JMenuItem filt = new JMenuItem("Filter", KeyEvent.VK_F);
 		filt.addActionListener(new ActionListener() {
 
@@ -119,7 +130,7 @@ public class ZejfSeisFrame extends JFrame {
 				drumSettings();
 			}
 		});
-		
+
 		JMenuItem seismometer = new JMenuItem("Seismometer", KeyEvent.VK_S);
 		seismometer.addActionListener(new ActionListener() {
 
@@ -128,12 +139,11 @@ public class ZejfSeisFrame extends JFrame {
 				seismometerSettings();
 			}
 		});
-		//location.setEnabled(false);
-		
+
 		settingsMenu.add(seismometer);
-		
 		settingsMenu.add(helicorder);
-		settingsMenu.add(menuReconnect);
+
+		bar.add(connectionMenu);
 		bar.add(settingsMenu);
 
 		JMenu filters = new JMenu("Filters");
@@ -209,7 +219,7 @@ public class ZejfSeisFrame extends JFrame {
 				double lat = Double.valueOf(fields[0].getText());
 				double lon = Double.valueOf(fields[1].getText());
 				int noise = Integer.valueOf(fields[2].getText());
-				if(noise < 0) {
+				if (noise < 0) {
 					throw new IllegalArgumentException("noise must be > 0!");
 				}
 				Settings.LOCATION_LATITUDE = lat;
@@ -218,13 +228,13 @@ public class ZejfSeisFrame extends JFrame {
 				Settings.saveProperties();
 			} catch (IllegalArgumentException ex) {
 				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			}  catch (FatalIOException e) {
+			} catch (FatalIOException e) {
 				ZejfSeis4.handleException(e);
 			}
 		}
 
 	}
-	
+
 	protected void realtimeSettings() {
 		String[] labels = { "Spectrogram gain: ", "Spectrogram window: ", "Spectrogram maximum frequency: " };
 		int numPairs = labels.length;
@@ -387,23 +397,33 @@ public class ZejfSeisFrame extends JFrame {
 
 	}
 
-	public void runSocket() {
+	private boolean checkCurrentConnection() {
 		if (ZejfSeis4.getClient() != null && ZejfSeis4.getClient().isConnected()) {
 			int result = JOptionPane.showConfirmDialog(this,
 					"Disconnect from " + Settings.ADDRESS + ":" + Settings.PORT + "?", "Port",
 					JOptionPane.YES_NO_OPTION);
-			if (result == 0) {
-				ZejfSeis4.getClient().close();
-			} else {
-				return;
+			if (result != 0) {
+				return false;
 			}
+
+			ZejfSeis4.getClient().close();
 		}
+		return true;
+	}
+
+	public void runSerial() {
+		if (!checkCurrentConnection()) {
+			return;
+		}
+	}
+
+	public void runSocket() {
+		if (!checkCurrentConnection()) {
+			return;
+		}
+
 		if (getAddress()) {
-			try {
-				ZejfSeis4.getClient().connect(Settings.ADDRESS, Settings.PORT);
-			} catch (RuntimeApplicationException | FatalIOException e) {
-				ZejfSeis4.handleException(e);
-			}
+			ZejfSeis4.getClient().connect(Settings.ADDRESS, Settings.PORT);
 		}
 	}
 
