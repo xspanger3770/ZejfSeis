@@ -25,7 +25,7 @@ The bottom section of the Realtime tab is a Spectrogram panel, which allows you 
 
 The Drum tab allows you to browse the recorded data. Each line represents a time interval, with its start labeled on the left side (red numbers indicating hours and gray ones minutes). By default, each line represents 10 minutes of data. For navigation, you can scroll with your mouse, or you can use the buttons on the upper control panel. The `<` button will move the drum by one line, and `<<` will move it by 10 lines. By pressing the `Now` button, you will move the drum to the latest data. To access older data, you can use the `Goto` button and enter a specific date and time. 
 
-The drum can be configured by accessing `Settings->Drum Settings`. By changing the value of `Gain`, you can adjust the scale of the waveform, and you can increase the `Decimate` field to lower the waveform resolution for better performance.
+The drum can be configured by accessing `Settings->Drum`. By changing the value of `Gain`, you can adjust the scale of the waveform, and you can increase the `Decimate` field to lower the waveform resolution for better performance.
 
 ![](https://user-images.githubusercontent.com/100421968/230572243-ad604679-4adf-420e-9f8f-30c36f75cf50.png)
 
@@ -57,4 +57,4 @@ The status can be one of the following: `Unknown`, `Not Detected`, `Broken`, `No
 
 ## Filters
 
-All the data displayed in the application are filtered using a band-pass filter, meaning that frequencies outside the range specified at `Settings->Filter` will get attenuated. Additionally, there is a quick filter selector at the top of the main window. These filters makes it easier seeing earthquakes at different distances by filtering some noise out from the signal.
+All the data displayed in the application are filtered using a band-pass filter, which makes frequencies outside the range will get attenuated. You can configure the filter using the `Filters` menu. You can either select one of the prepared filters or create custom one in `Filters->Custom`. These filters makes it easier seeing earthquakes at different distances by filtering some noise out from the signal.
