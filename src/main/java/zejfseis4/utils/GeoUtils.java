@@ -4,9 +4,6 @@ public interface GeoUtils {
 	public static final double EARTH_CIRCUMFERENCE = 40082;
 	public static final double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
 
-	public static final double ZEJF_LAT = 50.262;
-	public static final double ZEJF_LON = 17.262;
-
 	public static double[] moveOnGlobe(double lat1, double long1, double distance, double angle) {
 		// calculate angles
 		double delta = distance / EARTH_RADIUS;

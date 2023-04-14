@@ -24,12 +24,20 @@ public class Settings {
 	public static String ADDRESS;
 	public static int PORT;
 	public static double SPECTRO_MAX_FREQUENCY;
-
+	
+	public static double LOCATION_LATITUDE;
+	public static double LOCATION_LONGITUDE;
+	
+	public static int NOISE_LEVEL;
+	
 	public static final int[] DURATIONS = { 5, 10, 15, 20, 30, 60, 60 * 2, 60 * 3, 60 * 5, 60 * 10 };
 	public static final String[] DURATIONS_NAMES = { "5 Seconds", "10 Seconds", "15 Seconds", "20 Seconds",
 			"30 Seconds", "1 Minute", "2 Minutes", "3 Minutes", "5 Minutes", "10 Minutes" };
 
 	public static final int[] DRUM_SPACES = { 1, 2, 5, 10, 15, 20, 30, 60 };
+	public static int SAMPLE_RATES[] = { 20, 40, 60, 100, 200 };
+	
+	public static int SERIAL_PORT_SAMPLE_RATE;
 
 	static void loadProperties() throws FatalIOException {
 		Properties prop = new Properties();
@@ -44,9 +52,9 @@ public class Settings {
 		MAX_FREQUENCY = Double.valueOf(prop.getProperty("max_frequency", "20.0"));
 		MIN_FREQUENCY = Double.valueOf(prop.getProperty("min_frequency", "0.0"));
 
-		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.20"));
-		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "7"))];
-		WINDOW = Integer.valueOf(prop.getProperty("window", "120"));
+		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.25"));
+		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "8"))];
+		WINDOW = Integer.valueOf(prop.getProperty("window", "160"));
 		DRUM_SPACE_INDEX = Integer.valueOf(prop.getProperty("drum_space_index", "3"));
 		DRUM_GAIN = Double.valueOf(prop.getProperty("drum_gain", "1.0"));
 		ANTIALIAS = Boolean.valueOf(prop.getProperty("antialiasing", "false"));
@@ -54,7 +62,14 @@ public class Settings {
 		ADDRESS = String.valueOf(prop.getProperty("address", "0.0.0.0"));
 		PORT = Integer.valueOf(prop.getProperty("port", "6222"));
 		SPECTRO_MAX_FREQUENCY = Double.valueOf(prop.getProperty("spectro_max_freq", "20.0"));
-
+		
+		LOCATION_LATITUDE = Double.valueOf(prop.getProperty("geo_lat", "0.0"));
+		LOCATION_LONGITUDE = Double.valueOf(prop.getProperty("geo_lon", "0.0"));
+		
+		NOISE_LEVEL = Integer.valueOf(prop.getProperty("noise", "0"));
+		
+		SERIAL_PORT_SAMPLE_RATE = Integer.valueOf(prop.getProperty("serial_sample_rate", "40"));
+		
 		saveProperties();
 	}
 
@@ -72,6 +87,10 @@ public class Settings {
 		prop.setProperty("address", ADDRESS + "");
 		prop.setProperty("port", PORT + "");
 		prop.setProperty("spectro_max_freq", SPECTRO_MAX_FREQUENCY + "");
+		prop.setProperty("geo_lat", LOCATION_LATITUDE + "");
+		prop.setProperty("geo_lon", LOCATION_LONGITUDE + "");
+		prop.setProperty("noise", NOISE_LEVEL + "");
+		prop.setProperty("serial_sample_rate", SERIAL_PORT_SAMPLE_RATE + "");
 		try {
 			prop.store(new FileOutputStream(propertiesFile), "");
 		} catch (IOException e) {

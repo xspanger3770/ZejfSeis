@@ -21,6 +21,7 @@ import zejfseis4.data.DataRequest;
 import zejfseis4.events.Intensity;
 import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
+import zejfseis4.ui.renderer.ScaleRenderer;
 import zejfseis4.utils.NamedThreadFactory;
 
 public class RealtimeGraphPanel extends DataRequestPanel {
@@ -114,7 +115,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 		graphics.fillRect(0, 0, wrx, h - 1);
 
 		for (int i = Intensity.values().length - 1; i >= 0; i--) {
-			double intensity = Intensity.values()[i].getIntensity();
+			double intensity = Intensity.getIntensity(i);
 			double y0 = h * 0.5 - (h * 0.5) * (intensity / (double) max);
 			double y1 = h * 0.5 - (h * 0.5) * (-intensity / (double) max);
 			Rectangle2D rect = new Rectangle2D.Double(1, y0, extraWrx - 1, y1 - y0);
@@ -201,7 +202,8 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 			int r = 8;
 			Rectangle2D rect = new Rectangle2D.Double(extraWrx + 1, mouseY - r, wrx - extraWrx - 2, r * 2);
 			graphics.setStroke(new BasicStroke(1f));
-			graphics.setColor(Intensity.get(v).getColor());
+			Color intensityColor;
+			graphics.setColor(intensityColor = Intensity.get(v).getColor());
 			graphics.fill(rect);
 			graphics.setColor(Color.black);
 			graphics.draw(rect);
@@ -209,6 +211,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 			graphics.setFont(calibri12);
 			String str = String.format("%,d", (int) v);
 			int width = graphics.getFontMetrics().stringWidth(str);
+			graphics.setColor(ScaleRenderer.foregroundColor(intensityColor));
 			graphics.drawString(str, wrx - width - 2, (int) mouseY + 5);
 			
 			long t = (long) ((mouseX / (double)w) *  (Settings.REALTIME_DURATION_SECONDS * 1000.0) + graphStart);

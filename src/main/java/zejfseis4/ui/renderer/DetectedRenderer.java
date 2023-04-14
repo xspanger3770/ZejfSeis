@@ -28,6 +28,11 @@ public class DetectedRenderer extends TableCellRendererAdapter<Event, DetectionS
 	}
 	
 	@Override
+	public Color getForeground(Event entity, DetectionStatus value) {
+		return ScaleRenderer.foregroundColor(getBackground(entity, value));
+	}
+	
+	@Override
 	public String getText(Event entity, DetectionStatus value) {
 		if(entity.getDetectionStatus().equals(DetectionStatus.DETECTED)) {
 			return entity.getIntensityCategory().getName();
