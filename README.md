@@ -10,7 +10,7 @@ To begin your seismology journey, it's recommended that you first review my tuto
 
 There are two ways of connecting ZejfSeis application to a running seismometer. The easiest way is to plug your Arduino directly to your computer's USB port and use `Connection->Serial Port` option in the upper menu, which will establish a direct connection and allow you to view incoming data with ease.
 
-Alternatively, you can opt for the slightly more involved approach of setting up a [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) server on a separate device. While this requires a bit more setup time, it provides the benefit of running the project continuously and enabling you to connect to the running server from anywhere by simply entering its address under `Connection->Server`.
+Alternatively, you can opt for the slightly more involved approach of setting up a [ZejfSeis Server](https://github.com/xspanger3770/ZejfSeisServer) server on a separate device. While this requires a bit more setup time, it provides the benefit of running the project continuously and enabling you to connect to the running server from anywhere by simply entering its address under `Connection->Server`.
 
 ## Realtime tab
 The Realtime tab contains two main features. On the top is an interactive plot of the incoming data, which scales automatically based on the highest amplitude in the given time frame. The default setting for the time frame duration is 5 minutes and can be changed in `Settings->Realtime`.
