@@ -219,11 +219,6 @@ public class ZejfSeisFrame extends JFrame {
 		line.setSelectedIndex(Arrays.binarySearch(Settings.SAMPLE_RATES, Settings.SERIAL_PORT_SAMPLE_RATE));
 		p.add(line);
 
-		// JLabel l2 = new JLabel("Antialiasing:", JLabel.TRAILING);
-		// p.add(l2);
-		// JCheckBox checkBox = new JCheckBox();
-		// checkBox.setSelected(Settings.ANTIALIAS);
-		// p.add(checkBox);
 		// Lay out the panel.
 		SpringUtilities.makeCompactGrid(p, 1, 2, // rows, cols
 				6, 6, // initX, initY
@@ -313,11 +308,6 @@ public class ZejfSeisFrame extends JFrame {
 		line.setSelectedIndex(Arrays.binarySearch(Settings.DURATIONS, Settings.REALTIME_DURATION_SECONDS));
 		p.add(line);
 
-		// JLabel l2 = new JLabel("Antialiasing:", JLabel.TRAILING);
-		// p.add(l2);
-		// JCheckBox checkBox = new JCheckBox();
-		// checkBox.setSelected(Settings.ANTIALIAS);
-		// p.add(checkBox);
 		// Lay out the panel.
 		SpringUtilities.makeCompactGrid(p, numPairs + 1, 2, // rows, cols
 				6, 6, // initX, initY
