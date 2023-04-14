@@ -1,10 +1,16 @@
 # ZejfSeis
 
-ZejfSeis is a Java application designed to display data measured by a homemade seismometer. It communicates with [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) through a TCP connection and provides real-time data display, browsing of stored data and also displaying nearby earthquakes that might have been detected.
+ZejfSeis is a user-friendly and easy to use Java application that allows for the display and analysis of seismic data captured by a homemade seismometer. With its intuitive interface, users can easily access a range of useful features, including real-time seismic plot display, spectrogram visualization, and browsing of recorded data in a drum-like style. In addition to these functionalities, the application offers a convenient and efficient way to store recorded earthquakes in a local database for later review and analysis. Whether you're a professional seismologist or simply an enthusiast, ZejfSeis is a powerful tool that can help you gain a deeper understanding of the Earth's seismic activity!
 
-## Socket connection
+## Getting started
 
-To connect to a running [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) server, go to `Settings->Socket` and enter the IP address and port number of the server.
+To begin your seismology journey, it's recommended that you first review my tutorial on setting up the seismometer itself, which can be found at the following link: [Seismometer tutorial](https://github.com/xspanger3770/ZejfSeis/tree/develop/arduino). This guide provides clear and concise instructions for assembling and calibrating the seismometer, ensuring that it's ready to capture accurate seismic data.
+
+## Data source
+
+There are two ways of connecting ZejfSeis application to a running seismometer. The easiest way is to plug your Arduino directly to your computer's USB port and use `Connection->Serial Port` option in the upper menu, which will establish a direct connection and allow you to view incoming data with ease.
+
+Alternatively, you can opt for the slightly more involved approach of setting up a [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) server on a separate device. While this requires a bit more setup time, it provides the benefit of running the project continuously and enabling you to connect to the running server from anywhere by simply entering its address under `Connection->Server`.
 
 ## Realtime tab
 The Realtime tab contains two main features. On the top is an interactive plot of the incoming data, which scales automatically based on the highest amplitude in the given time frame. The default setting for the time frame duration is 5 minutes and can be changed in `Settings->Realtime`.
@@ -13,15 +19,15 @@ The Realtime tab contains two main features. On the top is an interactive plot o
 
 The bottom section of the Realtime tab is a Spectrogram panel, which allows you to analyze the waveform in more detail and helps you distinguish between noise and real earthquakes. You can adjust the colors by setting the Spectrogram gain field in `Settings->Realtime` so that background noise is displayed as a dark blue color.
 
-![](https://user-images.githubusercontent.com/100421968/230724558-52bbcdf1-1ace-4fac-b23d-15c901bb1f0a.png)
+![](https://user-images.githubusercontent.com/100421968/232130962-271493b3-8b2e-41bc-902b-3cf56cbbf69a.png)
 
 ## Drum tab
 
 The Drum tab allows you to browse the recorded data. Each line represents a time interval, with its start labeled on the left side (red numbers indicating hours and gray ones minutes). By default, each line represents 10 minutes of data. For navigation, you can scroll with your mouse, or you can use the buttons on the upper control panel. The `<` button will move the drum by one line, and `<<` will move it by 10 lines. By pressing the `Now` button, you will move the drum to the latest data. To access older data, you can use the `Goto` button and enter a specific date and time. 
 
-The drum can be configured by accessing `Settings->Drum Settings`. By changing the value of `Gain`, you can adjust the scale of the waveform, and you can increase the `Decimate` field to lower the waveform resolution for better performance.
+The drum can be configured by accessing `Settings->Drum`. By changing the value of `Gain`, you can adjust the scale of the waveform, and you can increase the `Decimate` field to lower the waveform resolution for better performance.
 
-![](https://user-images.githubusercontent.com/100421968/230572243-ad604679-4adf-420e-9f8f-30c36f75cf50.png)
+![](https://user-images.githubusercontent.com/100421968/232131108-2ccce048-c082-4465-bd44-5f26395e212f.png)
 
 ### Data explorer
 
@@ -51,4 +57,4 @@ The status can be one of the following: `Unknown`, `Not Detected`, `Broken`, `No
 
 ## Filters
 
-All the data displayed in the application are filtered using a band-pass filter, meaning that frequencies outside the range specified at `Settings->Filter` will get attenuated. Additionally, there is a quick filter selector at the top of the main window. These filters makes it easier seeing earthquakes at different distances by filtering some noise out from the signal.
+All the data displayed in the application are filtered using a band-pass filter, which makes frequencies outside the range will get attenuated. You can configure the filter using the `Filters` menu. You can either select one of the prepared filters or create custom one in `Filters->Custom`. These filters makes it easier seeing earthquakes at different distances by filtering some noise out from the signal.

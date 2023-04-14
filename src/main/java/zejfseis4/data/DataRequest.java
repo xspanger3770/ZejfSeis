@@ -99,6 +99,7 @@ public class DataRequest {
 	private void setTimes(long startTime, long endTime) {
 		synchronized (dataMutex) {
 			this.realtime = false;
+			this.durationMS = endTime - startTime;
 			if (!dataManager.isLoaded()) {
 				return;
 			}
@@ -135,6 +136,7 @@ public class DataRequest {
 			if (nextRealtime) {
 				setDuration(nextDuration);
 			} else {
+				System.out.println("SET TIMES "+nextStartTime+", "+nextEndTime);
 				setTimes(nextStartTime, nextEndTime);
 			}
 			change = false;
@@ -181,7 +183,7 @@ public class DataRequest {
 		double max = Math.min(sampleRate / 2, Settings.MAX_FREQUENCY);
 		filter.bandPass(4, sampleRate, (max + min) * 0.5, (max - min));
 
-		if (sampleRate >= 50) {
+		if (sampleRate > 100) {
 			remover_50Hz = new Butterworth();
 			remover_50Hz.bandStop(4, sampleRate, 50.0, 2.0);
 		} else {
@@ -211,7 +213,7 @@ public class DataRequest {
 						this.endLogID = dataManager.lastRealtimeLogID;
 						this.startLogID = endLogID - logCount + 1;
 					}
-					if (lastLogID != -1 && dataManager.lastRealtimeLogID > lastLogID) {
+					if (dataManager.lastRealtimeLogID > lastLogID) {
 						long start = lastLogID + 1;
 						long end = Math.min(getEndLogID(), dataManager.lastRealtimeLogID);
 						if (end - start >= 0) {
@@ -343,11 +345,7 @@ public class DataRequest {
 
 	public void restart() {
 		stop();
-		if (realtime) {
-			setDuration(durationMS);
-		} else {
-			setTimes(dataManager.getMillis(startLogID), dataManager.getMillis(endLogID));
-		}
+		setDuration(durationMS);
 		runWorkerThread();
 	}
 

@@ -5,6 +5,12 @@
   <version>0.0.1-SNAPSHOT</version>
   
   <dependencies>
+  		<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
+  		<dependency>
+			<groupId>com.fazecast</groupId>
+			<artifactId>jSerialComm</artifactId>
+			<version>2.7.0</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/edu.emory.mathcs/JTransforms -->
 		<dependency>
 			<groupId>edu.emory.mathcs</groupId>

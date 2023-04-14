@@ -35,6 +35,9 @@ public class Settings {
 			"30 Seconds", "1 Minute", "2 Minutes", "3 Minutes", "5 Minutes", "10 Minutes" };
 
 	public static final int[] DRUM_SPACES = { 1, 2, 5, 10, 15, 20, 30, 60 };
+	public static int SAMPLE_RATES[] = { 20, 40, 60, 100, 200 };
+	
+	public static int SERIAL_PORT_SAMPLE_RATE;
 
 	static void loadProperties() throws FatalIOException {
 		Properties prop = new Properties();
@@ -65,6 +68,8 @@ public class Settings {
 		
 		NOISE_LEVEL = Integer.valueOf(prop.getProperty("noise", "0"));
 		
+		SERIAL_PORT_SAMPLE_RATE = Integer.valueOf(prop.getProperty("serial_sample_rate", "40"));
+		
 		saveProperties();
 	}
 
@@ -85,6 +90,7 @@ public class Settings {
 		prop.setProperty("geo_lat", LOCATION_LATITUDE + "");
 		prop.setProperty("geo_lon", LOCATION_LONGITUDE + "");
 		prop.setProperty("noise", NOISE_LEVEL + "");
+		prop.setProperty("serial_sample_rate", SERIAL_PORT_SAMPLE_RATE + "");
 		try {
 			prop.store(new FileOutputStream(propertiesFile), "");
 		} catch (IOException e) {

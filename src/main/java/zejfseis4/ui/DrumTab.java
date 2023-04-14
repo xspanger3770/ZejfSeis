@@ -545,5 +545,9 @@ public class DrumTab extends DataRequestPanel {
 		super.updateFilter();
 		needsRedraw = true;
 	}
+	
+	public void reset() {
+		resetLineID(lastDuration);
+	}
 
 }

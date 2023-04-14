@@ -37,7 +37,19 @@ public class ZejfClient {
 
 	private boolean connected;
 
-	public void connect(String ip, int port) throws FatalIOException {
+	public void connect(String ip, int port) {
+		new Thread("Server connection") {
+			public void run() {
+				try {
+					_connect(ip, port);
+				} catch (RuntimeApplicationException | FatalIOException e) {
+					ZejfSeis4.handleException(e);
+				}
+			};
+		}.start();
+	}
+
+	private void _connect(String ip, int port) throws FatalIOException {
 		System.out.printf("Connecting to %s:%d\n", ip, port);
 		ZejfSeis4.getFrame().setStatus("Connecting...");
 		connected = true;
@@ -167,7 +179,8 @@ public class ZejfClient {
 		reader = new ZejfCReader(socket.getInputStream()) {
 
 			@Override
-			public void nextLine(String line) throws NumberFormatException, NoSuchElementException, InterruptedException {
+			public void nextLine(String line)
+					throws NumberFormatException, NoSuchElementException, InterruptedException {
 				parseLine(line);
 			}
 
@@ -232,7 +245,7 @@ public class ZejfClient {
 			reader.close();
 		}
 		ZejfSeis4.getDataManager().reset();
-		ZejfSeis4.getFrame().setStatus("Disconnected");
+		ZejfSeis4.getFrame().setStatus("Idle");
 		System.out.println("Connection closed... ?");
 	}
 
@@ -245,8 +258,8 @@ public class ZejfClient {
 	}
 
 	public void requestCheck(DataHour result) {
-		if(result.getHourID() < 100000) {
-			System.err.println("SUSPICIOUS VALUE: "+result.getHourID());
+		if (result.getHourID() < 100000) {
+			System.err.println("SUSPICIOUS VALUE: " + result.getHourID());
 		}
 		sendStrings("datahour_check", result.getHourID() + "", result.getSampleCount() + "");
 	}
