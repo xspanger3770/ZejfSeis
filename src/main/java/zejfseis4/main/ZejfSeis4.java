@@ -21,7 +21,7 @@ import zejfseis4.ui.ZejfSeisFrame;
 public class ZejfSeis4 {
 
 	public static final File MAIN_FOLDER = new File("./ZejfSeis4/");
-	public static final String VERSION = "4.6.0";
+	public static final String VERSION = "4.7.0";
 	public static final int COMPATIBILITY_VERSION = 4;
 
 	public static boolean DEBUG = true; // always debug :)
@@ -88,6 +88,8 @@ public class ZejfSeis4 {
 						}
 					}
 				});
+				
+				getFrame().setStatus("Idle");
 			}
 		});
 

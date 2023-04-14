@@ -245,7 +245,7 @@ public class ZejfClient {
 			reader.close();
 		}
 		ZejfSeis4.getDataManager().reset();
-		ZejfSeis4.getFrame().setStatus("Disconnected");
+		ZejfSeis4.getFrame().setStatus("Idle");
 		System.out.println("Connection closed... ?");
 	}
 
