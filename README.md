@@ -1,10 +1,16 @@
 # ZejfSeis
 
-ZejfSeis is a user-friendly and versatile Java application that allows for the display and analysis of seismic data captured by a homemade seismometer. With its intuitive interface, users can easily access a range of useful features, including real-time seismic plot display, spectrogram visualization, and browsing of recorded data in a drum-like style. In addition to these functionalities, the application offers a convenient and efficient way to store recorded earthquakes in a local database for later review and analysis. Whether you're a professional seismologist or simply an enthusiast, ZejfSeis is a powerful tool that can help you gain a deeper understanding of the Earth's seismic activity!
+ZejfSeis is a user-friendly and easy to use Java application that allows for the display and analysis of seismic data captured by a homemade seismometer. With its intuitive interface, users can easily access a range of useful features, including real-time seismic plot display, spectrogram visualization, and browsing of recorded data in a drum-like style. In addition to these functionalities, the application offers a convenient and efficient way to store recorded earthquakes in a local database for later review and analysis. Whether you're a professional seismologist or simply an enthusiast, ZejfSeis is a powerful tool that can help you gain a deeper understanding of the Earth's seismic activity!
 
-## Socket connection
+## Getting started
 
-To connect to a running [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) server, go to `Settings->Socket` and enter the IP address and port number of the server.
+To begin your seismology journey, it's recommended that you first review my tutorial on setting up the seismometer itself, which can be found at the following link: ()[todo link]. This guide provides clear and concise instructions for assembling and calibrating the seismometer, ensuring that it's ready to capture accurate seismic data.
+
+## Data source
+
+There are two ways of connecting ZejfSeis application to a running seismometer. The easiest way is to plug your Arduino directly to your computer's USB port and use `Connection->Serial Port` option in the upper menu, which will establish a direct connection and allow you to view incoming data with ease.
+
+Alternatively, you can opt for the slightly more involved approach of setting up a [ZejfCSeis](https://github.com/xspanger3770/ZejfCSeis) server on a separate device. While this requires a bit more setup time, it provides the benefit of running the project continuously and enabling you to connect to the running server from anywhere by simply entering its address under `Connection->Server`.
 
 ## Realtime tab
 The Realtime tab contains two main features. On the top is an interactive plot of the incoming data, which scales automatically based on the highest amplitude in the given time frame. The default setting for the time frame duration is 5 minutes and can be changed in `Settings->Realtime`.
