@@ -15,6 +15,7 @@ import zejfseis4.exception.ApplicationErrorHandler;
 import zejfseis4.exception.FatalIOException;
 import zejfseis4.exception.RuntimeApplicationException;
 import zejfseis4.scale.Scales;
+import zejfseis4.serial.ZejfSerialReader;
 import zejfseis4.ui.ZejfSeisFrame;
 
 public class ZejfSeis4 {
@@ -30,6 +31,7 @@ public class ZejfSeis4 {
 	private static ZejfClient client;
 	private static EventManager eventManager;
 	private static ApplicationErrorHandler errorHandler;
+	private static ZejfSerialReader serialReader;
 
 	public static void init() {
 		frame = new ZejfSeisFrame();
@@ -50,6 +52,7 @@ public class ZejfSeis4 {
 		}
 
 		client = new ZejfClient();
+		serialReader = new ZejfSerialReader();
 		dataManager = new DataManager();
 		try {
 			dataManager.loadFromInfo();
@@ -100,6 +103,10 @@ public class ZejfSeis4 {
 
 	public static ZejfClient getClient() {
 		return client;
+	}
+	
+	public static ZejfSerialReader getSerialReader() {
+		return serialReader;
 	}
 
 	public static EventManager getEventManager() {

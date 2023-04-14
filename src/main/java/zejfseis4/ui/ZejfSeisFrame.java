@@ -25,6 +25,8 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 
+import com.fazecast.jSerialComm.SerialPort;
+
 import zejfseis4.exception.FatalIOException;
 import zejfseis4.main.Settings;
 import zejfseis4.main.ZejfSeis4;
@@ -400,7 +402,7 @@ public class ZejfSeisFrame extends JFrame {
 	private boolean checkCurrentConnection() {
 		if (ZejfSeis4.getClient() != null && ZejfSeis4.getClient().isConnected()) {
 			int result = JOptionPane.showConfirmDialog(this,
-					"Disconnect from " + Settings.ADDRESS + ":" + Settings.PORT + "?", "Port",
+					"Disconnect from " + Settings.ADDRESS + ":" + Settings.PORT + "?", "Server",
 					JOptionPane.YES_NO_OPTION);
 			if (result != 0) {
 				return false;
@@ -408,12 +410,57 @@ public class ZejfSeisFrame extends JFrame {
 
 			ZejfSeis4.getClient().close();
 		}
+		
+		if(ZejfSeis4.getSerialReader() != null && ZejfSeis4.getSerialReader().isRunning()) {
+			int result = JOptionPane.showConfirmDialog(this,
+					"Close serial port?", "Serial Port",
+					JOptionPane.YES_NO_OPTION);
+			if (result != 0) {
+				return false;
+			}
+
+			ZejfSeis4.getSerialReader().close();
+
+		}
 		return true;
+	}
+
+	private SerialPort selectPort() {
+		if (SerialPort.getCommPorts().length == 0) {
+			JOptionPane.showMessageDialog(this, "No ports found.", "Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		JPanel p = new JPanel(new SpringLayout());
+		JLabel l = new JLabel("Select Port:");
+		p.add(l);
+		JComboBox<String> line = new JComboBox<String>();
+		for (SerialPort ser : SerialPort.getCommPorts()) {
+			line.addItem(ser.getDescriptivePortName());
+		}
+		p.add(line);
+		SpringUtilities.makeCompactGrid(p, 1, 2, // rows, cols
+				6, 6, // initX, initY
+				6, 6); // xPad, yPad
+		if (JOptionPane.showConfirmDialog(this, p, "Port Selection", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE) == 0) {
+			try {
+				return SerialPort.getCommPorts()[line.getSelectedIndex()];
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return null;
 	}
 
 	public void runSerial() {
 		if (!checkCurrentConnection()) {
 			return;
+		}
+
+		SerialPort port = selectPort();
+		if(port != null) {
+			ZejfSeis4.getSerialReader().run(port);
 		}
 	}
 
