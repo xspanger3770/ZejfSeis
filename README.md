@@ -19,7 +19,7 @@ The Realtime tab contains two main features. On the top is an interactive plot o
 
 The bottom section of the Realtime tab is a Spectrogram panel, which allows you to analyze the waveform in more detail and helps you distinguish between noise and real earthquakes. You can adjust the colors by setting the Spectrogram gain field in `Settings->Realtime` so that background noise is displayed as a dark blue color.
 
-![](https://user-images.githubusercontent.com/100421968/230724558-52bbcdf1-1ace-4fac-b23d-15c901bb1f0a.png)
+![](https://user-images.githubusercontent.com/100421968/232130962-271493b3-8b2e-41bc-902b-3cf56cbbf69a.png)
 
 ## Drum tab
 
@@ -27,7 +27,7 @@ The Drum tab allows you to browse the recorded data. Each line represents a time
 
 The drum can be configured by accessing `Settings->Drum`. By changing the value of `Gain`, you can adjust the scale of the waveform, and you can increase the `Decimate` field to lower the waveform resolution for better performance.
 
-![](https://user-images.githubusercontent.com/100421968/230572243-ad604679-4adf-420e-9f8f-30c36f75cf50.png)
+![](https://user-images.githubusercontent.com/100421968/232131108-2ccce048-c082-4465-bd44-5f26395e212f.png)
 
 ### Data explorer
 
