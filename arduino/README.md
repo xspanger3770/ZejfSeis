@@ -4,7 +4,7 @@ The seimometer itself is Lehman type seismometer.
 
 A Lehman type seismometer is a device used to detect ground motion caused by seismic activity. It uses a horizontal beam pendulum that is suspended from a stationary frame. The pendulum has a magnet attached to it and a copper coil is positioned nearby. When ground motion occurs, the magnet moves past the copper coil, inducing an electrical current which can be detected and recorded by a sensitive amplifier or data acquisition system. The Lehman seismometer is designed to be very sensitive, able to detect ground motion on the order of a few micrometers.
 
-There are a lot of tutorials online of how you can build one. You can also get an inspiration from my setup:
+There are a lot of tutorials online of how you can build one. You can also check my improvised, but surprisingly well working setup:
 
  <img src="https://user-images.githubusercontent.com/100421968/232200353-9d88fbe8-5430-4381-ad3f-09251e5ee6e8.jpg" width="700" title="Lehman seismometer in the basement">
 
