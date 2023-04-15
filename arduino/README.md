@@ -6,13 +6,16 @@ A Lehman type seismometer is a device used to detect ground motion caused by sei
 
 There are a lot of tutorials online of how you can build one. You can also get an inspiration from my setup:
 
-__TODO insert pictures__
+ <img src="https://user-images.githubusercontent.com/100421968/232200353-9d88fbe8-5430-4381-ad3f-09251e5ee6e8.jpg" width="700" title="Lehman seismometer in the basement">
 
 ## A few important notes
 
 ### Damping
 
 Damping is an essential aspect of seismometer design as it reduces unwanted noise and enhances sensitivity. In my design, a plastic plate is submerged in highly viscous fluid - motor oil. This fluid provides resistance to the pendulum's motion, causing it to come to rest gradually and reducing the amplitude of its oscillations. Without this damping mechanism, the pendulum would continue to swing due to inertia, making it difficult to distinguish between seismic waves and noise. Damping ensures the pendulum settles into a stable position and detects even the smallest ground movements, improving the instrument's precision. Other damping techniques, such as magnets or electrical feedback, may also be used to enhance seismometer sensitivity.
+
+<img src="https://user-images.githubusercontent.com/100421968/232200446-af84bbae-6932-4352-88ae-73c064cd4175.jpg" width="700" title="Damper">
+
 
 ### Frame angle
 
@@ -22,7 +25,7 @@ The angle of the frame relative to the vertical determines the natural period of
 
 As you can see, I used two strong neodymium magnets on both sides of the copper coil to increase induction and the instrument's overall gain. It is crucial to ensure that the magnets are correctly oriented with the same poles facing each other. This results in a highly concentrated magnetic field inside the coil while reducing the magnetic field on the outside. The high concentration of the magnetic field inside the coil results in increased sensitivity, allowing the seismometer to detect even the smallest ground movements.
 
-__TODO insert pictures__
+<img src="https://user-images.githubusercontent.com/100421968/232200513-c7219ab1-f05c-48ec-b11d-d9e728720be6.jpg" width="600" title="Detail of magnets around the coil">
 
 While the current design of my seismometer has proven to be effective, there is still room for improvement. One area for enhancement is the use of materials, specifically the wooden beams. Wood has some degree of elasticity, which can cause the vertical beam to bend under the weight of the pendulum. To improve stability and sensitivity, better materials such as aluminum could be used instead. Additionally, the metal string that holds the pendulum may be too rigid, resulting in unwanted forces that deviate it from its central position. This can limit the maximum achievable resonance period and reduce the overall accuracy of the instrument. To overcome this issue, a more flexible string or cable could be used, allowing for smoother and more precise pendulum movements. By addressing these design considerations, the performance and accuracy of the seismometer can be further enhanced.
 
@@ -39,7 +42,7 @@ To use the ADS1256 analog to digital converter, you will first need two Arduino 
 
 Here is the wiring for Arduino Nano - the two wires on the right connect directly to the seimometer main coil:
 
-<img src=https://user-images.githubusercontent.com/100421968/231836782-62f4d2d0-edd1-488e-90dd-6f7269f3b97f.jpg width=600 height=420>
+<img src=https://user-images.githubusercontent.com/100421968/231836782-62f4d2d0-edd1-488e-90dd-6f7269f3b97f.jpg width=600>
 
 I was using this ADC for about one year and it worked perfectly fine as I was able to detect many earthquakes every day from around the world. Later I switched to the more accurate ADS1263 to push the sensitivity to the limit. 
 
@@ -47,4 +50,4 @@ I was using this ADC for about one year and it worked perfectly fine as I was ab
 
 Hooking up the ADS1263 is pretty simmilar to the ADS1256. The Arduino library for it can be found here: [ADS126X](https://github.com/Molorius/ADS126X) and after installing it you can upload `ADS1263_Seismo` sketch located in this directory.
 
-__TODO image__
+<img src="https://user-images.githubusercontent.com/100421968/232200921-0e33d1e1-a011-46ac-badd-37c2328e6704.jpg" width=600>
