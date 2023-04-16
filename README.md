@@ -4,7 +4,7 @@ ZejfSeis is a user-friendly and easy to use Java application that allows for the
 
 ## Getting started
 
-To begin your seismology journey, it's recommended that you first review my tutorial on setting up the seismometer itself, which can be found at the following link: [Seismometer tutorial](https://github.com/xspanger3770/ZejfSeis/tree/develop/arduino). This guide provides clear and concise instructions for assembling and calibrating the seismometer, ensuring that it's ready to capture accurate seismic data.
+To begin your seismology journey, it's recommended that you first review my tutorial on setting up the seismometer itself, which can be found at the following link: [Seismometer tutorial](https://github.com/xspanger3770/ZejfSeis/tree/develop/arduino). This guide provides instructions for assembling and calibrating the seismometer, ensuring that it's ready to capture accurate seismic data.
 
 ## Data source
 
