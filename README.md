@@ -1,6 +1,6 @@
 # ZejfSeis
 
-ZejfSeis is a user-friendly and easy to use Java application that allows for the display and analysis of seismic data captured by a homemade seismometer. With its intuitive interface, users can easily access a range of useful features, including real-time seismic plot display, spectrogram visualization, and browsing of recorded data in a drum-like style. In addition to these functionalities, the application offers a convenient and efficient way to store recorded earthquake data in a local database for later review and analysis. Whether you're a professional seismologist or simply an enthusiast, ZejfSeis is a powerful tool that can help you gain a deeper understanding of the Earth's seismic activity!
+ZejfSeis is a user-friendly and easy to use Java application that allows for the display and analysis of seismic data captured by a homemade seismometer. With its intuitive interface, users can easily access a range of useful features, including real-time seismic plot display, spectrogram visualization, and browsing of recorded data. In addition to these functionalities, the application offers a convenient and efficient way to store recorded earthquake data in a local database for later review and analysis. Whether you're a professional seismologist or simply an enthusiast, ZejfSeis is a powerful tool that can help you gain a deeper understanding of the Earth's seismic activity!
 
 ## Getting started
 
