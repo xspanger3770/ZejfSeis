@@ -6,6 +6,31 @@ ZejfSeis is a user-friendly and easy to use Java application that allows for the
 
 To begin your seismology journey, it's recommended that you first review my tutorial on setting up the seismometer itself, which can be found at the following link: [Seismometer tutorial](https://github.com/xspanger3770/ZejfSeis/tree/main/arduino). This guide provides instructions for assembling and calibrating the seismometer, ensuring that it's ready to capture accurate seismic data.
 
+## Installation
+
+### Prerequisites
+
+Java Development Kit (JDK) version 17 installed on your computer. You can download the latest version from the official website https://www.oracle.com/java/technologies/downloads/
+
+### Running ZejfSeis
+
+* Download the latest version from the [Releases section](https://github.com/xspanger3770/ZejfSeis/releases)
+* Place the .jar file to the directory where you want the application to operate and store it's data
+* Open your command line interface (CLI).
+
+    Windows users: Press `Win + R` and type cmd to open the command prompt.
+
+    Linux users: Open the terminal emulator of your choice.
+
+* Navigate to the directory where you placed the .jar file using the cd command. For example:
+`cd C:\Users\Username\Desktop\ZejfSeis`
+
+* Run the application by executing the following command: `java -jar ZejfSeis.jar`
+
+* If everything has been set up correctly, the application should start running and you should see the main window of ZejfSeis.
+
+* On Windows, you can directly run the .jar file by double-clicking it. However, it is recommended to use the CLI for better control and troubleshooting.
+
 ## Data source
 
 There are two ways of connecting ZejfSeis application to a running seismometer. The easiest way is to plug your Arduino directly to your computer's USB port and use `Connection->Serial Port` option in the upper menu, which will establish a direct connection and allow you to view incoming data with ease.
