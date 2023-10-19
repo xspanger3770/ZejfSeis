@@ -47,7 +47,7 @@ public class ZejfSeisFrame extends JFrame {
 
 	public ZejfSeisFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setIconImage(new ImageIcon(ZejfSeisFrame.class.getResource("icon.png")).getImage());
+		setIconImage(new ImageIcon(ClassLoader.getSystemResource("icon.png")).getImage());
 	}
 
 	public void createFrame() {

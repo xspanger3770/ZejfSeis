@@ -44,7 +44,7 @@ public abstract class Scale {
 	public abstract Color getColor(double value);
 
 	public static BufferedImage getImage(String path) throws IOException {
-		return ImageIO.read(Scale.class.getResource(path));
+		return ImageIO.read(ClassLoader.getSystemResource(path));
 	}
 
 }
