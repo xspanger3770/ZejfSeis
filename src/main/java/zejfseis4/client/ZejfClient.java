@@ -3,6 +3,7 @@ package zejfseis4.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -23,17 +24,17 @@ public class ZejfClient {
 	public static final int SO_TIMEOUT = 10000;
 
 	private Socket socket;
-	private Object outputMutex = new Object();
-	private Object outputQueueMutex = new Object();
-	private Object inputMutex = new Object();
+	private final Object outputMutex = new Object();
+	private final Object outputQueueMutex = new Object();
+	private final Object inputMutex = new Object();
 
 	private ZejfCReader reader;
 	private Thread heartbeatThread;
 	private Thread outputThread;
 
-	private Semaphore outputSemaphore = new Semaphore(0);
+	private final Semaphore outputSemaphore = new Semaphore(0);
 
-	private Queue<String> outputQueue = new LinkedList<String>();;
+	private final Queue<String> outputQueue = new LinkedList<>();;
 
 	private boolean connected;
 
@@ -70,7 +71,7 @@ public class ZejfClient {
 
 	private void receiveInitialInfo(String ip) throws IOException, FatalIOException {
 		String compat_version = readString();
-		int comp = Integer.valueOf(compat_version.split(":")[1]);
+		int comp = Integer.parseInt(compat_version.split(":")[1]);
 		if (comp != ZejfSeis4.COMPATIBILITY_VERSION) {
 			throw new IncompatibleServerException();
 		} else {
@@ -84,9 +85,9 @@ public class ZejfClient {
 		System.out.println(err_value);
 		System.out.println(last_log_id);
 
-		int sr = Integer.valueOf(sample_rate.split(":")[1]);
-		int err = Integer.valueOf(err_value.split(":")[1]);
-		long lli = Long.valueOf(last_log_id.split(":")[1]);
+		int sr = Integer.parseInt(sample_rate.split(":")[1]);
+		int err = Integer.parseInt(err_value.split(":")[1]);
+		long lli = Long.parseLong(last_log_id.split(":")[1]);
 
 		System.out.println("Received info: ");
 		System.out.println("Sample rate: " + sr + "sps");
@@ -115,7 +116,7 @@ public class ZejfClient {
 		outputThread = new Thread("Output Thread") {
 			@Override
 			public void run() {
-				Queue<String> temp = new LinkedList<String>();
+				Queue<String> temp = new LinkedList<>();
 				while (true) {
 					try {
 						outputSemaphore.acquire();
@@ -168,9 +169,7 @@ public class ZejfClient {
 
 	private void sendStrings(String... strings) {
 		synchronized (outputQueueMutex) {
-			for (String str : strings) {
-				outputQueue.add(str);
-			}
+            outputQueue.addAll(Arrays.asList(strings));
 		}
 		outputSemaphore.release();
 	}
@@ -210,7 +209,7 @@ public class ZejfClient {
 			}
 			break;
 		case "logs":
-			Queue<SimpleLog> received = new LinkedList<SimpleLog>();
+			Queue<SimpleLog> received = new LinkedList<>();
 			synchronized (inputMutex) {
 				int value;
 				while ((value = reader.nextInt()) != ZejfSeis4.getDataManager().getErrVal()) {

@@ -7,7 +7,7 @@ public class ManualEvent extends Event {
 	private static final long serialVersionUID = -7163285823194829523L;
 	private long pWave;
 	private long sWave;
-	private String id;
+	private final String id;
 	private double mag;
 	
 	public static final double NO_MAG = -999;

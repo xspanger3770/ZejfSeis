@@ -27,7 +27,7 @@ import zejfseis4.utils.NamedThreadFactory;
 public class RealtimeGraphPanel extends DataRequestPanel {
 
 	private static final long serialVersionUID = 1L;
-	private static RenderingHints defaultHints;
+	private static final RenderingHints defaultHints;
 	
 	public RealtimeGraphPanel() {
 		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "RealtimeGraph", Settings.REALTIME_DURATION_SECONDS * 1000));
@@ -39,16 +39,13 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 	private void threads() {
 		ScheduledExecutorService exec = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Realtime Graph Panel Work"));
-		exec.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					repaint();
-				} catch (Exception e) {
-					ZejfSeis4.handleException(e); // uncaught
-				}
-			}
-		}, 0, 10, TimeUnit.MILLISECONDS);
+		exec.scheduleAtFixedRate(() -> {
+            try {
+                repaint();
+            } catch (Exception e) {
+                ZejfSeis4.handleException(e); // uncaught
+            }
+        }, 0, 10, TimeUnit.MILLISECONDS);
 	}
 
 	static {
@@ -67,13 +64,13 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 		}
 	}
 
-	public static BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 			new float[] { 3 }, 0);
 	private static final Font calibri12 = new Font("Calibri", Font.BOLD, 12);
 	private Double line1;
-	private int[] ones = new int[] { 1, 2, 5, 10 };
+	private final int[] ones = new int[] { 1, 2, 5, 10 };
 	
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
 	
 
 	public void updateDrum(Graphics2D graphics) {

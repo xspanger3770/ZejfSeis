@@ -1,37 +1,6 @@
 package zejfseis4.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.SwingConstants;
-import javax.swing.border.EtchedBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-
 import org.tinylog.Logger;
-
 import zejfseis4.data.DataManager;
 import zejfseis4.events.DetectionStatus;
 import zejfseis4.events.Event;
@@ -41,14 +10,26 @@ import zejfseis4.main.ZejfSeis4;
 import zejfseis4.ui.action.EditEventAction;
 import zejfseis4.ui.model.EventTableModel;
 
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 public class EventsTab extends JPanel {
 
-	private static final long serialVersionUID = 2678465200080299704L;
-	private Calendar displayedTime;
-	private JLabel labelTime;
-	private JTable table;
+	private final Calendar displayedTime;
+	private final JLabel labelTime;
+	private final JTable table;
 
-	private List<Event> data = new ArrayList<>();
+	private final List<Event> data = new ArrayList<>();
 	private EventTableModel tableModel;
 	private EditEventAction editEventAction;
 
@@ -65,24 +46,16 @@ public class EventsTab extends JPanel {
 
 		JButton btnBackM = new JButton("<<");
 		panelControl.add(btnBackM);
-		btnBackM.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				displayedTime.add(Calendar.YEAR, -1);
-				updatePanel();
-			}
-		});
+		btnBackM.addActionListener(arg0 -> {
+            displayedTime.add(Calendar.YEAR, -1);
+            updatePanel();
+        });
 		JButton btnBackS = new JButton("<");
 		panelControl.add(btnBackS);
-		btnBackS.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				displayedTime.add(Calendar.MONTH, -1);
-				updatePanel();
-			}
-		});
+		btnBackS.addActionListener(arg0 -> {
+            displayedTime.add(Calendar.MONTH, -1);
+            updatePanel();
+        });
 		labelTime = new JLabel("...", SwingConstants.CENTER);
 		labelTime.setFont(new Font("Calibri", Font.BOLD, 22));
 		labelTime.setPreferredSize(new Dimension(240, 26));
@@ -101,57 +74,45 @@ public class EventsTab extends JPanel {
 
 		JButton btnForwardS = new JButton(">");
 		panelControl.add(btnForwardS);
-		btnForwardS.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				displayedTime.add(Calendar.MONTH, +1);
-				if (displayedTime.getTimeInMillis() > System.currentTimeMillis()) {
-					displayedTime.setTimeInMillis(System.currentTimeMillis());
-					displayedTime.set(Calendar.DATE, 1);
-				}
-				updatePanel();
-			}
-		});
+		btnForwardS.addActionListener(arg0 -> {
+            displayedTime.add(Calendar.MONTH, +1);
+            if (displayedTime.getTimeInMillis() > System.currentTimeMillis()) {
+                displayedTime.setTimeInMillis(System.currentTimeMillis());
+                displayedTime.set(Calendar.DATE, 1);
+            }
+            updatePanel();
+        });
 		JButton btnForwardM = new JButton(">>");
-		btnForwardM.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				displayedTime.add(Calendar.YEAR, +1);
-				if (displayedTime.getTimeInMillis() > System.currentTimeMillis()) {
-					displayedTime.setTimeInMillis(System.currentTimeMillis());
-					displayedTime.set(Calendar.DATE, 1);
-				}
-				updatePanel();
-			}
-		});
+		btnForwardM.addActionListener(arg0 -> {
+            displayedTime.add(Calendar.YEAR, +1);
+            if (displayedTime.getTimeInMillis() > System.currentTimeMillis()) {
+                displayedTime.setTimeInMillis(System.currentTimeMillis());
+                displayedTime.set(Calendar.DATE, 1);
+            }
+            updatePanel();
+        });
 		panelControl.add(btnForwardM);
 
 		JButton download = new JButton("Download");
-		download.addActionListener(new ActionListener() {
+		download.addActionListener(arg0 -> {
+            download.setEnabled(false);
+            download.setText("Downloading...");
+            Thread downloader = new Thread("Whole month download") {
+                public void run() {
+                    try {
+                        ZejfSeis4.getEventManager().getFdsnDownloader().downloadWholeMonth(displayedTime);
+                    } catch (FatalIOException e) {
+                        ZejfSeis4.handleException(e);
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                    download.setEnabled(true);
+                    download.setText("Download");
+                };
+            };
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				download.setEnabled(false);
-				download.setText("Downloading...");
-				Thread downloader = new Thread("Whole month download") {
-					public void run() {
-						try {
-							ZejfSeis4.getEventManager().getFdsnDownloader().downloadWholeMonth(displayedTime);
-						} catch (FatalIOException e) {
-							ZejfSeis4.handleException(e);
-						} catch (IOException e) {
-							Logger.error(e);
-						}
-						download.setEnabled(true);
-						download.setText("Download");
-					};
-				};
-
-				downloader.start();
-			}
-		});
+            downloader.start();
+        });
 		panelControl.add(download);
 
 		add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
@@ -160,19 +121,7 @@ public class EventsTab extends JPanel {
 	}
 
 	private JTable createTable() {
-		tableModel = new EventTableModel(data) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void dataUpdated() {
-				// TODO
-			}
-
-			@Override
-			public boolean accept(Event transaction) {
-				return true;
-			}
-		};
+		tableModel = new EventTableModel(data);
 
 		JTable table = new JTable(tableModel);
 		table.setFont(new Font("Calibri", Font.BOLD, 16));

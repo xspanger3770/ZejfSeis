@@ -11,8 +11,8 @@ import javax.swing.border.LineBorder;
 public class RealtimeTab extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private RealtimeGraphPanel realtimeGraphPanel;
-	private SpectrogramPanel spectrogramPanel;
+	private final RealtimeGraphPanel realtimeGraphPanel;
+	private final SpectrogramPanel spectrogramPanel;
 
 	public RealtimeTab() {
 		setLayout(new GridLayout(0, 1, 0, 0));

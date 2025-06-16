@@ -16,14 +16,14 @@ public class DataRequest {
 	private final Semaphore semaphore = new Semaphore(0);
 	private boolean refill = false;
 	private Thread workerThread;
-	private DataManager dataManager;
+	private final DataManager dataManager;
 	private Log[] data;
 
 	public long headLogID;
 	public long lastLogID;
 	private long head;
 
-	public Object dataMutex = new Object();
+	public final Object dataMutex = new Object();
 
 	private Butterworth filter;
 	private Butterworth remover_50Hz;
@@ -33,7 +33,7 @@ public class DataRequest {
 	private long startLogID;
 	private long endLogID;
 	private long durationMS;
-	public int id;
+	public final int id;
 
 	public static int nextID = 0;
 
@@ -43,7 +43,7 @@ public class DataRequest {
 	private long nextDuration;
 	private boolean change = false;
 	private long lastFilteredLogID;
-	private String name;
+	private final String name;
 
 	public DataRequest(DataManager dataManager, String name, long startTime, long endTime) {
 		id = nextID++;

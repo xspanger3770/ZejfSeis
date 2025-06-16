@@ -12,7 +12,7 @@ import javax.swing.AbstractAction;
 public final class CloseAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
-	private Window frame;
+	private final Window frame;
 
 	public CloseAction(Window frame) {
         super("Close");

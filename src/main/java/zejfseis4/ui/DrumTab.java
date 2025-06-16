@@ -6,14 +6,10 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.text.ParseException;
@@ -41,12 +37,12 @@ public class DrumTab extends DataRequestPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private JButton btnBackM;
-	private JButton btnBackS;
-	private JButton btnForwardS;
-	private JButton btnForwardM;
+	private final JButton btnBackM;
+	private final JButton btnBackS;
+	private final JButton btnForwardS;
+	private final JButton btnForwardM;
 
-	private JPanel drumPanel;
+	private final JPanel drumPanel;
 
 	private BufferedImage drum;
 
@@ -79,65 +75,29 @@ public class DrumTab extends DataRequestPanel {
 		add(panelControl, BorderLayout.NORTH);
 		btnBackM = new JButton("<<");
 		panelControl.add(btnBackM);
-		btnBackM.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				incrementLineID(-10, lastDuration);
-			}
-		});
+		btnBackM.addActionListener(e -> incrementLineID(-10, lastDuration));
 		btnBackS = new JButton("<");
 		panelControl.add(btnBackS);
 
-		btnBackS.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				incrementLineID(-1, lastDuration);
-			}
-		});
+		btnBackS.addActionListener(e -> incrementLineID(-1, lastDuration));
 		JButton btnGoto = new JButton("Goto");
 		panelControl.add(btnGoto);
 
-		btnGoto.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				gotoTime();
-			}
-		});
+		btnGoto.addActionListener(e -> gotoTime());
 
 		JButton btnNow = new JButton("Now");
 		panelControl.add(btnNow);
 
-		btnNow.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				resetLineID(lastDuration);
-			}
-		});
+		btnNow.addActionListener(e -> resetLineID(lastDuration));
 
 		btnForwardS = new JButton(">");
 		panelControl.add(btnForwardS);
 
-		btnForwardS.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				incrementLineID(1, lastDuration);
-			}
-		});
+		btnForwardS.addActionListener(e -> incrementLineID(1, lastDuration));
 
 		btnForwardM = new JButton(">>");
 		panelControl.add(btnForwardM);
-		btnForwardM.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				incrementLineID(10, lastDuration);
-			}
-		});
+		btnForwardM.addActionListener(e -> incrementLineID(10, lastDuration));
 
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -146,13 +106,7 @@ public class DrumTab extends DataRequestPanel {
 			}
 		});
 
-		addMouseWheelListener(new MouseWheelListener() {
-
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				incrementLineID(e.getWheelRotation(), lastDuration);
-			}
-		});
+		addMouseWheelListener(e -> incrementLineID(e.getWheelRotation(), lastDuration));
 		drumPanel = new JPanel() {
 			private static final long serialVersionUID = 1L;
 
@@ -270,29 +224,20 @@ public class DrumTab extends DataRequestPanel {
 		long time2 = (long) (getMillis(lineID - line2, lastDuration)
 				+ ((dragEndX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
 
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				new DataExplorer(Math.min(time1, time2), Math.max(time1, time2));
-			}
-		});
+		SwingUtilities.invokeLater(() -> new DataExplorer(Math.min(time1, time2), Math.max(time1, time2)));
 	}
 
 	private void runThreads() {
 		ScheduledExecutorService exec = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Drum Tab Work"));
-		exec.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					runUpdate();
-					ZejfSeis4.getFrame().repaint();
-				} catch (Exception e) {
-					ZejfSeis4.handleException(e);
-				}
-			}
-		}, 0, 100, TimeUnit.MILLISECONDS);
+		exec.scheduleAtFixedRate(() -> {
+            try {
+                runUpdate();
+                ZejfSeis4.getFrame().repaint();
+            } catch (Exception e) {
+                ZejfSeis4.handleException(e);
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
 	private long lastCurrentLineID = -1;
@@ -508,8 +453,8 @@ public class DrumTab extends DataRequestPanel {
 		btnForwardS.setEnabled(enabled);
 	}
 
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
-	private static SimpleDateFormat ddMMyyyy = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
+	private static final SimpleDateFormat ddMMyyyy = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
 
 	protected void gotoTime() {
 		String str = JOptionPane.showInputDialog(ZejfSeis4.getFrame(), "dd.MM.yyyy [HH:mm]", "Enter time:",

@@ -2,7 +2,7 @@ package zejfseis4.utils;
 
 public abstract class Multithread {
 	
-	private Thread[] buffer;
+	private final Thread[] buffer;
 
 	public Multithread(int threads) {
 		buffer = new Thread[threads];
@@ -17,12 +17,7 @@ public abstract class Multithread {
 		for (int i = 0; i < threads; i++) {
 			long a = (long) (start + (end - start) * (i / (double) (threads)));
 			long b = (long) (start + (end - start) * ((i+1) / (double) (threads)));
-			buffer[i] = new Thread() {
-				@Override
-				public void run() {
-					Multithread.this.run(a, b);
-				}
-			};
+			buffer[i] = new Thread(() -> Multithread.this.run(a, b));
 		}
 		for (int i = 0; i < threads; i++) {
 			buffer[i].start();

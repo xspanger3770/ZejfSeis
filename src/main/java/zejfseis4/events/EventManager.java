@@ -21,12 +21,12 @@ public class EventManager {
 	public static final File eventsFolder = new File(ZejfSeis4.MAIN_FOLDER, "/events/");
 	public static final int PERMANENTLY_LOADED_MONTHS = 3;
 
-	private ArrayList<EventMonth> eventMonths;
-	private Object eventhMonthsSync;
-	private FDSNDownloader fdsnDownloader;
+	private final ArrayList<EventMonth> eventMonths;
+	private final Object eventhMonthsSync;
+	private final FDSNDownloader fdsnDownloader;
 
 	public EventManager() {
-		eventMonths = new ArrayList<EventMonth>();
+		eventMonths = new ArrayList<>();
 		eventhMonthsSync = new Object();
 		try {
 			load();
@@ -132,7 +132,7 @@ public class EventManager {
 	}
 
 	public ArrayList<Event> getEvents(long start, long end) throws FatalIOException {
-		ArrayList<Event> result = new ArrayList<Event>();
+		ArrayList<Event> result = new ArrayList<>();
 		Calendar endC = Calendar.getInstance();
 		endC.setTimeInMillis(end);
 		Calendar c = Calendar.getInstance();

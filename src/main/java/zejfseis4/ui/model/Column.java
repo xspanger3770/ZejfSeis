@@ -11,7 +11,7 @@ abstract class Column<E, T> {
     private final String name;
     private final Function<E, T> valueGetter;
     private final Class<T> columnType;
-	private TableCellRendererAdapter<E, ?> renderer;
+	private final TableCellRendererAdapter<E, ?> renderer;
 
     private Column(String name, Class<T> columnClass, Function<E, T> valueGetter, TableCellRendererAdapter<E, ?> renderer) {
         this.name = Objects.requireNonNull(name, "name cannot be null");

@@ -11,7 +11,7 @@ import zejfseis4.exception.FatalIOException;
 
 public class Settings {
 
-	private static File propertiesFile = new File(ZejfSeis4.MAIN_FOLDER, "properties.properties");
+	private static final File propertiesFile = new File(ZejfSeis4.MAIN_FOLDER, "properties.properties");
 	public static double SPECTRO_GAIN;
 	public static int REALTIME_DURATION_SECONDS;
 	public static int WINDOW;
@@ -35,7 +35,7 @@ public class Settings {
 			"30 Seconds", "1 Minute", "2 Minutes", "3 Minutes", "5 Minutes", "10 Minutes" };
 
 	public static final int[] DRUM_SPACES = { 1, 2, 5, 10, 15, 20, 30, 60 };
-	public static int SAMPLE_RATES[] = { 20, 40, 60, 100, 200 };
+	public static final int[] SAMPLE_RATES = { 20, 40, 60, 100, 200 };
 	
 	public static int SERIAL_PORT_SAMPLE_RATE;
 
@@ -49,26 +49,26 @@ public class Settings {
 		} catch (IOException e) {
 			throw new FatalIOException("Failed to load properties", e);
 		}
-		MAX_FREQUENCY = Double.valueOf(prop.getProperty("max_frequency", "20.0"));
-		MIN_FREQUENCY = Double.valueOf(prop.getProperty("min_frequency", "0.0"));
+		MAX_FREQUENCY = Double.parseDouble(prop.getProperty("max_frequency", "20.0"));
+		MIN_FREQUENCY = Double.parseDouble(prop.getProperty("min_frequency", "0.0"));
 
-		SPECTRO_GAIN = Double.valueOf(prop.getProperty("spectro_gain", "0.25"));
-		REALTIME_DURATION_SECONDS = DURATIONS[Integer.valueOf(prop.getProperty("realtime_duration_index", "8"))];
-		WINDOW = Integer.valueOf(prop.getProperty("window", "160"));
-		DRUM_SPACE_INDEX = Integer.valueOf(prop.getProperty("drum_space_index", "3"));
-		DRUM_GAIN = Double.valueOf(prop.getProperty("drum_gain", "1.0"));
-		ANTIALIAS = Boolean.valueOf(prop.getProperty("antialiasing", "false"));
-		DECIMATE = Integer.valueOf(prop.getProperty("decimate", "1"));
+		SPECTRO_GAIN = Double.parseDouble(prop.getProperty("spectro_gain", "0.25"));
+		REALTIME_DURATION_SECONDS = DURATIONS[Integer.parseInt(prop.getProperty("realtime_duration_index", "8"))];
+		WINDOW = Integer.parseInt(prop.getProperty("window", "160"));
+		DRUM_SPACE_INDEX = Integer.parseInt(prop.getProperty("drum_space_index", "3"));
+		DRUM_GAIN = Double.parseDouble(prop.getProperty("drum_gain", "1.0"));
+		ANTIALIAS = Boolean.parseBoolean(prop.getProperty("antialiasing", "false"));
+		DECIMATE = Integer.parseInt(prop.getProperty("decimate", "1"));
 		ADDRESS = String.valueOf(prop.getProperty("address", "0.0.0.0"));
-		PORT = Integer.valueOf(prop.getProperty("port", "6222"));
-		SPECTRO_MAX_FREQUENCY = Double.valueOf(prop.getProperty("spectro_max_freq", "20.0"));
+		PORT = Integer.parseInt(prop.getProperty("port", "6222"));
+		SPECTRO_MAX_FREQUENCY = Double.parseDouble(prop.getProperty("spectro_max_freq", "20.0"));
 		
-		LOCATION_LATITUDE = Double.valueOf(prop.getProperty("geo_lat", "0.0"));
-		LOCATION_LONGITUDE = Double.valueOf(prop.getProperty("geo_lon", "0.0"));
+		LOCATION_LATITUDE = Double.parseDouble(prop.getProperty("geo_lat", "0.0"));
+		LOCATION_LONGITUDE = Double.parseDouble(prop.getProperty("geo_lon", "0.0"));
 		
-		NOISE_LEVEL = Integer.valueOf(prop.getProperty("noise", "0"));
+		NOISE_LEVEL = Integer.parseInt(prop.getProperty("noise", "0"));
 		
-		SERIAL_PORT_SAMPLE_RATE = Integer.valueOf(prop.getProperty("serial_sample_rate", "40"));
+		SERIAL_PORT_SAMPLE_RATE = Integer.parseInt(prop.getProperty("serial_sample_rate", "40"));
 		
 		saveProperties();
 	}

@@ -2,8 +2,6 @@ package zejfseis4.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -18,8 +16,8 @@ import zejfseis4.main.ZejfSeis4;
 public class DataExplorer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private DataExplorerPanel dataExplorerPanel;
-	private JButton buttonAddEvent;
+	private final DataExplorerPanel dataExplorerPanel;
+	private final JButton buttonAddEvent;
 
 	public DataExplorer(long start, long end) {
 		addWindowListener(new WindowAdapter() {
@@ -53,24 +51,20 @@ public class DataExplorer extends JFrame {
 		buttonAddEvent = new JButton("Add Event");
 		buttonAddEvent.setEnabled(false);
 
-		buttonAddEvent.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				boolean wavesSelected = dataExplorerPanel.pWaveTime > 0 && dataExplorerPanel.sWaveTime > 0;
-				if (wavesSelected) {
-					ManualEvent manualEvent = new ManualEvent(dataExplorerPanel.pWaveTime, dataExplorerPanel.sWaveTime);
-					try {
-						ZejfSeis4.getEventManager().newEvent(manualEvent);
-					} catch (FatalIOException e1) {
-						ZejfSeis4.handleException(e1);
-					}
-					ZejfSeis4.getFrame().getEventsTab().updatePanel();
-					new EventExplorer(manualEvent);
-					DataExplorer.this.dispose();
-				}
-			}
-		});
+		buttonAddEvent.addActionListener(e -> {
+            boolean wavesSelected = dataExplorerPanel.pWaveTime > 0 && dataExplorerPanel.sWaveTime > 0;
+            if (wavesSelected) {
+                ManualEvent manualEvent = new ManualEvent(dataExplorerPanel.pWaveTime, dataExplorerPanel.sWaveTime);
+                try {
+                    ZejfSeis4.getEventManager().newEvent(manualEvent);
+                } catch (FatalIOException e1) {
+                    ZejfSeis4.handleException(e1);
+                }
+                ZejfSeis4.getFrame().getEventsTab().updatePanel();
+                new EventExplorer(manualEvent);
+                DataExplorer.this.dispose();
+            }
+        });
 
 		controlPanel.add(buttonAddEvent);
 		getContentPane().add(controlPanel, BorderLayout.NORTH);

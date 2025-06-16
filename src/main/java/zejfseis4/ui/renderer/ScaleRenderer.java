@@ -9,7 +9,7 @@ public class ScaleRenderer extends TableCellRendererAdapter<Event, Double> {
 
 	private static final long serialVersionUID = 1L;
 	private final Scale scale;
-	private String format;
+	private final String format;
 
 	public ScaleRenderer(Scale scale, String format) {
 		super();

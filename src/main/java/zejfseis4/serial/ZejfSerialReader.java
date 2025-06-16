@@ -44,15 +44,13 @@ public class ZejfSerialReader {
 	private int sample_rate;
 
 	public void run(SerialPort port) {
-		new Thread() {
-			public void run() {
-				try {
-					openPort(port);
-				} catch (Exception e) {
-					ZejfSeis4.handleException(e);
-				}
-			};
-		}.start();
+		new Thread(() -> {
+            try {
+                openPort(port);
+            } catch (Exception e) {
+                ZejfSeis4.handleException(e);
+            }
+        }).start();
 	}
 
 	private void openPort(SerialPort port) throws FatalIOException {

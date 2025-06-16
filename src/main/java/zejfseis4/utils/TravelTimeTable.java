@@ -10,9 +10,9 @@ public class TravelTimeTable {
 
 	private static final int PKP_START = 113;
 
-	public static final ArrayList<double[]> PTravelTimeTable = new ArrayList<double[]>();
-	public static final ArrayList<double[]> STravelTimeTable = new ArrayList<double[]>();
-	public static final ArrayList<double[]> PKPTravelTimeTable = new ArrayList<double[]>();
+	public static final ArrayList<double[]> PTravelTimeTable = new ArrayList<>();
+	public static final ArrayList<double[]> STravelTimeTable = new ArrayList<>();
+	public static final ArrayList<double[]> PKPTravelTimeTable = new ArrayList<>();
 
 	static {
 		fillTable();

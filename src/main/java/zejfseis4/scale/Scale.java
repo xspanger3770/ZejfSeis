@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 public abstract class Scale {
 
-	private String resourceName;
+	private final String resourceName;
 	private ArrayList<Color> colors;
 	
 	public static final Color ERROR_COLOR = Color.white;
@@ -19,7 +19,7 @@ public abstract class Scale {
 	}
 
 	void loadColors() throws IOException {
-		colors = new ArrayList<Color>();
+		colors = new ArrayList<>();
 		BufferedImage img = getImage(getResourceName());
 		Color last = null;
 		for (int y = 0; y < img.getHeight(); y++) {

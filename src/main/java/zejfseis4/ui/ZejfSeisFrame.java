@@ -3,8 +3,6 @@ package zejfseis4.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,64 +80,28 @@ public class ZejfSeisFrame extends JFrame {
 		JMenu connectionMenu = new JMenu("Connection");
 
 		JMenuItem menuSerial = new JMenuItem("Serial Port", KeyEvent.VK_P);
-		menuSerial.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				runSerial();
-			}
-		});
+		menuSerial.addActionListener(e -> runSerial());
 
 		connectionMenu.add(menuSerial);
 
 		JMenuItem menuServer = new JMenuItem("Server", KeyEvent.VK_S);
-		menuServer.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				runSocket();
-			}
-		});
+		menuServer.addActionListener(e -> runSocket());
 
 		connectionMenu.add(menuServer);
 
 		JMenu settingsMenu = new JMenu("Settings");
 		
 		JMenuItem seismometer = new JMenuItem("Seismometer", KeyEvent.VK_S);
-		seismometer.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				seismometerSettings();
-			}
-		});
+		seismometer.addActionListener(e -> seismometerSettings());
 
 		JMenuItem realtime = new JMenuItem("Realtime", KeyEvent.VK_R);
-		realtime.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				realtimeSettings();
-			}
-		});
+		realtime.addActionListener(e -> realtimeSettings());
 
 		JMenuItem drumMenuItem = new JMenuItem("Drum", KeyEvent.VK_D);
-		drumMenuItem.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				drumSettings();
-			}
-		});
+		drumMenuItem.addActionListener(e -> drumSettings());
 
 		JMenuItem serialPortItem = new JMenuItem("Serial Port", KeyEvent.VK_P);
-		serialPortItem.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				serialPortSettings();
-			}
-		});
+		serialPortItem.addActionListener(e -> serialPortSettings());
 		
 		settingsMenu.add(seismometer);
 		settingsMenu.add(realtime);
@@ -163,24 +125,12 @@ public class ZejfSeisFrame extends JFrame {
 		for (DefaultFilter defaultFilter : defaultFilters) {
 			JMenuItem item = new JMenuItem(String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(),
 					defaultFilter.min(), defaultFilter.max()));
-			item.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setFilters(defaultFilter.max(), defaultFilter.min());
-				}
-			});
+			item.addActionListener(e -> setFilters(defaultFilter.max(), defaultFilter.min()));
 			filters.add(item);
 		}
 		
 		JMenuItem customFilter = new JMenuItem("Custom", KeyEvent.VK_C);
-		customFilter.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				filterSettings();
-			}
-		});
+		customFilter.addActionListener(e -> filterSettings());
 		
 		filters.add(customFilter);
 
@@ -212,7 +162,7 @@ public class ZejfSeisFrame extends JFrame {
 		JPanel p = new JPanel(new SpringLayout());
 		
 		p.add(l);
-		JComboBox<String> line = new JComboBox<String>();
+		JComboBox<String> line = new JComboBox<>();
 		for (int sr : Settings.SAMPLE_RATES) {
 			line.addItem(sr+" Hz");
 		}
@@ -261,9 +211,9 @@ public class ZejfSeisFrame extends JFrame {
 		if (JOptionPane.showConfirmDialog(this, p, "Seismometer Settings", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE) == 0) {
 			try {
-				double lat = Double.valueOf(fields[0].getText());
-				double lon = Double.valueOf(fields[1].getText());
-				int noise = Integer.valueOf(fields[2].getText());
+				double lat = Double.parseDouble(fields[0].getText());
+				double lon = Double.parseDouble(fields[1].getText());
+				int noise = Integer.parseInt(fields[2].getText());
 				if (noise < 0) {
 					throw new IllegalArgumentException("noise must be > 0!");
 				}
@@ -301,7 +251,7 @@ public class ZejfSeisFrame extends JFrame {
 
 		JLabel l = new JLabel("Realtime Duration:", JLabel.TRAILING);
 		p.add(l);
-		JComboBox<String> line = new JComboBox<String>();
+		JComboBox<String> line = new JComboBox<>();
 		for (String str : Settings.DURATIONS_NAMES) {
 			line.addItem(str);
 		}
@@ -315,9 +265,9 @@ public class ZejfSeisFrame extends JFrame {
 		if (JOptionPane.showConfirmDialog(this, p, "Realtime Settings", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE) == 0) {
 			try {
-				Double spectro_gain = Double.valueOf(fields[0].getText());
-				Integer window = Integer.valueOf(fields[1].getText());
-				Double spectro_max_freq = Double.valueOf(fields[2].getText());
+				double spectro_gain = Double.parseDouble(fields[0].getText());
+				int window = Integer.parseInt(fields[1].getText());
+				double spectro_max_freq = Double.parseDouble(fields[2].getText());
 				Settings.SPECTRO_GAIN = spectro_gain;
 				Settings.WINDOW = window;
 				Settings.REALTIME_DURATION_SECONDS = Settings.DURATIONS[line.getSelectedIndex()];
@@ -358,8 +308,8 @@ public class ZejfSeisFrame extends JFrame {
 		if (JOptionPane.showConfirmDialog(this, p, "Filter Settings", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE) == 0) {
 			try {
-				double min = Double.valueOf(fields[0].getText());
-				double max = Double.valueOf(fields[1].getText());
+				double min = Double.parseDouble(fields[0].getText());
+				double max = Double.parseDouble(fields[1].getText());
 				if (min > max) {
 					throw new IllegalArgumentException("min > max !");
 				}
@@ -410,7 +360,7 @@ public class ZejfSeisFrame extends JFrame {
 		}
 		JLabel l = new JLabel("Line Duration:", JLabel.TRAILING);
 		p.add(l);
-		JComboBox<String> line = new JComboBox<String>();
+		JComboBox<String> line = new JComboBox<>();
 		for (int i : Settings.DRUM_SPACES) {
 			line.addItem(i + " Minutes");
 		}
@@ -423,10 +373,10 @@ public class ZejfSeisFrame extends JFrame {
 		if (JOptionPane.showConfirmDialog(this, p, "Drum Settings", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE) == 0) {
 			try {
-				Double gain = Double.valueOf(fields[0].getText());
+				double gain = Double.parseDouble(fields[0].getText());
 				Settings.DRUM_GAIN = gain;
 				Settings.DRUM_SPACE_INDEX = line.getSelectedIndex();
-				Settings.DECIMATE = Integer.valueOf(fields[1].getText());
+				Settings.DECIMATE = Integer.parseInt(fields[1].getText());
 				Settings.saveProperties();
 			} catch (FatalIOException e) {
 				ZejfSeis4.handleException(e);
@@ -471,7 +421,7 @@ public class ZejfSeisFrame extends JFrame {
 		JPanel p = new JPanel(new SpringLayout());
 		JLabel l = new JLabel("Select Port:");
 		p.add(l);
-		JComboBox<String> line = new JComboBox<String>();
+		JComboBox<String> line = new JComboBox<>();
 		for (SerialPort ser : SerialPort.getCommPorts()) {
 			line.addItem(ser.getDescriptivePortName());
 		}
@@ -536,7 +486,7 @@ public class ZejfSeisFrame extends JFrame {
 				JOptionPane.PLAIN_MESSAGE) == 0) {
 			try {
 				String address = fields[0].getText();
-				int port = Integer.valueOf(fields[1].getText());
+				int port = Integer.parseInt(fields[1].getText());
 				Settings.ADDRESS = address;
 				Settings.PORT = port;
 				Settings.saveProperties();

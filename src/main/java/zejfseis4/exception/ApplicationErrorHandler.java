@@ -19,7 +19,7 @@ import zejfseis4.ui.action.TerminateAction;
 
 public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler {
 
-	private ZejfSeisFrame frame;
+	private final ZejfSeisFrame frame;
 
 	public ApplicationErrorHandler(ZejfSeisFrame frame) {
 		this.frame = frame;

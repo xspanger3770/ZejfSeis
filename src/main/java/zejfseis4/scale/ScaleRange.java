@@ -4,8 +4,8 @@ import java.awt.Color;
 
 public class ScaleRange extends Scale {
 
-	private double max;
-	private double min;
+	private final double max;
+	private final double min;
 
 	public ScaleRange(String resourceName, double min, double max) {
 		super(resourceName);

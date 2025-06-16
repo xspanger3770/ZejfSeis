@@ -3,10 +3,6 @@ package zejfseis4.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
@@ -35,11 +31,11 @@ import zejfseis4.utils.TravelTimeTable;
 public class EventExplorer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private DataExplorerPanel dataExplorerPanel;
-	private Event event;
-	private JPanel eventPanel;
+	private final DataExplorerPanel dataExplorerPanel;
+	private final Event event;
+	private final JPanel eventPanel;
 	private JTextField textFieldIntensity;
-	private boolean manual;
+	private final boolean manual;
 
 	// TODO manual events depth 10km but created using 0km
 
@@ -110,9 +106,9 @@ public class EventExplorer extends JFrame {
 		setVisible(true);
 	}
 
-	private static SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 	private JTextField textFieldMag;
-	private static DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
+	private static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
 	private void buildEventPanel() {
 		eventPanel.setLayout(new BorderLayout(0, 0));
@@ -130,7 +126,7 @@ public class EventExplorer extends JFrame {
 		panel.add(panel_1);
 		panel_1.setLayout(null);
 
-		JComboBox<String> comboBoxDetectionStatus = new JComboBox<String>();
+		JComboBox<String> comboBoxDetectionStatus = new JComboBox<>();
 		for (DetectionStatus det : DetectionStatus.values()) {
 			comboBoxDetectionStatus.addItem(det.toString()); // TODO
 		}
@@ -151,27 +147,17 @@ public class EventExplorer extends JFrame {
 		btnSelectIntensity.setEnabled(comboBoxDetectionStatus.getSelectedIndex() > 1);
 		panel_1.add(btnSelectIntensity);
 
-		btnSelectIntensity.addActionListener(new ActionListener() {
+		btnSelectIntensity.addActionListener(e -> textFieldIntensity.setText("" + findPeak(dataExplorerPanel.start, dataExplorerPanel.end)));
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				textFieldIntensity.setText("" + findPeak(dataExplorerPanel.start, dataExplorerPanel.end));
-			}
-		});
+		comboBoxDetectionStatus.addItemListener(e -> {
+            boolean bool = comboBoxDetectionStatus.getSelectedIndex() > 1;
+            textFieldIntensity.setEnabled(bool);
+            btnSelectIntensity.setEnabled(bool);
+            if (bool) {
+                textFieldIntensity.setText("" + findPeak(dataExplorerPanel.start, dataExplorerPanel.end));
+            }
 
-		comboBoxDetectionStatus.addItemListener(new ItemListener() {
-
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				boolean bool = comboBoxDetectionStatus.getSelectedIndex() > 1;
-				textFieldIntensity.setEnabled(bool);
-				btnSelectIntensity.setEnabled(bool);
-				if (bool) {
-					textFieldIntensity.setText("" + findPeak(dataExplorerPanel.start, dataExplorerPanel.end));
-				}
-
-			}
-		});
+        });
 		JLabel lblNewLabel_1 = new JLabel("Origin: " + dateFormat1.format(new Date(event.getOrigin())));
 		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblNewLabel_1.setBounds(10, 33, 264, 15);
@@ -201,15 +187,11 @@ public class EventExplorer extends JFrame {
 		btnCalculateMag.setEnabled(manual);
 		panel_2.add(btnCalculateMag);
 
-		btnCalculateMag.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println(event.getDistance() + ", " + Double.valueOf(textFieldIntensity.getText()));
-				textFieldMag.setText(f1d.format(ManualEvent.calculateManualMagnitude(event.getDistance(),
-						Double.valueOf(textFieldIntensity.getText()))));
-			}
-		});
+		btnCalculateMag.addActionListener(e -> {
+            System.out.println(event.getDistance() + ", " + Double.valueOf(textFieldIntensity.getText()));
+            textFieldMag.setText(f1d.format(ManualEvent.calculateManualMagnitude(event.getDistance(),
+                    Double.parseDouble(textFieldIntensity.getText()))));
+        });
 
 		JLabel lblDepthkm = new JLabel("Depth: " + (int) (event.getDepth()) + "km");
 		lblDepthkm.setBounds(10, 69, 262, 15);
@@ -227,48 +209,40 @@ public class EventExplorer extends JFrame {
 		JPanel buttons = new JPanel();
 
 		JButton save = new JButton("Save");
-		save.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				event.setDetectionStatus(DetectionStatus.values()[comboBoxDetectionStatus.getSelectedIndex()]);
-				if (!textFieldIntensity.getText().isEmpty())
-					event.setIntensity(Integer.valueOf(textFieldIntensity.getText()));
-				if (manual) {
-					((ManualEvent) event).setMag(textFieldMag.getText().isEmpty() ? ManualEvent.NO_MAG
-							: Double.valueOf(textFieldMag.getText()));
-				}
-				try {
-					ZejfSeis4.getEventManager().saveAll();
-				} catch (FatalApplicationException e1) {
-					ZejfSeis4.handleException(e1);
-				}
-				ZejfSeis4.getFrame().getEventsTab().updatePanel();
-				EventExplorer.this.dispose();
-			}
-		});
+		save.addActionListener(e -> {
+            event.setDetectionStatus(DetectionStatus.values()[comboBoxDetectionStatus.getSelectedIndex()]);
+            if (!textFieldIntensity.getText().isEmpty())
+                event.setIntensity(Integer.parseInt(textFieldIntensity.getText()));
+            if (manual) {
+                ((ManualEvent) event).setMag(textFieldMag.getText().isEmpty() ? ManualEvent.NO_MAG
+                        : Double.parseDouble(textFieldMag.getText()));
+            }
+            try {
+                ZejfSeis4.getEventManager().saveAll();
+            } catch (FatalApplicationException e1) {
+                ZejfSeis4.handleException(e1);
+            }
+            ZejfSeis4.getFrame().getEventsTab().updatePanel();
+            EventExplorer.this.dispose();
+        });
 
 		JButton delete = new JButton("Delete");
 		delete.setEnabled(manual);
 
-		delete.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int result = JOptionPane.showConfirmDialog(EventExplorer.this, "Delete?", "Confirm",
-						JOptionPane.YES_NO_OPTION);
-				if (result == 0) {
-					try {
-						ZejfSeis4.getEventManager().removeEvent(event);
-						ZejfSeis4.getEventManager().saveAll();
-					} catch (FatalIOException e2) {
-						ZejfSeis4.handleException(e2);
-					}
-					ZejfSeis4.getFrame().getEventsTab().updatePanel();
-					EventExplorer.this.dispose();
-				}
-			}
-		});
+		delete.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(EventExplorer.this, "Delete?", "Confirm",
+                    JOptionPane.YES_NO_OPTION);
+            if (result == 0) {
+                try {
+                    ZejfSeis4.getEventManager().removeEvent(event);
+                    ZejfSeis4.getEventManager().saveAll();
+                } catch (FatalIOException e2) {
+                    ZejfSeis4.handleException(e2);
+                }
+                ZejfSeis4.getFrame().getEventsTab().updatePanel();
+                EventExplorer.this.dispose();
+            }
+        });
 
 		buttons.add(save);
 		buttons.add(delete);

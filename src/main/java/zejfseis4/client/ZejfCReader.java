@@ -11,12 +11,12 @@ import org.tinylog.Logger;
 
 public abstract class ZejfCReader {
 
-	private InputStream in;
+	private final InputStream in;
 
 	private Thread readerThread;
 	private Thread notifierThread;
 
-	private Queue<String> queue;
+	private final Queue<String> queue;
 	private Semaphore semaphore;
 	private Object mutex;
 
@@ -83,11 +83,11 @@ public abstract class ZejfCReader {
 	}
 
 	public int nextInt() throws NoSuchElementException, NumberFormatException, InterruptedException {
-		return Integer.valueOf(nextLine());
+		return Integer.parseInt(nextLine());
 	}
 
 	public long nextLong() throws NoSuchElementException, NumberFormatException, InterruptedException {
-		return Long.valueOf(nextLine());
+		return Long.parseLong(nextLine());
 	}
 
 	private void runNotifier() {

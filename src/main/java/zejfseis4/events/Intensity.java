@@ -18,8 +18,8 @@ public enum Intensity {
 	EXTREME_U("Extreme+", new Color(102, 0, 0)),
 	BLACK_SWAN("BLACK-SWAN", Color.black);
 
-	private String name;
-	private Color color;
+	private final String name;
+	private final Color color;
 
 	private Intensity(String name, Color color) {
 		this.name = name;

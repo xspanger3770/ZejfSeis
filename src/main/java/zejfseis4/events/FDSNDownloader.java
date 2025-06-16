@@ -33,9 +33,9 @@ public class FDSNDownloader {
 
 	protected static final int HOURS_BACKWARD = 24 * 1;
 
-	private EventManager eventManager;
+	private final EventManager eventManager;
 
-	private static File lastDownloadFile = new File(EventManager.eventsFolder, "lastDownload.dat");
+	private static final File lastDownloadFile = new File(EventManager.eventsFolder, "lastDownload.dat");
 	private long lastDownload;
 
 	public FDSNDownloader(EventManager eventManager) {
@@ -61,16 +61,13 @@ public class FDSNDownloader {
 	private void run() {
 		ScheduledExecutorService execEvents = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Events Downloader"));
-		execEvents.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					FDSNDownloader.this.update();
-				} catch (Exception e) {
-					ZejfSeis4.handleException(e); // uncaughtException
-				}
-			}
-		}, 0, 1, TimeUnit.MINUTES);
+		execEvents.scheduleAtFixedRate(() -> {
+            try {
+                FDSNDownloader.this.update();
+            } catch (Exception e) {
+                ZejfSeis4.handleException(e); // uncaughtException
+            }
+        }, 0, 1, TimeUnit.MINUTES);
 	}
 
 	private void update() {
@@ -157,7 +154,7 @@ public class FDSNDownloader {
 		}
 	}
 
-	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+	private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
 
 	// From ZejfSeis 1
 	public static ArrayList<CatalogueEvent> downloadEvents(Calendar start, Calendar end, int limit, double minMag)
@@ -183,7 +180,7 @@ public class FDSNDownloader {
 
 		String resultStr = result.toString();
 
-		ArrayList<CatalogueEvent> list = new ArrayList<CatalogueEvent>();
+		ArrayList<CatalogueEvent> list = new ArrayList<>();
 
 		if (resultStr.isBlank()) {
 			return list;

@@ -11,20 +11,14 @@ public class DetectedRenderer extends TableCellRendererAdapter<Event, DetectionS
 
 	@Override
 	public Color getBackground(Event entity, DetectionStatus detectionStatus) {
-		switch (detectionStatus) {
-		case BROKEN:
-			return Color.gray;
-		case NOISE:
-			return Color.gray;
-		case NOT_DETECTED:
-			return Color.LIGHT_GRAY;
-		case UNKNOWN:
-			return Color.white;
-		case DETECTED:
-			return entity.getIntensityCategory().getColor();
-		default:
-			return Color.LIGHT_GRAY;
-		}
+        return switch (detectionStatus) {
+            case BROKEN -> Color.gray;
+            case NOISE -> Color.gray;
+            case NOT_DETECTED -> Color.LIGHT_GRAY;
+            case UNKNOWN -> Color.white;
+            case DETECTED -> entity.getIntensityCategory().getColor();
+            default -> Color.LIGHT_GRAY;
+        };
 	}
 	
 	@Override

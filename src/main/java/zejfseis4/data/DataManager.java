@@ -43,11 +43,11 @@ public class DataManager {
 	private Queue<SimpleLog> realtimeQueue;
 	private Queue<Queue<SimpleLog>> requestsQueue;
 
-	private Semaphore queueSemaphore = new Semaphore(0);
-	private Object logQueueMutex = new Object();
+	private final Semaphore queueSemaphore = new Semaphore(0);
+	private final Object logQueueMutex = new Object();
 
-	protected Object dataHoursMutex = new Object();
-	private Object dataRequestsMutex = new Object();
+	protected final Object dataHoursMutex = new Object();
+	private final Object dataRequestsMutex = new Object();
 
 	private Thread autosaveThread;
 	private Thread logQueueThread;
@@ -83,8 +83,8 @@ public class DataManager {
 		}
 	}
 
-	private Queue<Queue<SimpleLog>> temp_requests = new LinkedList<>();
-	private Queue<SimpleLog> temp_realtime = new LinkedList<>();
+	private final Queue<Queue<SimpleLog>> temp_requests = new LinkedList<>();
+	private final Queue<SimpleLog> temp_realtime = new LinkedList<>();
 
 	private void processQueues() {
 		synchronized (logQueueMutex) {
@@ -169,8 +169,8 @@ public class DataManager {
 		}
 
 		String sourceName = prop.getProperty("source_name");
-		int sampleRate = Integer.valueOf(prop.getProperty("sample_rate", "-1"));
-		int errVal = Integer.valueOf(prop.getProperty("err_val", "-1"));
+		int sampleRate = Integer.parseInt(prop.getProperty("sample_rate", "-1"));
+		int errVal = Integer.parseInt(prop.getProperty("err_val", "-1"));
 
 		if (sampleRate <= 0) {
 			System.err.println("Invalid sample rate: " + sampleRate);
@@ -222,8 +222,8 @@ public class DataManager {
 		lastRealtimeLogID = -1;
 		lastDataHour = null;
 
-		realtimeQueue = new LinkedList<SimpleLog>();
-		requestsQueue = new LinkedList<Queue<SimpleLog>>();
+		realtimeQueue = new LinkedList<>();
+		requestsQueue = new LinkedList<>();
 		queueSemaphore.drainPermits();
 
 		temp_requests.clear();
@@ -300,7 +300,7 @@ public class DataManager {
 
 		if (dataRequests == null) {
 			synchronized (dataRequestsMutex) {
-				dataRequests = new LinkedList<DataRequest>();
+				dataRequests = new LinkedList<>();
 			}
 		}
 
@@ -396,7 +396,7 @@ public class DataManager {
 	}
 
 	public Queue<DataHour> getDataHours(long start, long end) throws TooBigIntervalException, FatalIOException {
-		Queue<DataHour> result = new LinkedList<DataHour>();
+		Queue<DataHour> result = new LinkedList<>();
 		long startHourID = getHourId(getMillis(start));
 		long endHourID = getHourId(getMillis(end));
 

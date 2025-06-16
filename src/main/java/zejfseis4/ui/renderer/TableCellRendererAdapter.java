@@ -7,6 +7,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import org.tinylog.Logger;
 import zejfseis4.ui.model.FilterableTableModel;
 
 public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
@@ -42,7 +43,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
 				}
 
 			} catch (ClassCastException e) {
-
+				Logger.error(e);
 			}
 		}
 

@@ -12,8 +12,8 @@ public enum EventDistance {
 	SHADOW("Shadow Zone", new Color(102,102,153)),
 	CORE("Core", new Color(0,180,0));
 
-	private String name;
-	private Color color;
+	private final String name;
+	private final Color color;
 
 	private EventDistance(String name, Color color) {
 		this.name = name;

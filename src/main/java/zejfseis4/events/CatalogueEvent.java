@@ -6,7 +6,7 @@ import zejfseis4.utils.GeoUtils;
 public class CatalogueEvent extends Event {
 
 	private static final long serialVersionUID = 7123289158597393382L;
-	private String id;
+	private final String id;
 	private long origin;
 	private double lat;
 	private double lon;

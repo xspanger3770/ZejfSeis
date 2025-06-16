@@ -7,15 +7,15 @@ import java.util.ArrayList;
 public class EventMonth implements Serializable {
 
 	private static final long serialVersionUID = 3134014099646196069L;
-	private int year;
-	private int month;
+	private final int year;
+	private final int month;
 
-	private ArrayList<Event> events;
+	private final ArrayList<Event> events;
 
 	public EventMonth(int year, int month) {
 		this.year = year;
 		this.month = month;
-		this.events = new ArrayList<Event>();
+		this.events = new ArrayList<>();
 	}
 
 	public int getYear() {

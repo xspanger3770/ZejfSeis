@@ -61,7 +61,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 	public boolean enableSelecting;
 	private int lastMouseY;
 
-	private static int statusPanelHeight = 20;
+	private static final int statusPanelHeight = 20;
 
 	public DataExplorerPanel(long start, long end) {
 		if (start >= end) {
@@ -209,7 +209,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 
 	protected synchronized void generateResults() {
 		if (results == null) {
-			results = new ArrayList<DataExplorerPanel.Result>();
+			results = new ArrayList<>();
 		}
 		int CURRENT_WINDOW = Settings.WINDOW;
 		int CURRENT_WINDOW_SCALED = Settings.WINDOW / HORIZONTAL_SCALE;
@@ -239,7 +239,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 			long firstID = (windowID + 1 - HORIZONTAL_SCALE) * CURRENT_WINDOW_SCALED;
 			long lastID = (windowID + 1) * CURRENT_WINDOW_SCALED - 1;
 			double[] values = new double[CURRENT_WINDOW];
-			double[] magnitude = new double[values.length];
+			double[] magnitude;
 			boolean broken = false;
 			for (long logID = firstID; logID <= lastID; logID++) {
 				double v = dataRequest.getFilteredValue((logID * 1000) / sampleRate);
@@ -281,31 +281,6 @@ public class DataExplorerPanel extends DataRequestPanel {
 		if (fullRedrawNext) {
 			fullRedrawNext = false;
 		}
-	}
-
-	@Deprecated
-	public double getMagOld(long time, double freqD) {
-		if (results == null || results.isEmpty()) {
-			return 0;
-		}
-		// int CURRENT_WINDOW_SCALED = Settings.WINDOW / HORIZONTAL_SCALE;
-		int secs = 1000 / ZejfSeis4.getDataManager().getSampleRate();
-		long startTime = (getStart() / secs) * secs;
-		long endTime = (getEnd() / secs) * secs;
-
-		double _i = ((time - startTime) / (double) (endTime - startTime)) * (results.size() - 1);
-
-		if (_i <= 0) {
-			return results.get(0).getMag(freqD);
-		} else if (_i >= 1) {
-			return results.get(results.size() - 1).getMag(freqD);
-		}
-
-		Result a = results.get((int) _i);
-		Result b = results.get((int) (_i + 1));
-		double vA = a.getMag(freqD);
-		double vB = b.getMag(freqD);
-		return vA * (1 - _i % 1) + vB * (_i % 1);
 	}
 
 	protected void zoom() {
@@ -369,9 +344,9 @@ public class DataExplorerPanel extends DataRequestPanel {
 		lastMode = thisMode;
 	}
 
-	private static SimpleDateFormat dateFormat1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH);
 	@SuppressWarnings("unused")
-	private static SimpleDateFormat dateFormat2 = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat2 = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
 
 	private void drawStatusPanel(int width, int height, Graphics2D graphics) {
 		Rectangle2D.Double rect = new Rectangle2D.Double(0, height - statusPanelHeight, width, statusPanelHeight);
@@ -448,7 +423,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		}
 	}
 
-	private static DecimalFormat f3d = new DecimalFormat("0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+	private static final DecimalFormat f3d = new DecimalFormat("0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
 	private static String dt(long l) {
 		long min = (l / (1000 * 60));
@@ -459,7 +434,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		return str + f3d.format((l % (1000 * 60)) / 1000.0) + "s";
 	}
 
-	int extraWrx = 14;
+	final int extraWrx = 14;
 
 	private void drawIntensity(int w, int h, Graphics2D g) {
 		if (mouse) {
@@ -711,7 +686,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		}
 	}
 
-	public static BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 			new float[] { 3 }, 0);
 
 	private void drawFFT(int w, int h) {
@@ -842,7 +817,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		System.out.println("Computed " + SIZE + ", " + maxMag);
 	}
 
-	private int[] ones = new int[] { 1, 2, 5, 10 };
+	private final int[] ones = new int[] { 1, 2, 5, 10 };
 
 	private static final Font calibri12 = new Font("Calibri", Font.BOLD, 12);
 	private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);

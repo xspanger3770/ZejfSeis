@@ -12,7 +12,7 @@ import zejfseis4.ui.model.EventTableModel;
 public class EditEventAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
-	private JTable eventsTable;
+	private final JTable eventsTable;
 
 	public EditEventAction(JTable eventsTable) {
 		super("Edit");

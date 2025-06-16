@@ -57,25 +57,19 @@ public class SpectrogramPanel extends DataRequestPanel {
 		ScheduledExecutorService exec = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Spectrogram Graph Panel Work"));
 		ScheduledExecutorService exec2 = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("resize"));
-		exec.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					repaint();
-				} catch (Exception e) {
-					ZejfSeis4.handleException(e); // uncaught
-				}
-			}
-		}, 0, 10, TimeUnit.MILLISECONDS);
-		exec2.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				if (resized) {
-					resized = false;
-					fullRedrawNext = true;
-				}
-			}
-		}, 0, 400, TimeUnit.MILLISECONDS);
+		exec.scheduleAtFixedRate(() -> {
+            try {
+                repaint();
+            } catch (Exception e) {
+                ZejfSeis4.handleException(e); // uncaught
+            }
+        }, 0, 10, TimeUnit.MILLISECONDS);
+		exec2.scheduleAtFixedRate(() -> {
+            if (resized) {
+                resized = false;
+                fullRedrawNext = true;
+            }
+        }, 0, 400, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -131,11 +125,11 @@ public class SpectrogramPanel extends DataRequestPanel {
 	}
 
 	private static final Font calibri12 = new Font("Calibri", Font.BOLD, 12);
-	private int[] ones = new int[] { 1, 2, 5, 10 };
-	public static BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+	private final int[] ones = new int[] { 1, 2, 5, 10 };
+	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 			new float[] { 4 }, 0);
 
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
 	
 	double maxF = 20;
 	private int wrx = -1;

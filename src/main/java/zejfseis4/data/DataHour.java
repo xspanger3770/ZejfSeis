@@ -13,9 +13,9 @@ public class DataHour implements Serializable {
 
 	private static final long serialVersionUID = 2494400085954647962L;
 	private int[] data;
-	private long hourID;
-	private int sampleRate;
-	private int errorValue;
+	private final long hourID;
+	private final int sampleRate;
+	private final int errorValue;
 
 	private int sampleCount;
 

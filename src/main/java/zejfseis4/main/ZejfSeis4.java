@@ -24,7 +24,7 @@ public class ZejfSeis4 {
     public static final String VERSION = zejfseis4.main.Version.VERSION;
     public static final int COMPATIBILITY_VERSION = 4;
 
-    public static boolean DEBUG = true; // always debug :)
+    public static final boolean DEBUG = true; // always debug :)
 
     private static ZejfSeisFrame frame;
     private static DataManager dataManager;
@@ -62,36 +62,32 @@ public class ZejfSeis4 {
 
         eventManager = new EventManager();
 
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(() -> {
+            frame.createFrame();
+            frame.setVisible(true);
 
-            @Override
-            public void run() {
-                frame.createFrame();
-                frame.setVisible(true);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    windowClosed(e);
+                }
 
-                frame.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent e) {
-                        windowClosed(e);
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    try {
+                        dataManager.exit();
+                    } catch (FatalIOException e1) {
+                        handleException(e1);
                     }
-
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        try {
-                            dataManager.exit();
-                        } catch (FatalIOException e1) {
-                            handleException(e1);
-                        }
-                        try {
-                            eventManager.saveAll();
-                        } catch (FatalIOException e1) {
-                            handleException(e1);
-                        }
+                    try {
+                        eventManager.saveAll();
+                    } catch (FatalIOException e1) {
+                        handleException(e1);
                     }
-                });
+                }
+            });
 
-                getFrame().setStatus("Idle");
-            }
+            getFrame().setStatus("Idle");
         });
 
     }
