@@ -185,8 +185,8 @@ public class DrumTab extends DataRequestPanel {
 		int line1 = (int) Math.round(((h - dragStartY) - LINE_PADDING) / (double) LINE_SPACE);
 		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
 
-		int startLine = line1 >= line2 ? line1 : line2;
-		int endLine = line1 < line2 ? line1 : line2;
+		int startLine = Math.max(line1, line2);
+		int endLine = Math.min(line1, line2);
 		int startX = line1 > line2 ? dragStartX : dragEndX;
 		int endX = line1 < line2 ? dragStartX : dragEndX;
 
@@ -220,9 +220,9 @@ public class DrumTab extends DataRequestPanel {
 		int line2 = (int) Math.round(((h - dragEndY) - LINE_PADDING) / (double) LINE_SPACE);
 
 		long time1 = (long) (getMillis(lineID - line1, lastDuration)
-				+ ((dragStartX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
+				+ ((dragStartX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000L);
 		long time2 = (long) (getMillis(lineID - line2, lastDuration)
-				+ ((dragEndX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000l);
+				+ ((dragEndX - wrx) / (double) (w - wrx)) * lastDuration * 60 * 1000L);
 
 		SwingUtilities.invokeLater(() -> new DataExplorer(Math.min(time1, time2), Math.max(time1, time2)));
 	}
@@ -285,7 +285,7 @@ public class DrumTab extends DataRequestPanel {
 		int lines = (int) Math.round((h - 2 * LINE_PADDING) / (double) LINE_SPACE + 1);
 
 		long endTime = getMillis(_lineID + 1, _duration);
-		long startTime = getMillis(_lineID - lines + 1, _duration) - FILTER_PADDING_MINUES * 60 * 1000l;
+		long startTime = getMillis(_lineID - lines + 1, _duration) - FILTER_PADDING_MINUES * 60 * 1000L;
 		if (endTime != this.endTime || startTime != this.startTime) {
 			getDataRequest().changeTimes(startTime, endTime);
 			this.endTime = endTime;

@@ -182,7 +182,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		drawExplorer((Graphics2D) g);
 	}
 
-	class Result {
+	static class Result {
 		double[] magnitudes;
 		long windowID;
 		boolean broken;
