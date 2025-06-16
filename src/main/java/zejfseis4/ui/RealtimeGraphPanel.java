@@ -26,11 +26,10 @@ import zejfseis4.utils.NamedThreadFactory;
 
 public class RealtimeGraphPanel extends DataRequestPanel {
 
-	private static final long serialVersionUID = 1L;
 	private static final RenderingHints defaultHints;
 	
 	public RealtimeGraphPanel() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "RealtimeGraph", Settings.REALTIME_DURATION_SECONDS * 1000));
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "RealtimeGraph", Settings.REALTIME_DURATION_SECONDS * 1000L));
 		setLayout(null);
 		
 		threads();
@@ -85,7 +84,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 
 		int mils = ZejfSeis4.getDataManager().getSampleTime();
 		long graphTime = (System.currentTimeMillis() / mils) * mils;
-		long graphStart = graphTime - Settings.REALTIME_DURATION_SECONDS * 1000;
+		long graphStart = graphTime - Settings.REALTIME_DURATION_SECONDS * 1000L;
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				Settings.ANTIALIAS ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
 		int max = 10;
@@ -131,12 +130,12 @@ public class RealtimeGraphPanel extends DataRequestPanel {
 
 		double one = 1;
 		mainLoop: for (int n = 0; n < 10; n++) {
-			for (int i = 0; i < ones.length; i++) {
-				one = Math.pow(10, n) * ones[i];
-				if (h * (one / max) > 40) {
-					break mainLoop;
-				}
-			}
+            for (int j : ones) {
+                one = Math.pow(10, n) * j;
+                if (h * (one / max) > 40) {
+                    break mainLoop;
+                }
+            }
 		}
 		for (double v = -one * (int) (max / one); v <= one * (int) (max / one); v += one) {
 			double y1 = h * 0.5 - (h * 0.5) * (v / (double) max);

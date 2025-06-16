@@ -34,7 +34,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 	public boolean fullRedrawNext;
 
 	public SpectrogramPanel() {
-		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "Spectro", Settings.REALTIME_DURATION_SECONDS * 1000) {
+		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "Spectro", Settings.REALTIME_DURATION_SECONDS * 1000L) {
 			@Override
 			public void onRefill(boolean realtime) {
 				if (!realtime) {
@@ -108,7 +108,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 			String str = String.format("%.1fHz", v);
 			int width = graphics.getFontMetrics().stringWidth(str);
 			graphics.drawString(str, wrx - width - 2, mouseY + 5);
-			
+
 			long t = (long) ((mouseX / (double)w-1) *  (Settings.REALTIME_DURATION_SECONDS * 1000.0) + System.currentTimeMillis());
 			str = dateFormat.format(new Date(t));
 			int size = 16;
@@ -130,7 +130,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 			new float[] { 4 }, 0);
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
-	
+
 	double maxF = 20;
 	private int wrx = -1;
 
@@ -199,7 +199,7 @@ public class SpectrogramPanel extends DataRequestPanel {
 			ifft = new DoubleFFT_1D(WINDOW);
 			fullRedrawNext = true;
 		}
-		
+
 		lastWindow = WINDOW;
 
 		if (fullRedrawNext || spectro == null) {
@@ -318,5 +318,5 @@ public class SpectrogramPanel extends DataRequestPanel {
 		super.updateDuration();
 		fullRedrawNext = true;
 	}
-	
+
 }
