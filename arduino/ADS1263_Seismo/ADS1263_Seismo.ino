@@ -8,8 +8,8 @@
 #define PIN_DRDY 9
 #define PIN_CS 10
 
-#define POS_PIN ADS126X_AIN1
-#define NEG_PIN ADS126X_AIN0
+#define POS_PIN ADS126X_AIN3
+#define NEG_PIN ADS126X_AIN2
 
 // ADS1263 OVERSAMPLING
 
@@ -19,8 +19,8 @@ const double sampling_time = 1.0 / ads_sample_rate;
 
 // OFFSET CALIBRATION
 
-const int calibration_seconds = 30;
-const int initial_ignore_seconds = 4;
+const int calibration_seconds = 60;
+const int initial_ignore_seconds = 12;
 
 // FILTER
 
@@ -41,9 +41,9 @@ int32_t offset;
 unsigned long last_time;
 unsigned long current_time;
 
-long double sum;
-unsigned int count;
-unsigned int calibration_count;
+int64_t sum;
+int32_t count;
+int32_t calibration_count;
 
 byte log_num;
 int shift;
@@ -112,9 +112,10 @@ void loop()
 {
     bool rdy = !(digitalRead(PIN_DRDY));
     if (rdy) {
+        int32_t current_val = adc.readADC1(POS_PIN, NEG_PIN);
         if (calibrating) {
             if( calibration_count >= initial_ignore_seconds * ads_sample_rate) {
-                sum += adc.readADC1(POS_PIN, NEG_PIN);
+                sum += current_val;
                 count++;
             }
 
@@ -129,18 +130,14 @@ void loop()
                 Serial.println(offset);
             }
         } else {
-            sum += filter.filterIn(adc.readADC1(POS_PIN, NEG_PIN)) - offset;
+            sum += filter.filterIn(current_val - offset);
             count++;
         }
     }
 
-    if (calibrating) {
-        return;
-    }
-
     current_time = micros();
 
-    if ((long)(current_time - last_time) >= sample_time_micros + shift) {
+    if (!calibrating && abs(current_time - last_time) >= sample_time_micros + shift) {
         int32_t value = lround(sum / count);
         sum = 0;
         count = 0;
