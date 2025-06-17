@@ -352,4 +352,24 @@ public class DataRequest {
 	public void onRefill(boolean isRealtime) {
 
 	}
+
+	public DataManager getDataManager() {
+		return dataManager;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public long getDurationMS() {
+		return durationMS;
+	}
+
+	public int getSampleTime() {
+		return dataManager.getSampleTime();
+	}
+
+	public long getLogId(long t) {
+		return dataManager.getLogId(t);
+	}
 }
