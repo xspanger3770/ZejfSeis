@@ -59,7 +59,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
         Graphics2D g = (Graphics2D) gr;
         g.setRenderingHints(defaultHints);
         synchronized (dataRequest.dataMutex) {
-            updateDrum(g);
+            updateDrum(g, dataRequest);
         }
     }
 
@@ -72,7 +72,7 @@ public class RealtimeGraphPanel extends DataRequestPanel {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.ENGLISH);
 
 
-    public void updateDrum(Graphics2D graphics) {
+    public void updateDrum(Graphics2D graphics, DataRequest dataRequest) {
         if (!ZejfSeis4.getDataManager().isLoaded()) {
             dataRequest = new DummyDataRequest(dataRequest.getDataManager(), dataRequest.getName(), dataRequest.getDurationMS());
         }
