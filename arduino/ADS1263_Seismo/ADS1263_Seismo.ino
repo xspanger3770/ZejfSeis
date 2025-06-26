@@ -108,7 +108,9 @@ void setup()
     delay(10);
     adc.setBiasMagnitude(ADS126X_BIAS_MAG_0);
     delay(10);
-    adc.setReference(ADS126X_REF_NEG_VSS, ADS126X_REF_POS_VDD);
+    adc.enableInternalReference();
+    delay(10);
+    adc.setReference(ADS126X_REF_NEG_INT, ADS126X_REF_POS_INT);
 }
 
 void loop()
