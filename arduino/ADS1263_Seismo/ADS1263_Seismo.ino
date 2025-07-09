@@ -19,8 +19,8 @@ const double input_sampling_time = 1.0 / ads_output_sample_rate;
 
 // OFFSET CALIBRATION
 
-const int calibration_seconds = 60;
-const int initial_ignore_seconds = 12;
+const int calibration_seconds = 20;
+const int initial_ignore_seconds = 4;
 const double continuous_offset_fade_time_seconds = 600.0;
 
 // FILTER
@@ -88,6 +88,17 @@ void get_output_sample_rate()
     Serial.println("Offset calibration start, be patient...");
 }
 
+void resetADC() {
+    adc.begin(PIN_CS);
+    adc.setRate(ADS_output_sample_rate);
+    adc.startADC1();
+    adc.setGain(ADS126X_GAIN_32);
+    adc.setFilter(ADS126X_SINC4);
+    adc.setBiasMagnitude(ADS126X_BIAS_MAG_0);
+    adc.enableInternalReference();
+    adc.setReference(ADS126X_REF_NEG_INT, ADS126X_REF_POS_INT);
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -96,25 +107,13 @@ void setup()
 
     get_output_sample_rate();
 
-    adc.begin(PIN_CS);
-    delay(10);
-    adc.setRate(ADS_output_sample_rate);
-    delay(10);
-    adc.startADC1();
-    delay(10);
-    adc.setGain(ADS126X_GAIN_32);
-    delay(10);
-    adc.setFilter(ADS126X_SINC4);
-    delay(10);
-    adc.setBiasMagnitude(ADS126X_BIAS_MAG_0);
-    delay(10);
-    adc.enableInternalReference();
-    delay(10);
-    adc.setReference(ADS126X_REF_NEG_INT, ADS126X_REF_POS_INT);
+    resetADC();
 }
 
 void loop()
 {
+    current_time = micros();
+
     bool rdy = !(digitalRead(PIN_DRDY));
     if (rdy) {
         int32_t current_val = adc.readADC1(POS_PIN, NEG_PIN);
@@ -145,10 +144,8 @@ void loop()
         }
     }
 
-    current_time = micros();
-
     if (!calibrating && (current_time - last_time) >= (unsigned long)output_sample_time_micros + shift) {
-        int32_t value = lround(sum / count);
+        int32_t value = count == 0 ? 0 : lround(sum / count);
         sum = 0;
         count = 0;
 

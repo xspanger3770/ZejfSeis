@@ -722,10 +722,10 @@ public class DataExplorerPanel extends DataRequestPanel {
 		explorerGraphics.setColor(Color.black);
 		explorerGraphics.drawRect(0, 0, w - 1, h - 1);
 		explorerGraphics.drawRect(wrx, 0, w - wrx, h - wry - statusPanelHeight);
-		for (int p = -2; p <= 1; p++) {
+		for (int p = -3; p <= 1; p++) {
 			for (int n = 1; n < 10; n++) {
 				double freq = n * Math.pow(10, p);
-				double x = wrx + (Math.log10(freq * 100) / 4) * (w - wrx);
+				double x = wrx + (Math.log10(freq * 1000) / 5) * (w - wrx);
 				explorerGraphics.setColor(n == 1 ? Color.black : Color.blue);
 				explorerGraphics.setStroke(n == 1 ? new BasicStroke(2) : dashed);
 				explorerGraphics.draw(new Line2D.Double(x, 0, x, h - wry - statusPanelHeight));
@@ -801,11 +801,11 @@ public class DataExplorerPanel extends DataRequestPanel {
 			double mag2 = magnitude[j + 1];
 			double freq1 = sampleRate * 0.5 * (j / (SIZE / 2.0));
 			double freq2 = sampleRate * 0.5 * ((j + 1) / (SIZE / 2.0));
-			if (freq1 < 0.01) {
+			if (freq1 < 0.001) {
 				continue;
 			}
-			double x1 = j == 0 ? wrx : wrx + (Math.log10(freq1 * 100) / 4) * (w - wrx);
-			double x2 = wrx + (Math.log10(freq2 * 100) / 4) * (w - wrx);
+			double x1 = j == 0 ? wrx : wrx + (Math.log10(freq1 * 1000) / 5) * (w - wrx);
+			double x2 = wrx + (Math.log10(freq2 * 1000) / 5) * (w - wrx);
 			double y1 = (h - wry - statusPanelHeight)
 					- (h - wry - statusPanelHeight) * (Math.log10(mag1 * 10) / (maxP + 1));
 			double y2 = (h - wry - statusPanelHeight)
