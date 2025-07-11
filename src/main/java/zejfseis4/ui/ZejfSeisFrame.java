@@ -120,7 +120,7 @@ public class ZejfSeisFrame extends JFrame {
 		defaultFilters.add(new DefaultFilter("Distant", 4.0, 0.5));
 		defaultFilters.add(new DefaultFilter("Secondary Microseisms", 0.4, 0.15));
 		defaultFilters.add(new DefaultFilter("Primary Microseisms", 0.1, 0.04));
-		defaultFilters.add(new DefaultFilter("Surface Waves", 0.13, 0.07));
+		defaultFilters.add(new DefaultFilter("Surface Waves", 0.13, 0.03));
 		defaultFilters.add(new DefaultFilter("Offset", 0.01, 0.0));
 
 		for (DefaultFilter defaultFilter : defaultFilters) {
