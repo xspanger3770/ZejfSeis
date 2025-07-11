@@ -117,10 +117,11 @@ public class ZejfSeisFrame extends JFrame {
 
 		defaultFilters.add(new DefaultFilter("Default", 20, 0.5));
 		defaultFilters.add(new DefaultFilter("Full", 20, 0.0));
-		defaultFilters.add(new DefaultFilter("Regional", 6, 1));
-		defaultFilters.add(new DefaultFilter("Distant", 2, 0.5));
-		defaultFilters.add(new DefaultFilter("S Waves", 0.08, 0.01));
-		defaultFilters.add(new DefaultFilter("Calibration", 0.01, 0.0));
+		defaultFilters.add(new DefaultFilter("Distant", 4.0, 0.5));
+		defaultFilters.add(new DefaultFilter("Secondary Microseisms", 0.4, 0.15));
+		defaultFilters.add(new DefaultFilter("Primary Microseisms", 0.1, 0.04));
+		defaultFilters.add(new DefaultFilter("Surface Waves", 0.13, 0.07));
+		defaultFilters.add(new DefaultFilter("Offset", 0.01, 0.0));
 
 		for (DefaultFilter defaultFilter : defaultFilters) {
 			JMenuItem item = new JMenuItem(String.format("%s (%.2fHz - %.2fHz)", defaultFilter.name(),
