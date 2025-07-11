@@ -41,7 +41,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 	private static final int FFT = 3;
 	private static final int HORIZONTAL_SCALE = 5;
 
-	private static final long MAXIMUM_DURATION = 24 * 60 * 60 * 1000l;
+	private static final long MAXIMUM_DURATION = 72 * 60 * 60 * 1000L;
 
 	private int MODE = 0;
 
@@ -71,7 +71,7 @@ public class DataExplorerPanel extends DataRequestPanel {
 		}
 
 		if (end - start >= MAXIMUM_DURATION) {
-			throw new IllegalArgumentException("Too long!");
+			start = end - MAXIMUM_DURATION;
 		}
 
 		setRequest(new DataRequest(ZejfSeis4.getDataManager(), "DataExplorer", start, end) {
